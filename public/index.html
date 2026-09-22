@@ -407,6 +407,54 @@ async function submitMovement() {
     document.getElementById('s-date').value = d; // Update the UI to show the corrected date
   }
   
+  // 3. Build the fully compliant XML with CORRECT namespaces (urn1 for Message, Header, Body)
+  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
+    '  <urn:WCODataModelVersionCode>3.6</urn:WCODataModelVersionCode>\n' +
+    '  <urn:WCOTypeName>DESAD</urn:WCOTypeName>\n' +
+    '  <urn:ResponsibleCountryCode>GB</urn:ResponsibleCountryCode>\n' +
+    '  <urn:ResponsibleAgencyName>HMRC</urn:ResponsibleAgencyName>\n' +
+    '  <urn:AgencyAssignedCustomizationCode>GB</urn:AgencyAssignedCustomizationCode>\n' +
+    '  <urn:AgencyAssignedCustomizationVersionCode>v2.1</urn:AgencyAssignedCustomizationVersionCode>\n' +
+    '  <urn:SubmittedDraftOfEADESAD>\n' +
+    '    <urn1:Message>\n' +
+    '      <urn1:Header>\n' +
+    '        <urn1:MessageSender>' + c + '</urn1:MessageSender>\n' +
+    '        <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n' +
+    '        <urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation>\n' +
+    '        <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n' +
+    '        <urn1:MessageIdentifier>' + uniqueLrn + '</urn1:MessageIdentifier>\n' +
+    '      </urn1:Header>\n' +
+    '      <urn1:Body>\n' +
+    '        <urn:EadEsadDraft>\n' +
+    '          <urn:ConsignorDetails>\n' +
+    '            <urn:ExciseReferenceNumber>' + c + '</urn:ExciseReferenceNumber>\n' +
+    '          </urn:ConsignorDetails>\n' +
+    '          <urn:ConsigneeDetails>\n' +
+    '            <urn:ExciseReferenceNumber>' + e + '</urn:ExciseReferenceNumber>\n' +
+    '          </urn:ConsigneeDetails>\n' +
+    '          <urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>\n' +
+    '          <urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>\n' +
+    '        </urn:EadEsadDraft>\n' +
+    '      </urn1:Body>\n' +
+    '    </urn1:Message>\n' +
+    '  </urn:SubmittedDraftOfEADESAD>\n' +
+    '</urn:IE815>';
+  
+  console.log('Sending Compliant XML:', xml);
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { 
+    method: 'POST', 
+    headers: { ...h, 'Content-Type': 'application/xml' }, 
+    body: xml 
+  });
+  
+  const responseText = await res.text();
+  console.log('HMRC Response Status:', res.status);
+  console.log('HMRC Response Body:', responseText);
+  
+  document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
+}
+  
   // 3. Build the fully compliant XML
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
