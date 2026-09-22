@@ -386,19 +386,28 @@ function exportResult(elementId, type) {
 
 // 4. API FUNCTIONS
 async function submitMovement() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+  if (!localStorage.getItem('hmrc_token')) { 
+    alert('Click "Login to HMRC" first!'); 
+    return; 
+  }
+  
   const h = await getHeaders();
   const c = document.getElementById('s-consignor').value;
   const e = document.getElementById('s-consignee').value;
-  const l = document.getElementById('s-lrn').value;
-  let d = document.getElementById('s-date').value;
   
-  if (!d.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    d = new Date().toISOString().slice(0,10);
-    document.getElementById('s-date').value = d;
+  // 1. Generate a UNIQUE LRN to avoid "Duplicate LRN" 400 errors
+  const uniqueLrn = 'LRN' + Date.now().toString().slice(-10);
+  document.getElementById('s-lrn').value = uniqueLrn;
+  
+  // 2. Ensure Date of Dispatch is TODAY or in the FUTURE to avoid 422 validation errors
+  let d = document.getElementById('s-date').value;
+  const today = new Date().toISOString().slice(0, 10);
+  if (!d || d < today) {
+    d = today;
+    document.getElementById('s-date').value = d; // Update the UI to show the corrected date
   }
   
-  const t = new Date().toISOString().slice(0,10);
+  // 3. Build the fully compliant XML
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
     '  <urn:WCODataModelVersionCode>3.6</urn:WCODataModelVersionCode>\n' +
@@ -412,16 +421,16 @@ async function submitMovement() {
     '      <urn:Header>\n' +
     '        <urn1:MessageSender>' + c + '</urn1:MessageSender>\n' +
     '        <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n' +
-    '        <urn1:DateOfPreparation>' + t + '</urn1:DateOfPreparation>\n' +
+    '        <urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation>\n' +
     '        <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n' +
-    '        <urn1:MessageIdentifier>' + l + '</urn1:MessageIdentifier>\n' +
+    '        <urn1:MessageIdentifier>' + uniqueLrn + '</urn1:MessageIdentifier>\n' +
     '      </urn:Header>\n' +
     '      <urn:Body>\n' +
     '        <urn:EadEsadDraft>\n' +
     '          <urn:ConsignorDetails><urn:ExciseReferenceNumber>' + c + '</urn:ExciseReferenceNumber></urn:ConsignorDetails>\n' +
     '          <urn:ConsigneeDetails><urn:ExciseReferenceNumber>' + e + '</urn:ExciseReferenceNumber></urn:ConsigneeDetails>\n' +
     '          <urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>\n' +
-    '          <urn:LocalReferenceNumber>' + l + '</urn:LocalReferenceNumber>\n' +
+    '          <urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>\n' +
     '        </urn:EadEsadDraft>\n' +
     '      </urn:Body>\n' +
     '    </urn:Message>\n' +
@@ -429,7 +438,12 @@ async function submitMovement() {
     '</urn:IE815>';
   
   console.log('Sending XML:', xml);
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { method: 'POST', headers: { ...h, 'Content-Type': 'application/xml' }, body: xml });
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { 
+    method: 'POST', 
+    headers: { ...h, 'Content-Type': 'application/xml' }, 
+    body: xml 
+  });
+  
   document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
 }
 
