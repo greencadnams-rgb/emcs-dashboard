@@ -13,7 +13,6 @@
     .card { background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #005ea5; color: white; border: none; border-radius: 5px; font-size: 14px; }
     button:hover { background: #003d6b; }
-    button:disabled { background: #999; cursor: not-allowed; }
     .btn-green { background: #00703c; }
     .btn-green:hover { background: #005a30; }
     .btn-red { background: #d4351c; }
@@ -41,39 +40,42 @@
     .status-bar { background: #005ea5; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
     .status-bar a { color: #ffdd57; text-decoration: none; margin-left: 15px; }
     .status-bar a:hover { text-decoration: underline; }
+    .token-status { padding: 5px 10px; border-radius: 3px; font-size: 12px; }
+    .token-ok { background: #00703c; }
+    .token-missing { background: #d4351c; }
   </style>
 </head>
 <body>
 
-<!-- ==================== LOGIN SCREEN ==================== -->
+<!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-box">
     <h1>🔒 EMCS Dashboard</h1>
-    <p style="margin-bottom:20px; color:#666;">Enter your credentials to continue</p>
+    <p style="margin-bottom:20px; color:#666;">Enter your password to continue</p>
     <input type="password" id="password" placeholder="Dashboard Password" onkeypress="if(event.key==='Enter')login()">
     <input type="text" id="totp-code" placeholder="6-digit 2FA code (if enabled)" maxlength="6" style="display:none;" onkeypress="if(event.key==='Enter')login()">
     <button onclick="login()" style="width:100%; margin-top:10px;">Login</button>
     <p id="login-error" class="error" style="margin-top:10px;"></p>
-
     <hr style="margin:25px 0;">
     <h3 style="font-size:1em; color:#666;">First Time? Setup 2FA</h3>
     <button class="btn-green" onclick="setup2FA()" style="font-size:13px; width:100%;">Setup 2FA</button>
     <div id="2fa-setup" style="display:none; margin-top:15px; text-align:left;">
       <p>Scan this QR code with your authenticator app:</p>
       <img id="qr-code" style="max-width:250px; display:block; margin:10px auto; border:1px solid #ddd; padding:10px;">
-      <p>Or enter this secret manually: <code id="secret-text" style="background:#f4f4f4; padding:3px 6px; border-radius:3px;"></code></p>
-      <input type="text" id="verify-code" placeholder="Enter 6-digit code to verify" maxlength="6" style="width:100%;">
+      <p>Or enter this secret: <code id="secret-text" style="background:#f4f4f4; padding:3px 6px; border-radius:3px;"></code></p>
+      <input type="text" id="verify-code" placeholder="Enter 6-digit code" maxlength="6" style="width:100%;">
       <button class="btn-green" onclick="verify2FA()" style="width:100%; margin-top:10px;">Verify & Enable 2FA</button>
       <p id="2fa-result" style="margin-top:10px;"></p>
     </div>
   </div>
 </div>
 
-<!-- ==================== MAIN DASHBOARD ==================== -->
+<!-- MAIN DASHBOARD -->
 <div id="dashboard" style="display:none;">
   <div class="status-bar">
     <span>🇬🇧 HMRC EMCS Dashboard</span>
     <div>
+      <span id="hmrc-status" class="token-status token-missing">HMRC: Not Logged In</span>
       <a href="/api/auth">Login to HMRC</a>
       <a href="#" onclick="logout()">Logout</a>
     </div>
@@ -92,7 +94,7 @@
       <button onclick="showTab('tab-unsubscribe',this)">9. Unsubscribe ERN</button>
     </div>
 
-    <!-- TAB 1: SUBMIT MOVEMENT (IE815) -->
+    <!-- TAB 1: SUBMIT MOVEMENT -->
     <div id="tab-submit" class="tab active">
       <div class="card">
         <h2>Submit Draft Movement (IE815)</h2>
@@ -104,35 +106,33 @@
         <button class="btn-green" onclick="exportResult('submit-output','movement')">Export CSV</button>
         <pre id="submit-output">Waiting...</pre>
         <div class="cheat-sheet">
-          <h3>🧪 Sandbox Magic LRNs (Put these in the LRN field above)</h3>
+          <h3>🧪 Sandbox Magic LRNs</h3>
           <table>
-            <tr><th>LRN Value</th><th>What Happens</th></tr>
-            <tr><td>lrnie8156540856</td><td>✅ 202 Success (Basic)</td></tr>
+            <tr><th>LRN Value</th><th>Result</th></tr>
+            <tr><td>lrnie8156540856</td><td>✅ 202 Success</td></tr>
             <tr><td>lrnie8155973812</td><td>✅ Success + IE818 Receipt</td></tr>
             <tr><td>lrnie8155743934</td><td>✅ Success + IE810 Cancel</td></tr>
+            <tr><td>lrnie8154968571</td><td>✅ Success + IE813 Change</td></tr>
+            <tr><td>lrnie8153786132</td><td>✅ Success + IE819 Reject</td></tr>
             <tr><td>SendA400</td><td>❌ 400 Bad Request</td></tr>
             <tr><td>SendA404</td><td>❌ 404 Not Found</td></tr>
             <tr><td>SendA500</td><td>❌ 500 Server Error</td></tr>
           </table>
         </div>
-        <div class="cheat-sheet">
-          <h3>🧪 Sandbox Magic Message IDs (For Tab 4)</h3>
-          <table>
-            <tr><th>Value</th><th>Result</th></tr>
-            <tr><td>SendA202</td><td>✅ 202 Accepted</td></tr>
-            <tr><td>SendA400</td><td>❌ 400 Bad Request</td></tr>
-          </table>
-        </div>
       </div>
     </div>
 
-    <!-- TAB 2: GET ALL MOVEMENTS -->
+    <!-- TAB 2: GET MOVEMENTS -->
     <div id="tab-get-movements" class="tab">
       <div class="card">
         <h2>Get All Movements</h2>
         <div class="field"><label>Search ERN</label><input type="text" id="gm-ern" value="GBWK002281023"></div>
         <div class="field"><label>Filter by ARC (optional)</label><input type="text" id="gm-arc"></div>
         <div class="field"><label>Filter by LRN (optional)</label><input type="text" id="gm-lrn"></div>
+        <div class="field"><label>Updated Since (optional)</label><input type="text" id="gm-since" placeholder="2024-01-17T15:27:29.540089Z"></div>
+        <div class="field"><label>Trader Type</label>
+          <select id="gm-type"><option value="">All</option><option value="consignor">Consignor</option><option value="consignee">Consignee</option></select>
+        </div>
         <button onclick="getMovements()">Get Movements</button>
         <button class="btn-green" onclick="exportResult('gm-output','movements')">Export CSV</button>
         <pre id="gm-output">Waiting...</pre>
@@ -142,7 +142,7 @@
     <!-- TAB 3: GET SINGLE MOVEMENT -->
     <div id="tab-get-movement" class="tab">
       <div class="card">
-        <h2>Get Single Movement by ID</h2>
+        <h2>Get Single Movement</h2>
         <div class="field"><label>Movement ID</label><input type="text" id="gsm-id" placeholder="Paste a Movement ID from Tab 1 or 2"></div>
         <button onclick="getSingleMovement()">Get Movement</button>
         <pre id="gsm-output">Waiting...</pre>
@@ -152,7 +152,7 @@
     <!-- TAB 4: SUBMIT MESSAGE -->
     <div id="tab-submit-msg" class="tab">
       <div class="card">
-        <h2>Submit Message for a Movement</h2>
+        <h2>Submit Message</h2>
         <div class="field"><label>Movement ID</label><input type="text" id="sm-id" placeholder="Paste a Movement ID from Tab 1"></div>
         <div class="field"><label>Message Type</label>
           <select id="sm-type">
@@ -160,6 +160,8 @@
             <option value="IE818">IE818 - Report of Receipt</option>
             <option value="IE813">IE813 - Change of Destination</option>
             <option value="IE819">IE819 - Alert or Rejection</option>
+            <option value="IE837">IE837 - Explain Delay</option>
+            <option value="IE871">IE871 - Reason for Shortage</option>
           </select>
         </div>
         <div class="field"><label>Message Identifier</label><input type="text" id="sm-msgid" value="SendA202"></div>
@@ -168,10 +170,10 @@
       </div>
     </div>
 
-    <!-- TAB 5: GET ALL MESSAGES -->
+    <!-- TAB 5: GET MESSAGES -->
     <div id="tab-get-messages" class="tab">
       <div class="card">
-        <h2>Get All Messages for a Movement</h2>
+        <h2>Get All Messages</h2>
         <div class="field"><label>Movement ID</label><input type="text" id="gmsg-id" placeholder="Paste a Movement ID"></div>
         <button onclick="getMessages()">Get Messages</button>
         <button class="btn-green" onclick="exportResult('gmsg-output','messages')">Export CSV</button>
@@ -182,7 +184,7 @@
     <!-- TAB 6: GET SINGLE MESSAGE -->
     <div id="tab-get-message" class="tab">
       <div class="card">
-        <h2>Get Single Message (Returns XML)</h2>
+        <h2>Get Single Message (XML)</h2>
         <div class="field"><label>Movement ID</label><input type="text" id="gsmsg-mid" placeholder="Paste a Movement ID"></div>
         <div class="field"><label>Message ID</label><input type="text" id="gsmsg-id" placeholder="e.g. XI00005"></div>
         <button onclick="getSingleMessage()">Get Message</button>
@@ -190,7 +192,7 @@
       </div>
     </div>
 
-    <!-- TAB 7: PRE-VALIDATE TRADER -->
+    <!-- TAB 7: PRE-VALIDATE -->
     <div id="tab-validate" class="tab">
       <div class="card">
         <h2>Pre-Validate Trader</h2>
@@ -200,6 +202,8 @@
             <option value="UK Record">UK Record</option>
             <option value="EU Trader">EU Trader</option>
             <option value="EU Warehouse">EU Warehouse</option>
+            <option value="UK Temporary Authorisation">UK Temporary Authorisation</option>
+            <option value="EU Temporary Authorisation">EU Temporary Authorisation</option>
           </select>
         </div>
         <div class="field"><label>Product Code 1</label><input type="text" id="pv-p1" value="W200"></div>
@@ -207,60 +211,77 @@
         <button onclick="preValidate()">Validate Trader</button>
         <pre id="pv-output">Waiting...</pre>
         <div class="cheat-sheet">
-          <h3>🧪 Sandbox Test Values</h3>
+          <h3>🧪 Test Values</h3>
           <table>
             <tr><th>Field</th><th>Value</th><th>Result</th></tr>
-            <tr><td>ERN</td><td>GBWK000000000</td><td>❌ Invalid Trader (Not Found)</td></tr>
+            <tr><td>ERN</td><td>GBWK000000000</td><td>❌ Invalid Trader</td></tr>
             <tr><td>ERN</td><td>SendA400</td><td>❌ 400 Bad Request</td></tr>
-            <tr><td>Product</td><td>W300 or S200</td><td>❌ Invalid Product Code</td></tr>
+            <tr><td>Product</td><td>W300 or S200</td><td>❌ Invalid Product</td></tr>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- TAB 8: SUBSCRIBE ERN -->
+    <!-- TAB 8: SUBSCRIBE -->
     <div id="tab-subscribe" class="tab">
       <div class="card">
-        <h2>Subscribe ERN for Push Notifications</h2>
-        <div class="field"><label>ERN to Subscribe</label><input type="text" id="sub-ern" value="GBWK002281023"></div>
+        <h2>Subscribe ERN</h2>
+        <div class="field"><label>ERN</label><input type="text" id="sub-ern" value="GBWK002281023"></div>
         <button class="btn-green" onclick="subscribeErn()">Subscribe</button>
         <pre id="sub-output">Waiting...</pre>
       </div>
     </div>
 
-    <!-- TAB 9: UNSUBSCRIBE ERN -->
+    <!-- TAB 9: UNSUBSCRIBE -->
     <div id="tab-unsubscribe" class="tab">
       <div class="card">
-        <h2>Unsubscribe ERN from Push Notifications</h2>
-        <div class="field"><label>ERN to Unsubscribe</label><input type="text" id="unsub-ern" value="GBWK002281023"></div>
+        <h2>Unsubscribe ERN</h2>
+        <div class="field"><label>ERN</label><input type="text" id="unsub-ern" value="GBWK002281023"></div>
         <button class="btn-red" onclick="unsubscribeErn()">Unsubscribe</button>
         <pre id="unsub-output">Waiting...</pre>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- ==================== JAVASCRIPT ==================== -->
 <script>
-// --- 1. AUTHENTICATION & TOKEN HANDLING ---
-// Check if HMRC just redirected us back with a token in the URL
+// =============================================
+// AUTHENTICATION (Fixed: uses localStorage)
+// =============================================
+
+// 1. Check if HMRC redirected back with a token
 const urlParams = new URLSearchParams(window.location.search);
 const hmrcTokenFromUrl = urlParams.get('hmrc_token');
 
 if (hmrcTokenFromUrl) {
   localStorage.setItem('hmrc_token', hmrcTokenFromUrl);
-  window.history.replaceState({}, document.title, window.location.pathname); // Clean URL
-  console.log('✅ HMRC Token saved to localStorage');
+  window.history.replaceState({}, document.title, window.location.pathname);
+  console.log('HMRC Token saved!');
 }
 
-const hmrcToken = localStorage.getItem('hmrc_token');
-
-// Check dashboard password auth
-if (document.cookie.includes('app_auth=authenticated')) {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
+// 2. Show dashboard if user is logged in
+function checkAuth() {
+  const dashAuth = localStorage.getItem('dashboard_auth');
+  if (dashAuth === 'authenticated') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    updateHmrcStatus();
+  }
 }
+
+function updateHmrcStatus() {
+  const token = localStorage.getItem('hmrc_token');
+  const el = document.getElementById('hmrc-status');
+  if (token) {
+    el.innerText = 'HMRC: Logged In ✅';
+    el.className = 'token-status token-ok';
+  } else {
+    el.innerText = 'HMRC: Not Logged In';
+    el.className = 'token-status token-missing';
+  }
+}
+
+checkAuth();
 
 async function login() {
   const password = document.getElementById('password').value;
@@ -276,21 +297,25 @@ async function login() {
     document.getElementById('login-error').innerText = 'Enter your 2FA code';
     return;
   }
-  if (res.ok) {
+  if (res.ok && data.success) {
+    localStorage.setItem('dashboard_auth', 'authenticated');
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
+    updateHmrcStatus();
   } else {
-    document.getElementById('login-error').innerText = data.error;
+    document.getElementById('login-error').innerText = data.error || 'Login failed';
   }
 }
 
 function logout() {
-  document.cookie = 'app_auth=; Max-Age=0; Path=/; Secure; SameSite=Lax';
+  localStorage.removeItem('dashboard_auth');
   localStorage.removeItem('hmrc_token');
   location.reload();
 }
 
-// --- 2. 2FA SETUP ---
+// =============================================
+// 2FA SETUP
+// =============================================
 async function setup2FA() {
   const res = await fetch('/api/setup-2fa', { method: 'POST' });
   if (res.ok) {
@@ -299,9 +324,7 @@ async function setup2FA() {
     document.getElementById('qr-code').src = data.qrCode;
     document.getElementById('secret-text').innerText = data.secret;
     window.tempSecret = data.secret;
-  } else {
-    alert('Please login with your password first');
-  }
+  } else { alert('Login with password first'); }
 }
 
 async function verify2FA() {
@@ -314,13 +337,15 @@ async function verify2FA() {
   const data = await res.json();
   if (data.success) {
     document.getElementById('2fa-result').innerHTML =
-      '<span class="success">✅ Verified! Add this to Vercel Environment Variables:<br><b>Key:</b> TOTP_SECRET<br><b>Value:</b> ' + data.secret + '</span>';
+      '<span class="success">✅ Verified! Add to Vercel Env Vars:<br><b>Key:</b> TOTP_SECRET<br><b>Value:</b> ' + data.secret + '</span>';
   } else {
     document.getElementById('2fa-result').innerHTML = '<span class="error">❌ ' + data.error + '</span>';
   }
 }
 
-// --- 3. UI HELPERS ---
+// =============================================
+// HELPERS
+// =============================================
 function showTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
@@ -330,19 +355,11 @@ function showTab(id, btn) {
 
 async function getHeaders() {
   let ip = '127.0.0.1';
-  try { 
-    const r = await fetch('https://api.ipify.org?format=json'); 
-    ip = (await r.json()).ip; 
-  } catch(e) {}
-  
+  try { const r = await fetch('https://api.ipify.org?format=json'); ip = (await r.json()).ip; } catch(e) {}
   let deviceId = localStorage.getItem('emcs_device_id');
-  if (!deviceId) { 
-    deviceId = 'dev-' + crypto.randomUUID(); 
-    localStorage.setItem('emcs_device_id', deviceId); 
-  }
-
+  if (!deviceId) { deviceId = 'dev-' + crypto.randomUUID(); localStorage.setItem('emcs_device_id', deviceId); }
   return {
-    'Authorization': `Bearer ${localStorage.getItem('hmrc_token')}`,
+    'Authorization': 'Bearer ' + localStorage.getItem('hmrc_token'),
     'x-client-ip': ip,
     'x-client-ua': navigator.userAgent,
     'x-device-id': deviceId,
@@ -353,202 +370,139 @@ async function getHeaders() {
   };
 }
 
-// --- 4. CSV EXPORT ---
 function exportResult(elementId, type) {
   const text = document.getElementById(elementId).innerText;
   let data;
-  try { data = JSON.parse(text); } catch(e) { alert('No valid JSON data. Run a query first.'); return; }
+  try { data = JSON.parse(text.replace(/^Status: \d+\n\n/, '')); } catch(e) { alert('No valid JSON. Run a query first.'); return; }
   if (!Array.isArray(data)) data = [data];
-  if (data.length === 0) { alert('No data to export.'); return; }
-
+  if (data.length === 0) { alert('No data.'); return; }
   const headers = Object.keys(data[0]);
-  const rows = data.map(row => headers.map(h => {
-    let val = row[h] !== null && row[h] !== undefined ? String(row[h]) : '';
-    return '"' + val.replace(/"/g, '""') + '"';
-  }).join(','));
+  const rows = data.map(row => headers.map(h => '"' + String(row[h] || '').replace(/"/g, '""') + '"').join(','));
   const csv = [headers.join(','), ...rows].join('\n');
-
   const blob = new Blob([csv], { type: 'text/csv' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `emcs-${type}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.download = 'emcs-' + type + '-' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
 }
 
-// --- 5. API FUNCTIONS (ALL 9 ENDPOINTS) ---
+// =============================================
+// ALL 9 API ENDPOINTS
+// =============================================
 
-// 1. Submit Movement (IE815)
 async function submitMovement() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Please login to HMRC first!'); return; }
+  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
   const h = await getHeaders();
-  const consignor = document.getElementById('s-consignor').value;
-  const consignee = document.getElementById('s-consignee').value;
-  const lrn = document.getElementById('s-lrn').value;
-  const date = document.getElementById('s-date').value;
-  const today = new Date().toISOString().slice(0,10);
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">
-  <urn:Message>
-    <urn:Header>
-      <urn1:MessageSender>${consignor}</urn1:MessageSender>
-      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>
-      <urn1:DateOfPreparation>${today}</urn1:DateOfPreparation>
-      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>
-      <urn1:MessageIdentifier>${lrn}</urn1:MessageIdentifier>
-    </urn:Header>
-    <urn:Body>
-      <urn:SubmittedDraftOfEADESAD>
-        <urn:EadEsadDraft>
-          <urn:ConsignorDetails><urn:ExciseReferenceNumber>${consignor}</urn:ExciseReferenceNumber></urn:ConsignorDetails>
-          <urn:ConsigneeDetails><urn:ExciseReferenceNumber>${consignee}</urn:ExciseReferenceNumber></urn:ConsigneeDetails>
-          <urn:DateOfDispatch>${date}</urn:DateOfDispatch>
-          <urn:LocalReferenceNumber>${lrn}</urn:LocalReferenceNumber>
-        </urn:EadEsadDraft>
-      </urn:SubmittedDraftOfEADESAD>
-    </urn:Body>
-  </urn:Message>
-</urn:IE815>`;
-
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', {
-    method: 'POST', headers: { ...h, 'Content-Type': 'application/xml' }, body: xml
-  });
-  document.getElementById('submit-output').innerText = `Status: ${res.status}\n\n${await res.text()}`;
+  const c = document.getElementById('s-consignor').value;
+  const e = document.getElementById('s-consignee').value;
+  const l = document.getElementById('s-lrn').value;
+  const d = document.getElementById('s-date').value;
+  const t = new Date().toISOString().slice(0,10);
+  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n  <urn:Message>\n    <urn:Header>\n      <urn1:MessageSender>' + c + '</urn1:MessageSender>\n      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n      <urn1:DateOfPreparation>' + t + '</urn1:DateOfPreparation>\n      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n      <urn1:MessageIdentifier>' + l + '</urn1:MessageIdentifier>\n    </urn:Header>\n    <urn:Body>\n      <urn:SubmittedDraftOfEADESAD>\n        <urn:EadEsadDraft>\n          <urn:ConsignorDetails><urn:ExciseReferenceNumber>' + c + '</urn:ExciseReferenceNumber></urn:ConsignorDetails>\n          <urn:ConsigneeDetails><urn:ExciseReferenceNumber>' + e + '</urn:ExciseReferenceNumber></urn:ConsigneeDetails>\n          <urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>\n          <urn:LocalReferenceNumber>' + l + '</urn:LocalReferenceNumber>\n        </urn:EadEsadDraft>\n      </urn:SubmittedDraftOfEADESAD>\n    </urn:Body>\n  </urn:Message>\n</urn:IE815>';
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { method: 'POST', headers: { ...h, 'Content-Type': 'application/xml' }, body: xml });
+  document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
 }
 
-// 2. Get All Movements
 async function getMovements() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Please login to HMRC first!'); return; }
+  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
   const h = await getHeaders();
   const ern = document.getElementById('gm-ern').value;
   const arc = document.getElementById('gm-arc').value;
   const lrn = document.getElementById('gm-lrn').value;
-  let q = `?ern=${ern}`;
-  if (arc) q += `&arc=${arc}`;
-  if (lrn) q += `&lrn=${lrn}`;
-
-  const res = await fetch(`/api/emcs?endpoint=/customs/excise/movements${q}`, { headers: h });
-  document.getElementById('gm-output').innerText = `Status: ${res.status}\n\n${await res.text()}`;
+  const since = document.getElementById('gm-since').value;
+  const type = document.getElementById('gm-type').value;
+  let q = '?ern=' + ern;
+  if (arc) q += '&arc=' + arc;
+  if (lrn) q += '&lrn=' + lrn;
+  if (since) q += '&updatedSince=' + encodeURIComponent(since);
+  if (type) q += '&traderType=' + type;
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements' + q, { headers: h });
+  document.getElementById('gm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
 }
 
-// 3. Get Single Movement
 async function getSingleMovement() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Please login to HMRC first!'); return; }
+  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
   const h = await getHeaders();
   const id = document.getElementById('gsm-id').value;
-  const res = await fetch(`/api/emcs?endpoint=/customs/excise/movements/${id}`, { headers: h });
-  document.getElementById('gsm-output').innerText = `Status: ${res.status}\n\n${await res.text()}`;
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + id, { headers: h });
+  document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
 }
 
-// 4. Submit Message
 async function submitMessage() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Please login to HMRC first!'); return; }
+  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
   const h = await getHeaders();
   const movId = document.getElementById('sm-id').value;
   const msgType = document.getElementById('sm-type').value;
   const msgId = document.getElementById('sm-msgid').value;
-  const today = new Date().toISOString().slice(0,10);
-
-  let bodyXml = '';
-  if (msgType === 'IE810') bodyXml = `<urn:CancellationOfEADESAD><urn:MovementId>${movId}</urn:MovementId></urn:CancellationOfEADESAD>`;
-  else if (msgType === 'IE818') bodyXml = `<urn:AcceptedOrRejectedReportOfReceiptExport><urn:MovementId>${movId}</urn:MovementId><urn:DestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:DestinationOffice></urn:AcceptedOrRejectedReportOfReceiptExport>`;
-  else if (msgType === 'IE813') bodyXml = `<urn:ChangeOfDestination><urn:MovementId>${movId}</urn:MovementId><urn:NewDestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:NewDestinationOffice></urn:ChangeOfDestination>`;
-  else if (msgType === 'IE819') bodyXml = `<urn:AlertOrRejectionOfMovement><urn:MovementId>${movId}</urn:MovementId></urn:AlertOrRejectionOfMovement>`;
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urn:${msgType} xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">
-  <urn:Message>
-    <urn:Header>
-      <urn1:MessageSender>GBWK002281023</urn1:MessageSender>
-      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>
-      <urn1:DateOfPreparation>${today}</urn1:DateOfPreparation>
-      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>
-      <urn1:MessageIdentifier>${msgId}</urn1:MessageIdentifier>
-    </urn:Header>
-    <urn:Body>${bodyXml}</urn:Body>
-  </urn:Message>
-</urn:${msgType}>`;
-
-  const res = await fetch(`/api/emcs?endpoint=/customs/excise/movements/${movId}/messages`, {
-    method: 'POST', headers: { ...h, 'Content-Type': 'application/xml' }, body: xml
-  });
-  document.getElementById('sm-output').innerText = `Status: ${res.status}\n\n${await res.text()}`;
+  const t = new Date().toISOString().slice(0,10);
+  let body = '';
+  if (msgType === 'IE810') body = '<urn:CancellationOfEADESAD><urn:MovementId>' + movId + '</urn:MovementId></urn:CancellationOfEADESAD>';
+  else if (msgType === 'IE818') body = '<urn:AcceptedOrRejectedReportOfReceiptExport><urn:MovementId>' + movId + '</urn:MovementId><urn:DestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:DestinationOffice></urn:AcceptedOrRejectedReportOfReceiptExport>';
+  else if (msgType === 'IE813') body = '<urn:ChangeOfDestination><urn:MovementId>' + movId + '</urn:MovementId><urn:NewDestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:NewDestinationOffice></urn:ChangeOfDestination>';
+  else if (msgType === 'IE819') body = '<urn:AlertOrRejectionOfMovement><urn:MovementId>' + movId + '</urn:MovementId></urn:AlertOrRejectionOfMovement>';
+  else if (msgType === 'IE837') body = '<urn:ExplanationOfDelay><urn:MovementId>' + movId + '</urn:MovementId></urn:ExplanationOfDelay>';
+  else if (msgType === 'IE871') body = '<urn:ReasonForShortage><urn:MovementId>' + movId + '</urn:MovementId></urn:ReasonForShortage>';
+  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urn:' + msgType + ' xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n  <urn:Message>\n    <urn:Header>\n      <urn1:MessageSender>GBWK002281023</urn1:MessageSender>\n      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n      <urn1:DateOfPreparation>' + t + '</urn1:DateOfPreparation>\n      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n      <urn1:MessageIdentifier>' + msgId + '</urn1:MessageIdentifier>\n    </urn:Header>\n    <urn:Body>' + body + '</urn:Body>\n  </urn:Message>\n</urn:' + msgType + '>';
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { method: 'POST', headers: { ...h, 'Content-Type': 'application/xml' }, body: xml });
+  document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
 }
 
-// 5. Get All Messages
 async function getMessages() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Please login to HMRC first!'); return; }
+  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
   const h = await getHeaders();
   const movId = document.getElementById('gmsg-id').value;
-  const res = await fetch(`/api/emcs?endpoint=/customs/excise/movements/${movId}/messages`, { headers: h });
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { headers: h });
   const text = await res.text();
-  
   try {
     const msgs = JSON.parse(text);
     if (Array.isArray(msgs)) {
-      msgs.forEach(m => {
-        if (m.encodedMessage) {
-          try { m.decodedXml = atob(m.encodedMessage); } catch(e) { m.decodedXml = 'Decode failed'; }
-        }
-      });
+      msgs.forEach(m => { if (m.encodedMessage) { try { m.decodedXml = atob(m.encodedMessage); } catch(e) { m.decodedXml = 'Decode failed'; } } });
       document.getElementById('gmsg-output').innerText = JSON.stringify(msgs, null, 2);
       return;
     }
   } catch(e) {}
-  document.getElementById('gmsg-output').innerText = `Status: ${res.status}\n\n${text}`;
+  document.getElementById('gmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
 }
 
-// 6. Get Single Message
 async function getSingleMessage() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Please login to HMRC first!'); return; }
+  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
   const h = await getHeaders();
   h['Accept'] = 'application/vnd.hmrc.1.0+xml';
   const movId = document.getElementById('gsmsg-mid').value;
   const msgId = document.getElementById('gsmsg-id').value;
-  const res = await fetch(`/api/emcs?endpoint=/customs/excise/movements/${movId}/messages/${msgId}`, { headers: h });
-  document.getElementById('gsmsg-output').innerText = `Status: ${res.status}\n\n${await res.text()}`;
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages/' + msgId, { headers: h });
+  document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
 }
 
-// 7. Pre-Validate Trader
 async function preValidate() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Please login to HMRC first!'); return; }
+  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
   const h = await getHeaders();
   h['x-correlation-id'] = crypto.randomUUID();
   const ern = document.getElementById('pv-ern').value;
   const group = document.getElementById('pv-group').value;
   const p1 = document.getElementById('pv-p1').value;
   const p2 = document.getElementById('pv-p2').value;
-
   const products = [];
   if (p1) products.push({ product: { exciseProductCode: p1 } });
   if (p2) products.push({ product: { exciseProductCode: p2 } });
-
-  const body = { exciseRegistrationNumber: ern, entityGroup: group, validateProductAuthorisationRequest: products };
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', {
-    method: 'POST', headers: { ...h, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
-  });
-  document.getElementById('pv-output').innerText = `Status: ${res.status}\n\n${await res.text()}`;
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', { method: 'POST', headers: { ...h, 'Content-Type': 'application/json' }, body: JSON.stringify({ exciseRegistrationNumber: ern, entityGroup: group, validateProductAuthorisationRequest: products }) });
+  document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
 }
 
-// 8. Subscribe ERN
 async function subscribeErn() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Please login to HMRC first!'); return; }
+  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
   const h = await getHeaders();
   const ern = document.getElementById('sub-ern').value;
-  const res = await fetch(`/api/emcs?endpoint=/customs/excise/erns/${ern}/subscription`, {
-    method: 'POST', headers: { ...h, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ boxId: '42c75e22-7bba-44f2-a610-4b4c3b262e3e' })
-  });
-  document.getElementById('sub-output').innerText = `Status: ${res.status}\n\n${await res.text()}`;
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + ern + '/subscription', { method: 'POST', headers: { ...h, 'Content-Type': 'application/json' }, body: JSON.stringify({ boxId: '42c75e22-7bba-44f2-a610-4b4c3b262e3e' }) });
+  document.getElementById('sub-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
 }
 
-// 9. Unsubscribe ERN
 async function unsubscribeErn() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Please login to HMRC first!'); return; }
+  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
   const h = await getHeaders();
   const ern = document.getElementById('unsub-ern').value;
-  const res = await fetch(`/api/emcs?endpoint=/customs/excise/erns/${ern}/subscription`, { method: 'DELETE', headers: h });
-  document.getElementById('unsub-output').innerText = res.status === 202 ? 'Successfully unsubscribed' : `Status: ${res.status}\n\n${await res.text()}`;
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + ern + '/subscription', { method: 'DELETE', headers: h });
+  document.getElementById('unsub-output').innerText = res.status === 202 ? 'Successfully unsubscribed' : 'Status: ' + res.status + '\n\n' + await res.text();
 }
 </script>
 </body>
