@@ -39,13 +39,13 @@
     .cheat-sheet th { background: #ffeeba; }
     #login-screen { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
     .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 450px; width: 100%; text-align: center; }
-    .status-bar { background: #005ea5; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .status-bar { background: #005ea5; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
     .status-bar a { color: #ffdd57; text-decoration: none; margin-left: 15px; }
     .status-bar a:hover { text-decoration: underline; }
     .token-status { padding: 5px 10px; border-radius: 3px; font-size: 12px; }
     .token-ok { background: #00703c; }
     .token-missing { background: #d4351c; }
-    .item-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 10px; }
+    .item-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 10px; background: #fafafa; }
     .mode-indicator { padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; }
     .mode-test { background: #ff9800; color: white; }
     .mode-prod { background: #d32f2f; color: white; }
@@ -70,7 +70,7 @@
       <img id="qr-code" style="max-width:250px; display:block; margin:10px auto; border:1px solid #ddd; padding:10px;">
       <p>Or enter this secret: <code id="secret-text" style="background:#f4f4f4; padding:3px 6px; border-radius:3px;"></code></p>
       <input type="text" id="verify-code" placeholder="Enter 6-digit code" maxlength="6" style="width:100%;">
-      <button id="verify-2fa-btn" class="btn-green" style="width:100%; margin-top:10px;">Verify & Enable 2FA</button>
+      <button id="verify-2fa-btn" class="btn-green" style="width:100%; margin-top:10px;">Verify and Enable 2FA</button>
       <p id="2fa-result" style="margin-top:10px;"></p>
     </div>
   </div>
@@ -103,7 +103,7 @@
     <!-- TAB 1: SUBMIT MOVEMENT -->
     <div id="tab-submit" class="tab active">
       <div class="card">
-        <h2>Submit Draft Movement (IE815) - EMCS Phase 4</h2>
+        <h2>Submit Draft Movement (IE815) - EMCS Phase 4 V3.23</h2>
 
         <h3>Consignor Trader</h3>
         <div class="field"><label>Trader Excise Number (ERN) *</label><input type="text" id="s-consignor-ern" value="GBWK002281023"></div>
@@ -137,7 +137,7 @@
         <div class="field"><label>Postcode *</label><input type="text" id="s-delivery-postcode" value="M2 2BB"></div>
         <div class="field"><label>City *</label><input type="text" id="s-delivery-city" value="Manchester"></div>
 
-        <h3>Dispatch Office & Transporter</h3>
+        <h3>Dispatch Office and Transporter</h3>
         <div class="field"><label>Competent Authority Dispatch Office Ref *</label><input type="text" id="s-dispatch-office" value="GB004098"></div>
         <div class="field"><label>Transporter VAT Number *</label><input type="text" id="s-transporter-vat" value="123798354"></div>
         <div class="field"><label>Transporter Name *</label><input type="text" id="s-transporter-name" value="Fast Freight Ltd"></div>
@@ -146,7 +146,7 @@
         <div class="field"><label>Transporter Postcode *</label><input type="text" id="s-transporter-postcode" value="FR5 4RN"></div>
         <div class="field"><label>Transporter City *</label><input type="text" id="s-transporter-city" value="Dover"></div>
 
-        <h3>Document & Journey Details</h3>
+        <h3>Document and Journey Details</h3>
         <div class="field"><label>Document Type *</label>
           <select id="s-doc-type">
             <option value="9" selected>9 - Other</option>
@@ -191,8 +191,8 @@
           </select>
         </div>
 
-        <h3>Invoice & Dispatch Details</h3>
-        <div class="field"><label>Local Reference Number (LRN)</label><input type="text" id="s-lrn" value="" readonly placeholder="Auto-generated"></div>
+        <h3>Invoice and Dispatch Details</h3>
+        <div class="field"><label>Local Reference Number (LRN)</label><input type="text" id="s-lrn" value="" readonly placeholder="Auto-generated on submit"></div>
         <div class="field"><label>Invoice Number *</label><input type="text" id="s-invoice-number" value="INV-2026-001"></div>
         <div class="field"><label>Origin Type Code *</label>
           <select id="s-origin-type">
@@ -216,9 +216,8 @@
 
         <h3>Goods Items</h3>
         <div class="field"><label>Number of Items *</label><input type="number" id="s-item-count" value="1" min="1" max="999" onchange="generateItemFields()"></div>
-
         <div id="goods-items-container">
-          <div class="item-field" data-item="1">
+          <div class="item-field">
             <h4>Item 1</h4>
             <div class="field"><label>Excise Product Code *</label><input type="text" id="s-product-1" value="B000"></div>
             <div class="field"><label>CN Code *</label><input type="text" id="s-cn-1" value="22030001"></div>
@@ -226,9 +225,7 @@
             <div class="field"><label>Gross Mass (kg) *</label><input type="number" id="s-weight-1" value="20000" step="0.001"></div>
             <div class="field"><label>Net Mass (kg) *</label><input type="number" id="s-net-weight-1" value="19999" step="0.001"></div>
             <div class="field"><label>ABV % *</label><input type="number" id="s-abv-1" value="0.5" step="0.1"></div>
-            <div class="field"><label>Fiscal Mark Used Flag *</label>
-              <select id="s-fiscal-1"><option value="0" selected>0 - No</option><option value="1">1 - Yes</option></select>
-            </div>
+            <div class="field"><label>Fiscal Mark Used Flag *</label><select id="s-fiscal-1"><option value="0" selected>0 - No</option><option value="1">1 - Yes</option></select></div>
             <div class="field"><label>Kind of Packages *</label><input type="text" id="s-package-kind-1" value="BA"></div>
             <div class="field"><label>Number of Packages *</label><input type="number" id="s-package-count-1" value="2"></div>
           </div>
@@ -239,13 +236,21 @@
         <pre id="submit-output">Waiting...</pre>
 
         <div class="cheat-sheet">
-          <h3>🧪 Sandbox Magic LRNs</h3>
+          <h3>Sandbox Magic LRNs (type into LRN field, then submit)</h3>
           <table>
             <tr><th>LRN Value</th><th>Result</th></tr>
-            <tr><td>lrnie8156540856</td><td>✅ 202 Success</td></tr>
-            <tr><td>lrnie8155973812</td><td>✅ Success + IE818 Receipt</td></tr>
-            <tr><td>lrnie8155743934</td><td>✅ Success + IE810 Cancel</td></tr>
-            <tr><td>SendA400</td><td>❌ 400 Bad Request</td></tr>
+            <tr><td>lrnie8156540856</td><td>202 Success</td></tr>
+            <tr><td>lrnie8155973812</td><td>Success + IE818 Receipt</td></tr>
+            <tr><td>lrnie8155743934</td><td>Success + IE810 Cancel</td></tr>
+            <tr><td>lrnie8154968571</td><td>Success + IE813 Change Consignee</td></tr>
+            <tr><td>lrnie8153786132</td><td>Success + IE819 Rejection</td></tr>
+            <tr><td>lrnie8155755321</td><td>Success + IE807 Interrupted</td></tr>
+            <tr><td>lrnie8155755325</td><td>Success + IE803 Change Destination</td></tr>
+            <tr><td>lrnie8155755329</td><td>Success + IE839 Custom Rejection</td></tr>
+            <tr><td>lrnie8155755330</td><td>Success + IE881 Manual Closure</td></tr>
+            <tr><td>SendA400</td><td>400 Bad Request</td></tr>
+            <tr><td>SendA404</td><td>404 Not Found</td></tr>
+            <tr><td>SendA500</td><td>500 Server Error</td></tr>
           </table>
         </div>
       </div>
@@ -277,9 +282,8 @@
     <!-- TAB 4: SUBMIT MESSAGE -->
     <div id="tab-submit-msg" class="tab">
       <div class="card">
-        <h2>Submit Message</h2>
-        <div class="field"><label>Movement ID *</label><input type="text" id="sm-id" placeholder="Paste a Movement ID from Tab 1"></div>
-        <div class="field"><label>ARC (Administrative Reference Code) *</label><input type="text" id="sm-arc" placeholder="e.g., 23GB00000000000377161"></div>
+        <h2>Submit Message (IE810/813/818/819/837/871)</h2>
+        <div class="field"><label>Administrative Reference Code (ARC) *</label><input type="text" id="sm-arc" placeholder="e.g., 23GB00000000000377161"></div>
         <div class="field"><label>Sequence Number *</label><input type="number" id="sm-seq" value="1" min="1"></div>
         <div class="field"><label>Message Type *</label>
           <select id="sm-type">
@@ -292,9 +296,7 @@
           </select>
         </div>
         <div class="field"><label>Message Identifier *</label><input type="text" id="sm-msgid" value="GB100000000302249"></div>
-        
         <div id="msg-specific-fields"></div>
-        
         <button id="submit-message-btn" style="margin-top:20px;">Submit Message</button>
         <pre id="sm-output">Waiting...</pre>
       </div>
@@ -303,7 +305,7 @@
     <!-- TAB 5: GET MESSAGES -->
     <div id="tab-get-messages" class="tab">
       <div class="card">
-        <h2>Get All Messages</h2>
+        <h2>Get All Messages for a Movement</h2>
         <div class="field"><label>Movement ID</label><input type="text" id="gmsg-id" placeholder="Paste a Movement ID"></div>
         <button id="get-messages-btn">Get Messages</button>
         <button id="export-gmsg-btn" class="btn-green">Export CSV</button>
@@ -314,7 +316,7 @@
     <!-- TAB 6: GET SINGLE MESSAGE -->
     <div id="tab-get-message" class="tab">
       <div class="card">
-        <h2>Get Single Message (XML)</h2>
+        <h2>Get Single Message (Returns XML)</h2>
         <div class="field"><label>Movement ID</label><input type="text" id="gsmsg-mid" placeholder="Paste a Movement ID"></div>
         <div class="field"><label>Message ID</label><input type="text" id="gsmsg-id" placeholder="e.g. XI00005"></div>
         <button id="get-single-message-btn">Get Message</button>
@@ -332,6 +334,8 @@
             <option value="UK Record">UK Record</option>
             <option value="EU Trader">EU Trader</option>
             <option value="EU Warehouse">EU Warehouse</option>
+            <option value="UK Temporary Authorisation">UK Temporary Authorisation</option>
+            <option value="EU Temporary Authorisation">EU Temporary Authorisation</option>
           </select>
         </div>
         <div class="field"><label>Product Code 1</label><input type="text" id="pv-p1" value="W200"></div>
@@ -344,7 +348,7 @@
     <!-- TAB 8: SUBSCRIBE -->
     <div id="tab-subscribe" class="tab">
       <div class="card">
-        <h2>Subscribe ERN</h2>
+        <h2>Subscribe ERN for Push Notifications</h2>
         <div class="field"><label>ERN</label><input type="text" id="sub-ern" value="GBWK002281023"></div>
         <button id="subscribe-ern-btn" class="btn-green">Subscribe</button>
         <pre id="sub-output">Waiting...</pre>
@@ -354,7 +358,7 @@
     <!-- TAB 9: UNSUBSCRIBE -->
     <div id="tab-unsubscribe" class="tab">
       <div class="card">
-        <h2>Unsubscribe ERN</h2>
+        <h2>Unsubscribe ERN from Push Notifications</h2>
         <div class="field"><label>ERN</label><input type="text" id="unsub-ern" value="GBWK002281023"></div>
         <button id="unsubscribe-ern-btn" class="btn-red">Unsubscribe</button>
         <pre id="unsub-output">Waiting...</pre>
@@ -365,21 +369,21 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('✅ Script loaded successfully');
+  console.log('Script loaded successfully');
 
-  // ==================== AUTHENTICATION ====================
-  const urlParams = new URLSearchParams(window.location.search);
-  const hmrcTokenFromUrl = urlParams.get('hmrc_token');
+  var TMS_NS = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.23';
 
+  // ==================== AUTH ====================
+  var urlParams = new URLSearchParams(window.location.search);
+  var hmrcTokenFromUrl = urlParams.get('hmrc_token');
   if (hmrcTokenFromUrl) {
     localStorage.setItem('hmrc_token', hmrcTokenFromUrl);
     window.history.replaceState({}, document.title, window.location.pathname);
-    console.log('✅ HMRC Token saved to localStorage');
+    console.log('HMRC Token saved');
   }
 
   function checkAuth() {
-    const dashAuth = localStorage.getItem('dashboard_auth');
-    if (dashAuth === 'authenticated') {
+    if (localStorage.getItem('dashboard_auth') === 'authenticated') {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       updateHmrcStatus();
@@ -387,10 +391,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function updateHmrcStatus() {
-    const token = localStorage.getItem('hmrc_token');
-    const el = document.getElementById('hmrc-status');
-    if (token) {
-      el.innerText = 'HMRC: Logged In ✅';
+    var el = document.getElementById('hmrc-status');
+    if (localStorage.getItem('hmrc_token')) {
+      el.innerText = 'HMRC: Logged In';
       el.className = 'token-status token-ok';
     } else {
       el.innerText = 'HMRC: Not Logged In';
@@ -400,17 +403,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
   checkAuth();
 
-  // Login
   document.getElementById('login-btn').addEventListener('click', async function() {
     try {
-      const password = document.getElementById('password').value;
-      const totpCode = document.getElementById('totp-code').value;
-      const res = await fetch('/api/protect', {
+      var res = await fetch('/api/protect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password, totpCode })
+        body: JSON.stringify({ password: document.getElementById('password').value, totpCode: document.getElementById('totp-code').value })
       });
-      const data = await res.json();
+      var data = await res.json();
       if (data.requires2FA) {
         document.getElementById('totp-code').style.display = 'block';
         document.getElementById('login-error').innerText = 'Enter your 2FA code';
@@ -425,12 +425,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('login-error').innerText = data.error || 'Login failed';
       }
     } catch (err) {
-      console.error('Login error:', err);
-      document.getElementById('login-error').innerText = 'Network error. Check console.';
+      document.getElementById('login-error').innerText = 'Network error';
     }
   });
 
-  // Logout
   document.getElementById('logout-btn').addEventListener('click', function(e) {
     e.preventDefault();
     localStorage.removeItem('dashboard_auth');
@@ -438,46 +436,36 @@ document.addEventListener('DOMContentLoaded', function() {
     location.reload();
   });
 
-  // 2FA Setup
   document.getElementById('setup-2fa-btn').addEventListener('click', async function() {
     try {
-      const res = await fetch('/api/setup-2fa', { method: 'POST' });
+      var res = await fetch('/api/setup-2fa', { method: 'POST' });
       if (res.ok) {
-        const data = await res.json();
+        var data = await res.json();
         document.getElementById('2fa-setup').style.display = 'block';
         document.getElementById('qr-code').src = data.qrCode;
         document.getElementById('secret-text').innerText = data.secret;
         window.tempSecret = data.secret;
-      } else {
-        alert('Please login with your password first');
-      }
-    } catch (err) {
-      console.error('2FA Setup error:', err);
-    }
+      } else { alert('Login first'); }
+    } catch (err) { console.error(err); }
   });
 
-  // 2FA Verify
   document.getElementById('verify-2fa-btn').addEventListener('click', async function() {
     try {
-      const code = document.getElementById('verify-code').value;
-      const res = await fetch('/api/setup-2fa', {
+      var res = await fetch('/api/setup-2fa', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret: window.tempSecret, token: code })
+        body: JSON.stringify({ secret: window.tempSecret, token: document.getElementById('verify-code').value })
       });
-      const data = await res.json();
+      var data = await res.json();
       if (data.success) {
-        document.getElementById('2fa-result').innerHTML =
-          '<span class="success">✅ Verified! Add to Vercel Env Vars:<br><b>Key:</b> TOTP_SECRET<br><b>Value:</b> ' + data.secret + '</span>';
+        document.getElementById('2fa-result').innerHTML = '<span class="success">Verified! Add TOTP_SECRET to Vercel: ' + data.secret + '</span>';
       } else {
-        document.getElementById('2fa-result').innerHTML = '<span class="error">❌ ' + data.error + '</span>';
+        document.getElementById('2fa-result').innerHTML = '<span class="error">' + data.error + '</span>';
       }
-    } catch (err) {
-      console.error('2FA Verify error:', err);
-    }
+    } catch (err) { console.error(err); }
   });
 
-  // ==================== TAB SWITCHING ====================
+  // ==================== TABS ====================
   document.querySelectorAll('.nav-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
@@ -489,19 +477,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ==================== HELPERS ====================
   async function getHeaders() {
-    let ip = '127.0.0.1';
-    try {
-      const r = await fetch('https://api.ipify.org?format=json');
-      const data = await r.json();
-      ip = data.ip;
-    } catch(e) {}
-
-    let deviceId = localStorage.getItem('emcs_device_id');
-    if (!deviceId) {
-      deviceId = 'dev-' + crypto.randomUUID();
-      localStorage.setItem('emcs_device_id', deviceId);
-    }
-
+    var ip = '127.0.0.1';
+    try { var r = await fetch('https://api.ipify.org?format=json'); ip = (await r.json()).ip; } catch(e) {}
+    var deviceId = localStorage.getItem('emcs_device_id');
+    if (!deviceId) { deviceId = 'dev-' + crypto.randomUUID(); localStorage.setItem('emcs_device_id', deviceId); }
     return {
       'Authorization': 'Bearer ' + localStorage.getItem('hmrc_token'),
       'x-client-ip': ip,
@@ -515,560 +494,317 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function exportResult(elementId, type) {
-    const text = document.getElementById(elementId).innerText;
-    let data;
+    var text = document.getElementById(elementId).innerText;
+    var data;
     try { data = JSON.parse(text.replace(/^Status: \d+\n\n/, '')); } catch(e) { alert('No valid JSON. Run a query first.'); return; }
     if (!Array.isArray(data)) data = [data];
     if (data.length === 0) { alert('No data.'); return; }
-    const headers = Object.keys(data[0]);
-    const rows = data.map(function(row) {
-      return headers.map(function(h) {
-        return '"' + String(row[h] || '').replace(/"/g, '""') + '"';
-      }).join(',');
-    });
-    const csv = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
+    var headers = Object.keys(data[0]);
+    var rows = data.map(function(row) { return headers.map(function(h) { return '"' + String(row[h] || '').replace(/"/g, '""') + '"'; }).join(','); });
+    var csv = [headers.join(',')].concat(rows).join('\n');
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'emcs-' + type + '-' + new Date().toISOString().slice(0,10) + '.csv';
     a.click();
   }
 
-  // ==================== GENERATE ITEM FIELDS ====================
   window.generateItemFields = function() {
-    const count = parseInt(document.getElementById('s-item-count').value) || 1;
-    const container = document.getElementById('goods-items-container');
-    container.innerHTML = '';
-
-    for (let i = 1; i <= count; i++) {
-      container.innerHTML += `
-        <div class="item-field" data-item="${i}">
-          <h4>Item ${i}</h4>
-          <div class="field"><label>Excise Product Code *</label><input type="text" id="s-product-${i}" value="B000"></div>
-          <div class="field"><label>CN Code *</label><input type="text" id="s-cn-${i}" value="22030001"></div>
-          <div class="field"><label>Quantity *</label><input type="number" id="s-qty-${i}" value="2000" step="0.001"></div>
-          <div class="field"><label>Gross Mass (kg) *</label><input type="number" id="s-weight-${i}" value="20000" step="0.001"></div>
-          <div class="field"><label>Net Mass (kg) *</label><input type="number" id="s-net-weight-${i}" value="19999" step="0.001"></div>
-          <div class="field"><label>ABV % *</label><input type="number" id="s-abv-${i}" value="0.5" step="0.1"></div>
-          <div class="field"><label>Fiscal Mark Used Flag *</label>
-            <select id="s-fiscal-${i}"><option value="0" selected>0 - No</option><option value="1">1 - Yes</option></select>
-          </div>
-          <div class="field"><label>Kind of Packages *</label><input type="text" id="s-package-kind-${i}" value="BA"></div>
-          <div class="field"><label>Number of Packages *</label><input type="number" id="s-package-count-${i}" value="2"></div>
-        </div>
-      `;
+    var count = parseInt(document.getElementById('s-item-count').value) || 1;
+    var container = document.getElementById('goods-items-container');
+    var html = '';
+    for (var i = 1; i <= count; i++) {
+      html += '<div class="item-field"><h4>Item ' + i + '</h4>' +
+        '<div class="field"><label>Excise Product Code *</label><input type="text" id="s-product-' + i + '" value="B000"></div>' +
+        '<div class="field"><label>CN Code *</label><input type="text" id="s-cn-' + i + '" value="22030001"></div>' +
+        '<div class="field"><label>Quantity *</label><input type="number" id="s-qty-' + i + '" value="2000" step="0.001"></div>' +
+        '<div class="field"><label>Gross Mass (kg) *</label><input type="number" id="s-weight-' + i + '" value="20000" step="0.001"></div>' +
+        '<div class="field"><label>Net Mass (kg) *</label><input type="number" id="s-net-weight-' + i + '" value="19999" step="0.001"></div>' +
+        '<div class="field"><label>ABV % *</label><input type="number" id="s-abv-' + i + '" value="0.5" step="0.1"></div>' +
+        '<div class="field"><label>Fiscal Mark Used Flag *</label><select id="s-fiscal-' + i + '"><option value="0" selected>0 - No</option><option value="1">1 - Yes</option></select></div>' +
+        '<div class="field"><label>Kind of Packages *</label><input type="text" id="s-package-kind-' + i + '" value="BA"></div>' +
+        '<div class="field"><label>Number of Packages *</label><input type="number" id="s-package-count-' + i + '" value="2"></div>' +
+        '</div>';
     }
+    container.innerHTML = html;
   };
 
-  // ==================== MESSAGE TYPE SPECIFIC FIELDS ====================
+  // ==================== MESSAGE SPECIFIC FIELDS ====================
   document.getElementById('sm-type').addEventListener('change', function() {
-    const msgType = this.value;
-    const container = document.getElementById('msg-specific-fields');
-    container.innerHTML = '<h3 style="margin-top:20px;">Message-Specific Fields</h3>';
-
+    var msgType = this.value;
+    var container = document.getElementById('msg-specific-fields');
+    var html = '<h3 style="margin-top:20px;">Message-Specific Fields</h3>';
     if (msgType === 'IE810') {
-      container.innerHTML += `
-        <div class="field"><label>Cancellation Reason Code *</label>
-          <select id="msg-cancel-reason">
-            <option value="1">1 - Duplicate</option>
-            <option value="2">2 - Erroneous movement</option>
-            <option value="3">3 - Movement cancelled before dispatch</option>
-            <option value="4">4 - Movement cancelled during transit</option>
-          </select>
-        </div>
-      `;
+      html += '<div class="field"><label>Cancellation Reason Code *</label><select id="msg-cancel-reason"><option value="1">1 - Duplicate</option><option value="2">2 - Erroneous movement</option><option value="3" selected>3 - Cancelled before dispatch</option><option value="4">4 - Cancelled during transit</option></select></div>';
     } else if (msgType === 'IE818') {
-      container.innerHTML += `
-        <div class="field"><label>Date of Arrival *</label><input type="date" id="msg-arrival-date" value="${new Date().toISOString().slice(0,10)}"></div>
-        <div class="field"><label>Global Conclusion of Receipt *</label>
-          <select id="msg-receipt-conclusion">
-            <option value="1">1 - Receipt acceptable</option>
-            <option value="2">2 - Receipt unacceptable with reservations</option>
-            <option value="3">3 - Receipt unacceptable - refusal</option>
-          </select>
-        </div>
-      `;
+      html += '<div class="field"><label>Date of Arrival *</label><input type="date" id="msg-arrival-date" value="' + new Date().toISOString().slice(0,10) + '"></div>';
+      html += '<div class="field"><label>Global Conclusion of Receipt *</label><select id="msg-receipt-conclusion"><option value="1">1 - Acceptable</option><option value="2">2 - Unacceptable with reservations</option><option value="3">3 - Unacceptable - refusal</option></select></div>';
     } else if (msgType === 'IE813') {
-      container.innerHTML += `
-        <div class="field"><label>New Destination Type Code *</label>
-          <select id="msg-dest-type">
-            <option value="1">1 - Tax warehouse</option>
-            <option value="2">2 - Registered consignee</option>
-            <option value="3">3 - Temporary registered consignee</option>
-          </select>
-        </div>
-        <div class="field"><label>New Consignee ERN *</label><input type="text" id="msg-new-consignee" value="GBWK240176600"></div>
-        <div class="field"><label>New Consignee Name *</label><input type="text" id="msg-new-consignee-name" value="New Consignee Ltd"></div>
-      `;
+      html += '<div class="field"><label>New Destination Type *</label><select id="msg-dest-type"><option value="1" selected>1 - Tax warehouse</option><option value="2">2 - Registered consignee</option><option value="3">3 - Temporary registered consignee</option></select></div>';
+      html += '<div class="field"><label>New Consignee ERN *</label><input type="text" id="msg-new-consignee" value="GBWK240176600"></div>';
+      html += '<div class="field"><label>New Consignee Name *</label><input type="text" id="msg-new-consignee-name" value="New Consignee Ltd"></div>';
+      html += '<div class="field"><label>New Consignee Street *</label><input type="text" id="msg-new-consignee-street" value="New Street"></div>';
+      html += '<div class="field"><label>New Consignee Street Number *</label><input type="text" id="msg-new-consignee-street-num" value="10"></div>';
+      html += '<div class="field"><label>New Consignee Postcode *</label><input type="text" id="msg-new-consignee-postcode" value="MK4 4NW"></div>';
+      html += '<div class="field"><label>New Consignee City *</label><input type="text" id="msg-new-consignee-city" value="Milton Keynes"></div>';
     } else if (msgType === 'IE819') {
-      container.innerHTML += `
-        <div class="field"><label>Date of Alert/Rejection *</label><input type="date" id="msg-alert-date" value="${new Date().toISOString().slice(0,10)}"></div>
-        <div class="field"><label>EAD/ESAD Rejected Flag *</label>
-          <select id="msg-rejected-flag">
-            <option value="0">0 - No</option>
-            <option value="1">1 - Yes</option>
-          </select>
-        </div>
-        <div class="field"><label>Rejection Reason Code *</label>
-          <select id="msg-rejection-reason">
-            <option value="1">1 - Other</option>
-            <option value="2">2 - Quantity discrepancies</option>
-            <option value="3">3 - Product type discrepancy</option>
-          </select>
-        </div>
-        <div class="field"><label>Complementary Information</label><input type="text" id="msg-rejection-info" value="Goods rejected due to damage"></div>
-      `;
+      html += '<div class="field"><label>Date of Alert/Rejection *</label><input type="date" id="msg-alert-date" value="' + new Date().toISOString().slice(0,10) + '"></div>';
+      html += '<div class="field"><label>EAD/ESAD Rejected Flag *</label><select id="msg-rejected-flag"><option value="0">0 - No</option><option value="1" selected>1 - Yes</option></select></div>';
+      html += '<div class="field"><label>Rejection Reason Code *</label><select id="msg-rejection-reason"><option value="1">1 - Other</option><option value="2" selected>2 - Quantity discrepancies</option><option value="3">3 - Product type discrepancy</option></select></div>';
+      html += '<div class="field"><label>Complementary Information</label><input type="text" id="msg-rejection-info" value="Goods rejected due to damage"></div>';
     } else if (msgType === 'IE837') {
-      container.innerHTML += `
-        <div class="field"><label>Submitter Type *</label>
-          <select id="msg-submitter-type">
-            <option value="1">1 - Consignor</option>
-            <option value="2">2 - Consignee</option>
-          </select>
-        </div>
-        <div class="field"><label>Explanation Code *</label>
-          <select id="msg-explanation-code">
-            <option value="1">1 - Transport problems</option>
-            <option value="2">2 - Force majeure</option>
-            <option value="6">6 - Other</option>
-          </select>
-        </div>
-        <div class="field"><label>Complementary Information *</label><input type="text" id="msg-delay-info" value="Accident on M5"></div>
-      `;
+      html += '<div class="field"><label>Submitter Type *</label><select id="msg-submitter-type"><option value="1" selected>1 - Consignor</option><option value="2">2 - Consignee</option></select></div>';
+      html += '<div class="field"><label>Explanation Code *</label><select id="msg-explanation-code"><option value="1">1 - Transport problems</option><option value="2">2 - Force majeure</option><option value="6" selected>6 - Other</option></select></div>';
+      html += '<div class="field"><label>Complementary Information *</label><input type="text" id="msg-delay-info" value="Accident on M5"></div>';
     } else if (msgType === 'IE871') {
-      container.innerHTML += `
-        <div class="field"><label>Date of Analysis *</label><input type="date" id="msg-analysis-date" value="${new Date().toISOString().slice(0,10)}"></div>
-        <div class="field"><label>Global Explanation *</label><input type="text" id="msg-shortage-explanation" value="Courier drank the wine"></div>
-      `;
+      html += '<div class="field"><label>Date of Analysis *</label><input type="date" id="msg-analysis-date" value="' + new Date().toISOString().slice(0,10) + '"></div>';
+      html += '<div class="field"><label>Global Explanation *</label><input type="text" id="msg-shortage-explanation" value="Courier drank the wine"></div>';
     }
+    container.innerHTML = html;
   });
-
-  // Trigger change event to show initial fields
   document.getElementById('sm-type').dispatchEvent(new Event('change'));
 
-  // ==================== API FUNCTIONS ====================
-
-  // 1. Submit Movement (IE815)
+  // ==================== 1. SUBMIT MOVEMENT (IE815) ====================
   document.getElementById('submit-movement-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-
-    const h = await getHeaders();
-
-    const consignorErn = document.getElementById('s-consignor-ern').value;
-    const consignorName = document.getElementById('s-consignor-name').value;
-    const consignorStreet = document.getElementById('s-consignor-street').value;
-    const consignorStreetNum = document.getElementById('s-consignor-street-num').value;
-    const consignorPostcode = document.getElementById('s-consignor-postcode').value;
-    const consignorCity = document.getElementById('s-consignor-city').value;
-
-    const consigneeErn = document.getElementById('s-consignee-ern').value;
-    const consigneeName = document.getElementById('s-consignee-name').value;
-    const consigneeStreet = document.getElementById('s-consignee-street').value;
-    const consigneeStreetNum = document.getElementById('s-consignee-street-num').value;
-    const consigneePostcode = document.getElementById('s-consignee-postcode').value;
-    const consigneeCity = document.getElementById('s-consignee-city').value;
-
-    const dispatchWarehouse = document.getElementById('s-dispatch-warehouse').value;
-    const dispatchName = document.getElementById('s-dispatch-name').value;
-    const dispatchStreet = document.getElementById('s-dispatch-street').value;
-    const dispatchStreetNum = document.getElementById('s-dispatch-street-num').value;
-    const dispatchPostcode = document.getElementById('s-dispatch-postcode').value;
-    const dispatchCity = document.getElementById('s-dispatch-city').value;
-
-    const deliveryTraderId = document.getElementById('s-delivery-trader-id').value;
-    const deliveryName = document.getElementById('s-delivery-name').value;
-    const deliveryStreet = document.getElementById('s-delivery-street').value;
-    const deliveryStreetNum = document.getElementById('s-delivery-street-num').value;
-    const deliveryPostcode = document.getElementById('s-delivery-postcode').value;
-    const deliveryCity = document.getElementById('s-delivery-city').value;
-
-    const dispatchOffice = document.getElementById('s-dispatch-office').value;
-    const transporterVat = document.getElementById('s-transporter-vat').value;
-    const transporterName = document.getElementById('s-transporter-name').value;
-    const transporterStreet = document.getElementById('s-transporter-street').value;
-    const transporterStreetNum = document.getElementById('s-transporter-street-num').value;
-    const transporterPostcode = document.getElementById('s-transporter-postcode').value;
-    const transporterCity = document.getElementById('s-transporter-city').value;
-
-    const docType = document.getElementById('s-doc-type').value;
-    const docRef = document.getElementById('s-doc-ref').value;
-    const destTypeCode = document.getElementById('s-dest-type').value;
-    const journeyTime = document.getElementById('s-journey-time').value;
-    const transportArrangement = document.getElementById('s-transport-arrangement').value;
-    const transportModeCode = document.getElementById('s-transport-mode').value;
-    const guarantorTypeCode = document.getElementById('s-guarantor-type').value;
-    const invoiceNumber = document.getElementById('s-invoice-number').value;
-    const originTypeCode = document.getElementById('s-origin-type').value;
-    const transportUnitCode = document.getElementById('s-transport-unit-code').value;
-    const identityOfTransportUnits = document.getElementById('s-identity-transport').value;
-
-    const uniqueLrn = 'LRN' + Date.now().toString().slice(-10) + '-' + Math.floor(Math.random() * 1000);
+    var h = await getHeaders();
+    var today = new Date().toISOString().slice(0, 10);
+    var uniqueLrn = 'LRN' + Date.now().toString().slice(-10) + '-' + Math.floor(Math.random() * 1000);
     document.getElementById('s-lrn').value = uniqueLrn;
+    var d = document.getElementById('s-date').value;
+    if (!d || d < today) { d = today; document.getElementById('s-date').value = d; }
+    var dispatchTime = document.getElementById('s-time').value || '12:00';
+    if (dispatchTime.length === 5) dispatchTime = dispatchTime + ':00';
 
-    let d = document.getElementById('s-date').value;
-    const today = new Date().toISOString().slice(0, 10);
-    if (!d || d < today) {
-      d = today;
-      document.getElementById('s-date').value = d;
+    var itemCount = parseInt(document.getElementById('s-item-count').value) || 1;
+    var bodyEadEsadXml = '';
+    for (var i = 1; i <= itemCount; i++) {
+      bodyEadEsadXml += '<urn:BodyEadEsad>' +
+        '<urn:BodyRecordUniqueReference>' + i + '</urn:BodyRecordUniqueReference>' +
+        '<urn:ExciseProductCode>' + document.getElementById('s-product-' + i).value + '</urn:ExciseProductCode>' +
+        '<urn:CnCode>' + document.getElementById('s-cn-' + i).value + '</urn:CnCode>' +
+        '<urn:Quantity>' + document.getElementById('s-qty-' + i).value + '</urn:Quantity>' +
+        '<urn:GrossMass>' + document.getElementById('s-weight-' + i).value + '</urn:GrossMass>' +
+        '<urn:NetMass>' + document.getElementById('s-net-weight-' + i).value + '</urn:NetMass>' +
+        '<urn:AlcoholicStrengthByVolumeInPercentage>' + document.getElementById('s-abv-' + i).value + '</urn:AlcoholicStrengthByVolumeInPercentage>' +
+        '<urn:FiscalMarkUsedFlag>' + document.getElementById('s-fiscal-' + i).value + '</urn:FiscalMarkUsedFlag>' +
+        '<urn:Package>' +
+        '<urn:KindOfPackages>' + document.getElementById('s-package-kind-' + i).value + '</urn:KindOfPackages>' +
+        '<urn:NumberOfPackages>' + document.getElementById('s-package-count-' + i).value + '</urn:NumberOfPackages>' +
+        '</urn:Package>' +
+        '</urn:BodyEadEsad>';
     }
 
-    const dispatchTime = document.getElementById('s-time').value || '12:00:00';
+    var xml = '<urn:IE815 xmlns:urn="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:IE815:V3.23" xmlns:urn1="' + TMS_NS + '">' +
+      '<urn:Header>' +
+      '<urn1:MessageSender>NDEA.GB</urn1:MessageSender>' +
+      '<urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>' +
+      '<urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation>' +
+      '<urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>' +
+      '<urn1:MessageIdentifier>' + uniqueLrn + '</urn1:MessageIdentifier>' +
+      '<urn1:CorrelationIdentifier>PORTAL' + uniqueLrn + '</urn1:CorrelationIdentifier>' +
+      '</urn:Header>' +
+      '<urn:Body>' +
+      '<urn:SubmittedDraftOfEADESAD>' +
+      '<urn:Attributes><urn:SubmissionMessageType>1</urn:SubmissionMessageType></urn:Attributes>' +
+      '<urn:ConsigneeTrader language="en">' +
+      '<urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid>' +
+      '<urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName>' +
+      '<urn:StreetName>' + document.getElementById('s-consignee-street').value + '</urn:StreetName>' +
+      '<urn:StreetNumber>' + document.getElementById('s-consignee-street-num').value + '</urn:StreetNumber>' +
+      '<urn:Postcode>' + document.getElementById('s-consignee-postcode').value + '</urn:Postcode>' +
+      '<urn:City>' + document.getElementById('s-consignee-city').value + '</urn:City>' +
+      '</urn:ConsigneeTrader>' +
+      '<urn:ConsignorTrader language="en">' +
+      '<urn:TraderExciseNumber>' + document.getElementById('s-consignor-ern').value + '</urn:TraderExciseNumber>' +
+      '<urn:TraderName>' + document.getElementById('s-consignor-name').value + '</urn:TraderName>' +
+      '<urn:StreetName>' + document.getElementById('s-consignor-street').value + '</urn:StreetName>' +
+      '<urn:StreetNumber>' + document.getElementById('s-consignor-street-num').value + '</urn:StreetNumber>' +
+      '<urn:Postcode>' + document.getElementById('s-consignor-postcode').value + '</urn:Postcode>' +
+      '<urn:City>' + document.getElementById('s-consignor-city').value + '</urn:City>' +
+      '</urn:ConsignorTrader>' +
+      '<urn:PlaceOfDispatchTrader language="en">' +
+      '<urn:ReferenceOfTaxWarehouse>' + document.getElementById('s-dispatch-warehouse').value + '</urn:ReferenceOfTaxWarehouse>' +
+      '<urn:TraderName>' + document.getElementById('s-dispatch-name').value + '</urn:TraderName>' +
+      '<urn:StreetName>' + document.getElementById('s-dispatch-street').value + '</urn:StreetName>' +
+      '<urn:StreetNumber>' + document.getElementById('s-dispatch-street-num').value + '</urn:StreetNumber>' +
+      '<urn:Postcode>' + document.getElementById('s-dispatch-postcode').value + '</urn:Postcode>' +
+      '<urn:City>' + document.getElementById('s-dispatch-city').value + '</urn:City>' +
+      '</urn:PlaceOfDispatchTrader>' +
+      '<urn:DeliveryPlaceTrader language="en">' +
+      '<urn:Traderid>' + document.getElementById('s-delivery-trader-id').value + '</urn:Traderid>' +
+      '<urn:TraderName>' + document.getElementById('s-delivery-name').value + '</urn:TraderName>' +
+      '<urn:StreetName>' + document.getElementById('s-delivery-street').value + '</urn:StreetName>' +
+      '<urn:StreetNumber>' + document.getElementById('s-delivery-street-num').value + '</urn:StreetNumber>' +
+      '<urn:Postcode>' + document.getElementById('s-delivery-postcode').value + '</urn:Postcode>' +
+      '<urn:City>' + document.getElementById('s-delivery-city').value + '</urn:City>' +
+      '</urn:DeliveryPlaceTrader>' +
+      '<urn:CompetentAuthorityDispatchOffice><urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber></urn:CompetentAuthorityDispatchOffice>' +
+      '<urn:FirstTransporterTrader language="en">' +
+      '<urn:VatNumber>' + document.getElementById('s-transporter-vat').value + '</urn:VatNumber>' +
+      '<urn:TraderName>' + document.getElementById('s-transporter-name').value + '</urn:TraderName>' +
+      '<urn:StreetName>' + document.getElementById('s-transporter-street').value + '</urn:StreetName>' +
+      '<urn:StreetNumber>' + document.getElementById('s-transporter-street-num').value + '</urn:StreetNumber>' +
+      '<urn:Postcode>' + document.getElementById('s-transporter-postcode').value + '</urn:Postcode>' +
+      '<urn:City>' + document.getElementById('s-transporter-city').value + '</urn:City>' +
+      '</urn:FirstTransporterTrader>' +
+      '<urn:DocumentCertificate>' +
+      '<urn:DocumentType>' + document.getElementById('s-doc-type').value + '</urn:DocumentType>' +
+      '<urn:DocumentReference>' + document.getElementById('s-doc-ref').value + '</urn:DocumentReference>' +
+      '</urn:DocumentCertificate>' +
+      '<urn:HeaderEadEsad>' +
+      '<urn:DestinationTypeCode>' + document.getElementById('s-dest-type').value + '</urn:DestinationTypeCode>' +
+      '<urn:JourneyTime>' + document.getElementById('s-journey-time').value + '</urn:JourneyTime>' +
+      '<urn:TransportArrangement>' + document.getElementById('s-transport-arrangement').value + '</urn:TransportArrangement>' +
+      '</urn:HeaderEadEsad>' +
+      '<urn:TransportMode><urn:TransportModeCode>' + document.getElementById('s-transport-mode').value + '</urn:TransportModeCode></urn:TransportMode>' +
+      '<urn:MovementGuarantee><urn:GuarantorTypeCode>' + document.getElementById('s-guarantor-type').value + '</urn:GuarantorTypeCode></urn:MovementGuarantee>' +
+      bodyEadEsadXml +
+      '<urn:EadEsadDraft>' +
+      '<urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>' +
+      '<urn:InvoiceNumber>' + document.getElementById('s-invoice-number').value + '</urn:InvoiceNumber>' +
+      '<urn:InvoiceDate>' + today + '</urn:InvoiceDate>' +
+      '<urn:OriginTypeCode>' + document.getElementById('s-origin-type').value + '</urn:OriginTypeCode>' +
+      '<urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>' +
+      '<urn:TimeOfDispatch>' + dispatchTime + '</urn:TimeOfDispatch>' +
+      '</urn:EadEsadDraft>' +
+      '<urn:TransportDetails>' +
+      '<urn:TransportUnitCode>' + document.getElementById('s-transport-unit-code').value + '</urn:TransportUnitCode>' +
+      '<urn:IdentityOfTransportUnits>' + document.getElementById('s-identity-transport').value + '</urn:IdentityOfTransportUnits>' +
+      '</urn:TransportDetails>' +
+      '</urn:SubmittedDraftOfEADESAD>' +
+      '</urn:Body>' +
+      '</urn:IE815>';
 
-    const itemCount = parseInt(document.getElementById('s-item-count').value) || 1;
-    let bodyEadEsadXml = '';
-    for (let i = 1; i <= itemCount; i++) {
-      const productCode = document.getElementById('s-product-' + i).value;
-      const cnCode = document.getElementById('s-cn-' + i).value;
-      const quantity = document.getElementById('s-qty-' + i).value;
-      const grossMass = document.getElementById('s-weight-' + i).value;
-      const netMass = document.getElementById('s-net-weight-' + i).value;
-      const abv = document.getElementById('s-abv-' + i).value;
-      const fiscalMark = document.getElementById('s-fiscal-' + i).value;
-      const packageKind = document.getElementById('s-package-kind-' + i).value;
-      const packageCount = document.getElementById('s-package-count-' + i).value;
-
-      bodyEadEsadXml += `
-            <urn:BodyEadEsad>
-                <urn:BodyRecordUniqueReference>${i}</urn:BodyRecordUniqueReference>
-                <urn:ExciseProductCode>${productCode}</urn:ExciseProductCode>
-                <urn:CnCode>${cnCode}</urn:CnCode>
-                <urn:Quantity>${quantity}</urn:Quantity>
-                <urn:GrossMass>${grossMass}</urn:GrossMass>
-                <urn:NetMass>${netMass}</urn:NetMass>
-                <urn:AlcoholicStrengthByVolumeInPercentage>${abv}</urn:AlcoholicStrengthByVolumeInPercentage>
-                <urn:FiscalMarkUsedFlag>${fiscalMark}</urn:FiscalMarkUsedFlag>
-                <urn:Package>
-                    <urn:KindOfPackages>${packageKind}</urn:KindOfPackages>
-                    <urn:NumberOfPackages>${packageCount}</urn:NumberOfPackages>
-                </urn:Package>
-            </urn:BodyEadEsad>`;
-    }
-
-    const xml = `<urn:IE815 xmlns:urn="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:IE815:V3.13"
-           xmlns:urn1="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.13">
-    <urn:Header>
-        <urn1:MessageSender>NDEA.GB</urn1:MessageSender>
-        <urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>
-        <urn1:DateOfPreparation>${today}</urn1:DateOfPreparation>
-        <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>
-        <urn1:MessageIdentifier>${uniqueLrn}</urn1:MessageIdentifier>
-        <urn1:CorrelationIdentifier>PORTAL${uniqueLrn}</urn1:CorrelationIdentifier>
-    </urn:Header>
-    <urn:Body>
-        <urn:SubmittedDraftOfEADESAD>
-            <urn:Attributes>
-                <urn:SubmissionMessageType>1</urn:SubmissionMessageType>
-            </urn:Attributes>
-            <urn:ConsigneeTrader language="en">
-                <urn:Traderid>${consigneeErn}</urn:Traderid>
-                <urn:TraderName>${consigneeName}</urn:TraderName>
-                <urn:StreetName>${consigneeStreet}</urn:StreetName>
-                <urn:StreetNumber>${consigneeStreetNum}</urn:StreetNumber>
-                <urn:Postcode>${consigneePostcode}</urn:Postcode>
-                <urn:City>${consigneeCity}</urn:City>
-            </urn:ConsigneeTrader>
-            <urn:ConsignorTrader language="en">
-                <urn:TraderExciseNumber>${consignorErn}</urn:TraderExciseNumber>
-                <urn:TraderName>${consignorName}</urn:TraderName>
-                <urn:StreetName>${consignorStreet}</urn:StreetName>
-                <urn:StreetNumber>${consignorStreetNum}</urn:StreetNumber>
-                <urn:Postcode>${consignorPostcode}</urn:Postcode>
-                <urn:City>${consignorCity}</urn:City>
-            </urn:ConsignorTrader>
-            <urn:PlaceOfDispatchTrader language="en">
-                <urn:ReferenceOfTaxWarehouse>${dispatchWarehouse}</urn:ReferenceOfTaxWarehouse>
-                <urn:TraderName>${dispatchName}</urn:TraderName>
-                <urn:StreetName>${dispatchStreet}</urn:StreetName>
-                <urn:StreetNumber>${dispatchStreetNum}</urn:StreetNumber>
-                <urn:Postcode>${dispatchPostcode}</urn:Postcode>
-                <urn:City>${dispatchCity}</urn:City>
-            </urn:PlaceOfDispatchTrader>
-            <urn:DeliveryPlaceTrader language="en">
-                <urn:Traderid>${deliveryTraderId}</urn:Traderid>
-                <urn:TraderName>${deliveryName}</urn:TraderName>
-                <urn:StreetName>${deliveryStreet}</urn:StreetName>
-                <urn:StreetNumber>${deliveryStreetNum}</urn:StreetNumber>
-                <urn:Postcode>${deliveryPostcode}</urn:Postcode>
-                <urn:City>${deliveryCity}</urn:City>
-            </urn:DeliveryPlaceTrader>
-            <urn:CompetentAuthorityDispatchOffice>
-                <urn:ReferenceNumber>${dispatchOffice}</urn:ReferenceNumber>
-            </urn:CompetentAuthorityDispatchOffice>
-            <urn:FirstTransporterTrader language="en">
-                <urn:VatNumber>${transporterVat}</urn:VatNumber>
-                <urn:TraderName>${transporterName}</urn:TraderName>
-                <urn:StreetName>${transporterStreet}</urn:StreetName>
-                <urn:StreetNumber>${transporterStreetNum}</urn:StreetNumber>
-                <urn:Postcode>${transporterPostcode}</urn:Postcode>
-                <urn:City>${transporterCity}</urn:City>
-            </urn:FirstTransporterTrader>
-            <urn:DocumentCertificate>
-                <urn:DocumentType>${docType}</urn:DocumentType>
-                <urn:DocumentReference>${docRef}</urn:DocumentReference>
-            </urn:DocumentCertificate>
-            <urn:HeaderEadEsad>
-                <urn:DestinationTypeCode>${destTypeCode}</urn:DestinationTypeCode>
-                <urn:JourneyTime>${journeyTime}</urn:JourneyTime>
-                <urn:TransportArrangement>${transportArrangement}</urn:TransportArrangement>
-            </urn:HeaderEadEsad>
-            <urn:TransportMode>
-                <urn:TransportModeCode>${transportModeCode}</urn:TransportModeCode>
-            </urn:TransportMode>
-            <urn:MovementGuarantee>
-                <urn:GuarantorTypeCode>${guarantorTypeCode}</urn:GuarantorTypeCode>
-            </urn:MovementGuarantee>
-            ${bodyEadEsadXml}
-            <urn:EadEsadDraft>
-                <urn:LocalReferenceNumber>${uniqueLrn}</urn:LocalReferenceNumber>
-                <urn:InvoiceNumber>${invoiceNumber}</urn:InvoiceNumber>
-                <urn:InvoiceDate>${today}</urn:InvoiceDate>
-                <urn:OriginTypeCode>${originTypeCode}</urn:OriginTypeCode>
-                <urn:DateOfDispatch>${d}</urn:DateOfDispatch>
-                <urn:TimeOfDispatch>${dispatchTime}</urn:TimeOfDispatch>
-            </urn:EadEsadDraft>
-            <urn:TransportDetails>
-                <urn:TransportUnitCode>${transportUnitCode}</urn:TransportUnitCode>
-                <urn:IdentityOfTransportUnits>${identityOfTransportUnits}</urn:IdentityOfTransportUnits>
-            </urn:TransportDetails>
-        </urn:SubmittedDraftOfEADESAD>
-    </urn:Body>
-</urn:IE815>`;
-
-    console.log('Sending EMCS IE815 XML:', xml);
-
-    const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', {
-      method: 'POST',
-      headers: { ...h, 'Content-Type': 'application/xml' },
-      body: xml
-    });
-
-    const responseText = await res.text();
+    console.log('Sending IE815 XML:', xml);
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { method: 'POST', headers: Object.assign({}, h, { 'Content-Type': 'application/xml' }), body: xml });
+    var responseText = await res.text();
     console.log('HMRC Response:', res.status, responseText);
     document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
   });
 
   document.getElementById('export-submit-btn').addEventListener('click', function() { exportResult('submit-output', 'movement'); });
 
-  // 4. Submit Message
-  document.getElementById('submit-message-btn').addEventListener('click', async function() {
-    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-    
-    const h = await getHeaders();
-    const msgType = document.getElementById('sm-type').value;
-    const msgId = document.getElementById('sm-msgid').value;
-    const arc = document.getElementById('sm-arc').value;
-    const seq = document.getElementById('sm-seq').value;
-    const today = new Date().toISOString().slice(0, 10);
-    const now = new Date().toISOString().slice(0, 19);
-    
-    let bodyXml = '';
-    let namespace = `urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:${msgType}:V3.13`;
-    
-    if (msgType === 'IE810') {
-      const reason = document.getElementById('msg-cancel-reason').value;
-      bodyXml = `
-        <urn:CancellationOfEAD>
-            <urn:Attributes>
-                <urn:DateAndTimeOfValidationOfCancellation>${now}</urn:DateAndTimeOfValidationOfCancellation>
-            </urn:Attributes>
-            <urn:ExciseMovementEad>
-                <urn:AdministrativeReferenceCode>${arc}</urn:AdministrativeReferenceCode>
-            </urn:ExciseMovementEad>
-            <urn:Cancellation>
-                <urn:CancellationReasonCode>${reason}</urn:CancellationReasonCode>
-            </urn:Cancellation>
-        </urn:CancellationOfEAD>`;
-    } else if (msgType === 'IE818') {
-      const arrivalDate = document.getElementById('msg-arrival-date').value;
-      const conclusion = document.getElementById('msg-receipt-conclusion').value;
-      bodyXml = `
-        <urn:AcceptedOrRejectedReportOfReceiptExport>
-            <urn:Attributes>
-                <urn:DateAndTimeOfValidationOfReportOfReceiptExport>${now}</urn:DateAndTimeOfValidationOfReportOfReceiptExport>
-            </urn:Attributes>
-            <urn:ConsigneeTrader language="en">
-                <urn:Traderid>${document.getElementById('s-consignee-ern').value}</urn:Traderid>
-                <urn:TraderName>${document.getElementById('s-consignee-name').value}</urn:TraderName>
-            </urn:ConsigneeTrader>
-            <urn:ExciseMovement>
-                <urn:AdministrativeReferenceCode>${arc}</urn:AdministrativeReferenceCode>
-                <urn:SequenceNumber>${seq}</urn:SequenceNumber>
-            </urn:ExciseMovement>
-            <urn:DeliveryPlaceTrader language="en">
-                <urn:Traderid>${document.getElementById('s-delivery-trader-id').value}</urn:Traderid>
-                <urn:TraderName>${document.getElementById('s-delivery-name').value}</urn:TraderName>
-            </urn:DeliveryPlaceTrader>
-            <urn:DestinationOffice>
-                <urn:ReferenceNumber>${document.getElementById('s-dispatch-office').value}</urn:ReferenceNumber>
-            </urn:DestinationOffice>
-            <urn:ReportOfReceiptExport>
-                <urn:DateOfArrivalOfExciseProducts>${arrivalDate}</urn:DateOfArrivalOfExciseProducts>
-                <urn:GlobalConclusionOfReceipt>${conclusion}</urn:GlobalConclusionOfReceipt>
-            </urn:ReportOfReceiptExport>
-        </urn:AcceptedOrRejectedReportOfReceiptExport>`;
-    } else if (msgType === 'IE813') {
-      const newDestType = document.getElementById('msg-dest-type').value;
-      const newConsigneeErn = document.getElementById('msg-new-consignee').value;
-      const newConsigneeName = document.getElementById('msg-new-consignee-name').value;
-      bodyXml = `
-        <urn:ChangeOfDestination>
-            <urn:Attributes>
-                <urn:DateAndTimeOfValidationOfChangeOfDestination>${now}</urn:DateAndTimeOfValidationOfChangeOfDestination>
-            </urn:Attributes>
-            <urn:UpdateEadEsad>
-                <urn:AdministrativeReferenceCode>${arc}</urn:AdministrativeReferenceCode>
-                <urn:JourneyTime>D02</urn:JourneyTime>
-                <urn:ChangedTransportArrangement>1</urn:ChangedTransportArrangement>
-                <urn:SequenceNumber>${seq}</urn:SequenceNumber>
-            </urn:UpdateEadEsad>
-            <urn:DestinationChanged>
-                <urn:DestinationTypeCode>${newDestType}</urn:DestinationTypeCode>
-                <urn:NewConsigneeTrader language="en">
-                    <urn:Traderid>${newConsigneeErn}</urn:Traderid>
-                    <urn:TraderName>${newConsigneeName}</urn:TraderName>
-                </urn:NewConsigneeTrader>
-            </urn:DestinationChanged>
-        </urn:ChangeOfDestination>`;
-    } else if (msgType === 'IE819') {
-      const alertDate = document.getElementById('msg-alert-date').value;
-      const rejectedFlag = document.getElementById('msg-rejected-flag').value;
-      const rejectionReason = document.getElementById('msg-rejection-reason').value;
-      const rejectionInfo = document.getElementById('msg-rejection-info').value;
-      bodyXml = `
-        <urn:AlertOrRejectionOfEADESAD>
-            <urn:Attributes>
-                <urn:DateAndTimeOfValidationOfAlertRejection>${now}</urn:DateAndTimeOfValidationOfAlertRejection>
-            </urn:Attributes>
-            <urn:ConsigneeTrader language="en">
-                <urn:Traderid>${document.getElementById('s-consignee-ern').value}</urn:Traderid>
-                <urn:TraderName>${document.getElementById('s-consignee-name').value}</urn:TraderName>
-            </urn:ConsigneeTrader>
-            <urn:ExciseMovement>
-                <urn:AdministrativeReferenceCode>${arc}</urn:AdministrativeReferenceCode>
-                <urn:SequenceNumber>${seq}</urn:SequenceNumber>
-            </urn:ExciseMovement>
-            <urn:DestinationOffice>
-                <urn:ReferenceNumber>${document.getElementById('s-dispatch-office').value}</urn:ReferenceNumber>
-            </urn:DestinationOffice>
-            <urn:AlertOrRejection>
-                <urn:DateOfAlertOrRejection>${alertDate}</urn:DateOfAlertOrRejection>
-                <urn:EadEsadRejectedFlag>${rejectedFlag}</urn:EadEsadRejectedFlag>
-            </urn:AlertOrRejection>
-            <urn:AlertOrRejectionOfEadEsadReason>
-                <urn:AlertOrRejectionOfMovementReasonCode>${rejectionReason}</urn:AlertOrRejectionOfMovementReasonCode>
-                <urn:ComplementaryInformation language="en">${rejectionInfo}</urn:ComplementaryInformation>
-            </urn:AlertOrRejectionOfEadEsadReason>
-        </urn:AlertOrRejectionOfEADESAD>`;
-    } else if (msgType === 'IE837') {
-      const submitterType = document.getElementById('msg-submitter-type').value;
-      const explanationCode = document.getElementById('msg-explanation-code').value;
-      const delayInfo = document.getElementById('msg-delay-info').value;
-      bodyXml = `
-        <urn:ExplanationOnDelayForDelivery>
-            <urn:Attributes>
-                <urn:SubmitterIdentification>${submitterType === '1' ? document.getElementById('s-consignor-ern').value : document.getElementById('s-consignee-ern').value}</urn:SubmitterIdentification>
-                <urn:SubmitterType>${submitterType}</urn:SubmitterType>
-                <urn:ExplanationCode>${explanationCode}</urn:ExplanationCode>
-                <urn:ComplementaryInformation language="en">${delayInfo}</urn:ComplementaryInformation>
-                <urn:MessageRole>1</urn:MessageRole>
-                <urn:DateAndTimeOfValidationOfExplanationOnDelay>${now}</urn:DateAndTimeOfValidationOfExplanationOnDelay>
-            </urn:Attributes>
-            <urn:ExciseMovement>
-                <urn:AdministrativeReferenceCode>${arc}</urn:AdministrativeReferenceCode>
-                <urn:SequenceNumber>${seq}</urn:SequenceNumber>
-            </urn:ExciseMovement>
-        </urn:ExplanationOnDelayForDelivery>`;
-    } else if (msgType === 'IE871') {
-      const analysisDate = document.getElementById('msg-analysis-date').value;
-      const explanation = document.getElementById('msg-shortage-explanation').value;
-      bodyXml = `
-        <urn:ExplanationOnReasonForShortage>
-            <urn:Attributes>
-                <urn:SubmitterType>1</urn:SubmitterType>
-                <urn:DateAndTimeOfValidationOfExplanationOnShortage>${now}</urn:DateAndTimeOfValidationOfExplanationOnShortage>
-            </urn:Attributes>
-            <urn:ExciseMovement>
-                <urn:AdministrativeReferenceCode>${arc}</urn:AdministrativeReferenceCode>
-                <urn:SequenceNumber>${seq}</urn:SequenceNumber>
-            </urn:ExciseMovement>
-            <urn:ConsignorTrader language="en">
-                <urn:TraderExciseNumber>${document.getElementById('s-consignor-ern').value}</urn:TraderExciseNumber>
-                <urn:TraderName>${document.getElementById('s-consignor-name').value}</urn:TraderName>
-            </urn:ConsignorTrader>
-            <urn:Analysis>
-                <urn:DateOfAnalysis>${analysisDate}</urn:DateOfAnalysis>
-                <urn:GlobalExplanation language="en">${explanation}</urn:GlobalExplanation>
-            </urn:Analysis>
-        </urn:ExplanationOnReasonForShortage>`;
-    }
-
-    const xml = `<urn:${msgType} xmlns:urn="${namespace}"
-           xmlns:urn1="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.13">
-    <urn:Header>
-        <urn1:MessageSender>NDEA.GB</urn1:MessageSender>
-        <urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>
-        <urn1:DateOfPreparation>${today}</urn1:DateOfPreparation>
-        <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>
-        <urn1:MessageIdentifier>${msgId}</urn1:MessageIdentifier>
-        <urn1:CorrelationIdentifier>PORTAL${msgId}</urn1:CorrelationIdentifier>
-    </urn:Header>
-    <urn:Body>
-        ${bodyXml}
-    </urn:Body>
-</urn:${msgType}>`;
-
-    console.log('Sending EMCS Message XML:', xml);
-
-    const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { 
-      method: 'POST', 
-      headers: { ...h, 'Content-Type': 'application/xml' }, 
-      body: xml 
-    });
-    
-    const responseText = await res.text();
-    console.log('HMRC Response:', res.status, responseText);
-    document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
-  });
-
-  // 2. Get Movements
+  // ==================== 2. GET MOVEMENTS ====================
   document.getElementById('get-movements-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-    const h = await getHeaders();
-    const ern = document.getElementById('gm-ern').value;
-    const arc = document.getElementById('gm-arc').value;
-    const lrn = document.getElementById('gm-lrn').value;
-    let q = '?ern=' + ern;
-    if (arc) q += '&arc=' + arc;
-    if (lrn) q += '&lrn=' + lrn;
-    const res = await fetch('/api/emcs?endpoint=/customs/excise/movements' + q, { headers: h });
+    var h = await getHeaders();
+    var q = '?ern=' + document.getElementById('gm-ern').value;
+    if (document.getElementById('gm-arc').value) q += '&arc=' + document.getElementById('gm-arc').value;
+    if (document.getElementById('gm-lrn').value) q += '&lrn=' + document.getElementById('gm-lrn').value;
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements' + q, { headers: h });
     document.getElementById('gm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
   document.getElementById('export-gm-btn').addEventListener('click', function() { exportResult('gm-output', 'movements'); });
 
-  // 3. Get Single Movement
+  // ==================== 3. GET SINGLE MOVEMENT ====================
   document.getElementById('get-single-movement-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-    const h = await getHeaders();
-    const id = document.getElementById('gsm-id').value;
-    const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + id, { headers: h });
+    var h = await getHeaders();
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + document.getElementById('gsm-id').value, { headers: h });
     document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
-  // 5. Get Messages
+  // ==================== 4. SUBMIT MESSAGE ====================
+  document.getElementById('submit-message-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+    var h = await getHeaders();
+    var msgType = document.getElementById('sm-type').value;
+    var msgId = document.getElementById('sm-msgid').value;
+    var arc = document.getElementById('sm-arc').value;
+    var seq = document.getElementById('sm-seq').value;
+    var today = new Date().toISOString().slice(0, 10);
+    var now = new Date().toISOString().slice(0, 19);
+    var namespace = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:' + msgType + ':V3.23';
+    var bodyXml = '';
+
+    if (msgType === 'IE810') {
+      var reason = document.getElementById('msg-cancel-reason').value;
+      bodyXml = '<urn:CancellationOfEAD>' +
+        '<urn:Attributes><urn:DateAndTimeOfValidationOfCancellation>' + now + '</urn:DateAndTimeOfValidationOfCancellation></urn:Attributes>' +
+        '<urn:ExciseMovementEad><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode></urn:ExciseMovementEad>' +
+        '<urn:Cancellation><urn:CancellationReasonCode>' + reason + '</urn:CancellationReasonCode></urn:Cancellation>' +
+        '</urn:CancellationOfEAD>';
+    } else if (msgType === 'IE818') {
+      var arrivalDate = document.getElementById('msg-arrival-date').value;
+      var conclusion = document.getElementById('msg-receipt-conclusion').value;
+      bodyXml = '<urn:AcceptedOrRejectedReportOfReceiptExport>' +
+        '<urn:Attributes><urn:DateAndTimeOfValidationOfReportOfReceiptExport>' + now + '</urn:DateAndTimeOfValidationOfReportOfReceiptExport></urn:Attributes>' +
+        '<urn:ConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName></urn:ConsigneeTrader>' +
+        '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
+        '<urn:DeliveryPlaceTrader language="en"><urn:Traderid>' + document.getElementById('s-delivery-trader-id').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('s-delivery-name').value + '</urn:TraderName></urn:DeliveryPlaceTrader>' +
+        '<urn:DestinationOffice><urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber></urn:DestinationOffice>' +
+        '<urn:ReportOfReceiptExport><urn:DateOfArrivalOfExciseProducts>' + arrivalDate + '</urn:DateOfArrivalOfExciseProducts><urn:GlobalConclusionOfReceipt>' + conclusion + '</urn:GlobalConclusionOfReceipt></urn:ReportOfReceiptExport>' +
+        '</urn:AcceptedOrRejectedReportOfReceiptExport>';
+    } else if (msgType === 'IE813') {
+      bodyXml = '<urn:ChangeOfDestination>' +
+        '<urn:Attributes><urn:DateAndTimeOfValidationOfChangeOfDestination>' + now + '</urn:DateAndTimeOfValidationOfChangeOfDestination></urn:Attributes>' +
+        '<urn:UpdateEadEsad><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:JourneyTime>D02</urn:JourneyTime><urn:ChangedTransportArrangement>1</urn:ChangedTransportArrangement><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:UpdateEadEsad>' +
+        '<urn:DestinationChanged><urn:DestinationTypeCode>' + document.getElementById('msg-dest-type').value + '</urn:DestinationTypeCode>' +
+        '<urn:NewConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('msg-new-consignee').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('msg-new-consignee-name').value + '</urn:TraderName><urn:StreetName>' + document.getElementById('msg-new-consignee-street').value + '</urn:StreetName><urn:StreetNumber>' + document.getElementById('msg-new-consignee-street-num').value + '</urn:StreetNumber><urn:Postcode>' + document.getElementById('msg-new-consignee-postcode').value + '</urn:Postcode><urn:City>' + document.getElementById('msg-new-consignee-city').value + '</urn:City></urn:NewConsigneeTrader>' +
+        '<urn:DeliveryPlaceTrader language="en"><urn:Traderid>' + document.getElementById('msg-new-consignee').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('msg-new-consignee-name').value + '</urn:TraderName><urn:StreetName>' + document.getElementById('msg-new-consignee-street').value + '</urn:StreetName><urn:StreetNumber>' + document.getElementById('msg-new-consignee-street-num').value + '</urn:StreetNumber><urn:Postcode>' + document.getElementById('msg-new-consignee-postcode').value + '</urn:Postcode><urn:City>' + document.getElementById('msg-new-consignee-city').value + '</urn:City></urn:DeliveryPlaceTrader>' +
+        '<urn:MovementGuarantee><urn:GuarantorTypeCode>1</urn:GuarantorTypeCode></urn:MovementGuarantee>' +
+        '</urn:DestinationChanged>' +
+        '<urn:NewTransporterTrader language="en"><urn:TraderName>' + document.getElementById('msg-new-consignee-name').value + '</urn:TraderName><urn:StreetName>' + document.getElementById('msg-new-consignee-street').value + '</urn:StreetName><urn:StreetNumber>' + document.getElementById('msg-new-consignee-street-num').value + '</urn:StreetNumber><urn:Postcode>' + document.getElementById('msg-new-consignee-postcode').value + '</urn:Postcode><urn:City>' + document.getElementById('msg-new-consignee-city').value + '</urn:City></urn:NewTransporterTrader>' +
+        '<urn:TransportDetails><urn:TransportUnitCode>1</urn:TransportUnitCode><urn:IdentityOfTransportUnits>1</urn:IdentityOfTransportUnits></urn:TransportDetails>' +
+        '</urn:ChangeOfDestination>';
+    } else if (msgType === 'IE819') {
+      bodyXml = '<urn:AlertOrRejectionOfEADESAD>' +
+        '<urn:Attributes><urn:DateAndTimeOfValidationOfAlertRejection>' + now + '</urn:DateAndTimeOfValidationOfAlertRejection></urn:Attributes>' +
+        '<urn:ConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName></urn:ConsigneeTrader>' +
+        '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
+        '<urn:DestinationOffice><urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber></urn:DestinationOffice>' +
+        '<urn:AlertOrRejection><urn:DateOfAlertOrRejection>' + document.getElementById('msg-alert-date').value + '</urn:DateOfAlertOrRejection><urn:EadEsadRejectedFlag>' + document.getElementById('msg-rejected-flag').value + '</urn:EadEsadRejectedFlag></urn:AlertOrRejection>' +
+        '<urn:AlertOrRejectionOfEadEsadReason><urn:AlertOrRejectionOfMovementReasonCode>' + document.getElementById('msg-rejection-reason').value + '</urn:AlertOrRejectionOfMovementReasonCode><urn:ComplementaryInformation language="en">' + document.getElementById('msg-rejection-info').value + '</urn:ComplementaryInformation></urn:AlertOrRejectionOfEadEsadReason>' +
+        '</urn:AlertOrRejectionOfEADESAD>';
+    } else if (msgType === 'IE837') {
+      var submitterType = document.getElementById('msg-submitter-type').value;
+      var submitterId = submitterType === '1' ? document.getElementById('s-consignor-ern').value : document.getElementById('s-consignee-ern').value;
+      bodyXml = '<urn:ExplanationOnDelayForDelivery>' +
+        '<urn:Attributes><urn:SubmitterIdentification>' + submitterId + '</urn:SubmitterIdentification><urn:SubmitterType>' + submitterType + '</urn:SubmitterType><urn:ExplanationCode>' + document.getElementById('msg-explanation-code').value + '</urn:ExplanationCode><urn:ComplementaryInformation language="en">' + document.getElementById('msg-delay-info').value + '</urn:ComplementaryInformation><urn:MessageRole>1</urn:MessageRole><urn:DateAndTimeOfValidationOfExplanationOnDelay>' + now + '</urn:DateAndTimeOfValidationOfExplanationOnDelay></urn:Attributes>' +
+        '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
+        '</urn:ExplanationOnDelayForDelivery>';
+    } else if (msgType === 'IE871') {
+      bodyXml = '<urn:ExplanationOnReasonForShortage>' +
+        '<urn:Attributes><urn:SubmitterType>1</urn:SubmitterType><urn:DateAndTimeOfValidationOfExplanationOnShortage>' + now + '</urn:DateAndTimeOfValidationOfExplanationOnShortage></urn:Attributes>' +
+        '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
+        '<urn:ConsignorTrader language="en"><urn:TraderExciseNumber>' + document.getElementById('s-consignor-ern').value + '</urn:TraderExciseNumber><urn:TraderName>' + document.getElementById('s-consignor-name').value + '</urn:TraderName></urn:ConsignorTrader>' +
+        '<urn:Analysis><urn:DateOfAnalysis>' + document.getElementById('msg-analysis-date').value + '</urn:DateOfAnalysis><urn:GlobalExplanation language="en">' + document.getElementById('msg-shortage-explanation').value + '</urn:GlobalExplanation></urn:Analysis>' +
+        '</urn:ExplanationOnReasonForShortage>';
+    }
+
+    var xml = '<urn:' + msgType + ' xmlns:urn="' + namespace + '" xmlns:urn1="' + TMS_NS + '">' +
+      '<urn:Header>' +
+      '<urn1:MessageSender>NDEA.GB</urn1:MessageSender>' +
+      '<urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>' +
+      '<urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation>' +
+      '<urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>' +
+      '<urn1:MessageIdentifier>' + msgId + '</urn1:MessageIdentifier>' +
+      '<urn1:CorrelationIdentifier>PORTAL' + msgId + '</urn1:CorrelationIdentifier>' +
+      '</urn:Header>' +
+      '<urn:Body>' + bodyXml + '</urn:Body>' +
+      '</urn:' + msgType + '>';
+
+    console.log('Sending ' + msgType + ' XML:', xml);
+    var movId = document.getElementById('sm-id') ? document.getElementById('sm-id').value : '';
+    var endpoint = movId ? '/customs/excise/movements/' + movId + '/messages' : '/customs/excise/movements';
+    var res = await fetch('/api/emcs?endpoint=' + endpoint, { method: 'POST', headers: Object.assign({}, h, { 'Content-Type': 'application/xml' }), body: xml });
+    var responseText = await res.text();
+    console.log('HMRC Response:', res.status, responseText);
+    document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
+  });
+
+  // ==================== 5. GET MESSAGES ====================
   document.getElementById('get-messages-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-    const h = await getHeaders();
-    const movId = document.getElementById('gmsg-id').value;
-    const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { headers: h });
-    const text = await res.text();
+    var h = await getHeaders();
+    var movId = document.getElementById('gmsg-id').value;
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { headers: h });
+    var text = await res.text();
     try {
-      const msgs = JSON.parse(text);
+      var msgs = JSON.parse(text);
       if (Array.isArray(msgs)) {
-        msgs.forEach(function(m) {
-          if (m.encodedMessage) {
-            try { m.decodedXml = atob(m.encodedMessage); } catch(e) { m.decodedXml = 'Decode failed'; }
-          }
-        });
+        msgs.forEach(function(m) { if (m.encodedMessage) { try { m.decodedXml = atob(m.encodedMessage); } catch(e) { m.decodedXml = 'Decode failed'; } } });
         document.getElementById('gmsg-output').innerText = JSON.stringify(msgs, null, 2);
         return;
       }
@@ -1077,57 +813,51 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   document.getElementById('export-gmsg-btn').addEventListener('click', function() { exportResult('gmsg-output', 'messages'); });
 
-  // 6. Get Single Message
+  // ==================== 6. GET SINGLE MESSAGE ====================
   document.getElementById('get-single-message-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-    const h = await getHeaders();
+    var h = await getHeaders();
     h['Accept'] = 'application/vnd.hmrc.1.0+xml';
-    const movId = document.getElementById('gsmsg-mid').value;
-    const msgId = document.getElementById('gsmsg-id').value;
-    const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages/' + msgId, { headers: h });
+    var movId = document.getElementById('gsmsg-mid').value;
+    var msgId = document.getElementById('gsmsg-id').value;
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages/' + msgId, { headers: h });
     document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
-  // 7. Pre-Validate
+  // ==================== 7. PRE-VALIDATE ====================
   document.getElementById('pre-validate-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-    const h = await getHeaders();
+    var h = await getHeaders();
     h['x-correlation-id'] = crypto.randomUUID();
-    const ern = document.getElementById('pv-ern').value;
-    const group = document.getElementById('pv-group').value;
-    const p1 = document.getElementById('pv-p1').value;
-    const p2 = document.getElementById('pv-p2').value;
-    const products = [];
-    if (p1) products.push({ product: { exciseProductCode: p1 } });
-    if (p2) products.push({ product: { exciseProductCode: p2 } });
-    const res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', {
+    var products = [];
+    if (document.getElementById('pv-p1').value) products.push({ product: { exciseProductCode: document.getElementById('pv-p1').value } });
+    if (document.getElementById('pv-p2').value) products.push({ product: { exciseProductCode: document.getElementById('pv-p2').value } });
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', {
       method: 'POST',
-      headers: { ...h, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ exciseRegistrationNumber: ern, entityGroup: group, validateProductAuthorisationRequest: products })
+      headers: Object.assign({}, h, { 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ exciseRegistrationNumber: document.getElementById('pv-ern').value, entityGroup: document.getElementById('pv-group').value, validateProductAuthorisationRequest: products })
     });
     document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
-  // 8. Subscribe
+  // ==================== 8. SUBSCRIBE ====================
   document.getElementById('subscribe-ern-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-    const h = await getHeaders();
-    const ern = document.getElementById('sub-ern').value;
-    const res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + ern + '/subscription', {
+    var h = await getHeaders();
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + document.getElementById('sub-ern').value + '/subscription', {
       method: 'POST',
-      headers: { ...h, 'Content-Type': 'application/json' },
+      headers: Object.assign({}, h, { 'Content-Type': 'application/json' }),
       body: JSON.stringify({ boxId: '42c75e22-7bba-44f2-a610-4b4c3b262e3e' })
     });
     document.getElementById('sub-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
-  // 9. Unsubscribe
+  // ==================== 9. UNSUBSCRIBE ====================
   document.getElementById('unsubscribe-ern-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-    const h = await getHeaders();
-    const ern = document.getElementById('unsub-ern').value;
-    const res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + ern + '/subscription', { method: 'DELETE', headers: h });
-    const text = await res.text();
+    var h = await getHeaders();
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + document.getElementById('unsub-ern').value + '/subscription', { method: 'DELETE', headers: h });
+    var text = await res.text();
     document.getElementById('unsub-output').innerText = res.status === 202 ? 'Successfully unsubscribed' : 'Status: ' + res.status + '\n\n' + text;
   });
 
