@@ -464,24 +464,30 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ==================== GENERATE ITEM FIELDS ====================
-  window.generateItemFields = function() {
-    const count = parseInt(document.getElementById('s-item-count').value) || 1;
-    const container = document.getElementById('goods-items-container');
-    container.innerHTML = '';
+ window.generateItemFields = function() {
+  const count = parseInt(document.getElementById('s-item-count').value) || 1;
+  const container = document.getElementById('goods-items-container');
+  container.innerHTML = '';
 
-    for (let i = 1; i <= count; i++) {
-      container.innerHTML += `
-        <div class="item-field" data-item="${i}">
-          <h4>Item ${i}</h4>
-          <div class="field"><label>Excise Product Code *</label><input type="text" id="s-product-${i}" value="W200"></div>
-          <div class="field"><label>Goods Description *</label><input type="text" id="s-desc-${i}" value="Cigarettes"></div>
-          <div class="field"><label>Quantity *</label><input type="number" id="s-qty-${i}" value="1000" step="0.001"></div>
-          <div class="field"><label>Gross Weight (kg) *</label><input type="number" id="s-weight-${i}" value="50" step="0.001"></div>
-          <div class="field"><label>Net Weight (kg) *</label><input type="number" id="s-net-weight-${i}" value="45" step="0.001"></div>
+  for (let i = 1; i <= count; i++) {
+    container.innerHTML += `
+      <div class="item-field" data-item="${i}">
+        <h4>Item ${i}</h4>
+        <div class="field"><label>Excise Product Code *</label><input type="text" id="s-product-${i}" value="B000"></div>
+        <div class="field"><label>CN Code *</label><input type="text" id="s-cn-${i}" value="22030001"></div>
+        <div class="field"><label>Quantity *</label><input type="number" id="s-qty-${i}" value="2000" step="0.001"></div>
+        <div class="field"><label>Gross Mass (kg) *</label><input type="number" id="s-weight-${i}" value="20000" step="0.001"></div>
+        <div class="field"><label>Net Mass (kg) *</label><input type="number" id="s-net-weight-${i}" value="19999" step="0.001"></div>
+        <div class="field"><label>ABV % *</label><input type="number" id="s-abv-${i}" value="0.5" step="0.1"></div>
+        <div class="field"><label>Fiscal Mark Used Flag *</label>
+          <select id="s-fiscal-${i}"><option value="0" selected>0 - No</option><option value="1">1 - Yes</option></select>
         </div>
-      `;
-    }
-  };
+        <div class="field"><label>Kind of Packages *</label><input type="text" id="s-package-kind-${i}" value="BA"></div>
+        <div class="field"><label>Number of Packages *</label><input type="number" id="s-package-count-${i}" value="2"></div>
+      </div>
+    `;
+  }
+};
 
   // ==================== API FUNCTIONS ====================
 
