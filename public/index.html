@@ -10,6 +10,8 @@
     .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
     h1 { color: #005ea5; margin-bottom: 10px; }
     h2 { color: #333; margin-bottom: 15px; font-size: 1.3em; }
+    h3 { color: #005ea5; margin-top: 20px; margin-bottom: 10px; font-size: 1.1em; }
+    h4 { color: #505a5f; margin-bottom: 8px; }
     .card { background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #005ea5; color: white; border: none; border-radius: 5px; font-size: 14px; }
     button:hover { background: #003d6b; }
@@ -17,9 +19,9 @@
     .btn-green:hover { background: #005a30; }
     .btn-red { background: #d4351c; }
     .btn-red:hover { background: #aa2a16; }
-    input, select { padding: 8px 12px; margin: 5px; border: 2px solid #b1b4b6; border-radius: 4px; font-size: 14px; width: 100%; max-width: 400px; }
+    input, select { padding: 8px 12px; margin: 5px 0; border: 2px solid #b1b4b6; border-radius: 4px; font-size: 14px; width: 100%; max-width: 400px; }
     input:focus, select:focus { border-color: #005ea5; outline: none; }
-    pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; overflow-x: auto; max-height: 400px; font-size: 13px; white-space: pre-wrap; word-wrap: break-word; }
+    pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; overflow-x: auto; max-height: 400px; font-size: 13px; white-space: pre-wrap; word-wrap: break-word; margin-top: 15px; }
     .success { color: #00703c; font-weight: bold; }
     .error { color: #d4351c; font-weight: bold; }
     .nav { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 20px; }
@@ -31,7 +33,7 @@
     .field { margin-bottom: 10px; }
     .field label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 14px; }
     .cheat-sheet { background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin-top: 15px; font-size: 13px; }
-    .cheat-sheet h3 { margin-bottom: 8px; }
+    .cheat-sheet h3 { margin-bottom: 8px; margin-top: 0; }
     .cheat-sheet table { width: 100%; border-collapse: collapse; }
     .cheat-sheet th, .cheat-sheet td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
     .cheat-sheet th { background: #ffeeba; }
@@ -43,6 +45,7 @@
     .token-status { padding: 5px 10px; border-radius: 3px; font-size: 12px; }
     .token-ok { background: #00703c; }
     .token-missing { background: #d4351c; }
+    .item-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -94,17 +97,67 @@
       <button class="nav-btn" data-tab="tab-unsubscribe">9. Unsubscribe ERN</button>
     </div>
 
-    <!-- TAB 1: SUBMIT MOVEMENT -->
+    <!-- TAB 1: SUBMIT MOVEMENT - COMPREHENSIVE -->
     <div id="tab-submit" class="tab active">
       <div class="card">
-        <h2>Submit Draft Movement (IE815)</h2>
-        <div class="field"><label>Consignor ERN</label><input type="text" id="s-consignor" value="GBWK002281023"></div>
-        <div class="field"><label>Consignee ERN</label><input type="text" id="s-consignee" value="GBWKQOZ8OVLYR"></div>
-        <div class="field"><label>Local Reference Number (LRN)</label><input type="text" id="s-lrn" value="lrnie8156540856"></div>
-        <div class="field"><label>Date of Dispatch (YYYY-MM-DD)</label><input type="text" id="s-date" value="2026-12-01" placeholder="YYYY-MM-DD"></div>
-        <button id="submit-movement-btn">Submit Movement</button>
+        <h2>Submit Draft Movement (IE815) - Complete EMCS Form</h2>
+
+        <h3>Consignor Details</h3>
+        <div class="field"><label>Consignor ERN *</label><input type="text" id="s-consignor-ern" value="GBWK002281023"></div>
+        <div class="field"><label>Consignor Name *</label><input type="text" id="s-consignor-name" value="Test Consignor Ltd"></div>
+        <div class="field"><label>Consignor Address *</label><input type="text" id="s-consignor-address" value="123 Test Street, London, E1 8QS"></div>
+
+        <h3>Consignee Details</h3>
+        <div class="field"><label>Consignee ERN *</label><input type="text" id="s-consignee-ern" value="GBWKQOZ8OVLYR"></div>
+        <div class="field"><label>Consignee Name *</label><input type="text" id="s-consignee-name" value="Test Consignee Ltd"></div>
+        <div class="field"><label>Consignee Address *</label><input type="text" id="s-consignee-address" value="456 Delivery Road, Manchester, M1 1AA"></div>
+
+        <h3>Movement Details</h3>
+        <div class="field"><label>Local Reference Number (LRN)</label><input type="text" id="s-lrn" value="lrnie8156540856" readonly></div>
+        <div class="field"><label>Date of Dispatch *</label><input type="date" id="s-date" value="2026-12-01"></div>
+        <div class="field"><label>Dispatch Office Code *</label><input type="text" id="s-dispatch-office" value="GB000001"></div>
+        <div class="field"><label>Destination Office Code *</label><input type="text" id="s-destination-office" value="GB000002"></div>
+        <div class="field"><label>Place of Dispatch *</label><input type="text" id="s-place-dispatch" value="GB000001"></div>
+        <div class="field"><label>Place of Delivery *</label><input type="text" id="s-place-delivery" value="GB000002"></div>
+
+        <h3>Transport Details</h3>
+        <div class="field"><label>Transport Mode *</label>
+          <select id="s-transport-mode">
+            <option value="1">1 - Sea transport</option>
+            <option value="2">2 - Rail transport</option>
+            <option value="3" selected>3 - Road transport</option>
+            <option value="4">4 - Air transport</option>
+            <option value="5">5 - Postal consignment</option>
+            <option value="7">7 - Fixed transport installations</option>
+            <option value="8">8 - Inland waterway transport</option>
+          </select>
+        </div>
+        <div class="field"><label>Transport Unit ID (e.g., vehicle registration) *</label><input type="text" id="s-transport-unit" value="AB12CDE"></div>
+        <div class="field"><label>Security Required *</label>
+          <select id="s-security">
+            <option value="0" selected>0 - Not required</option>
+            <option value="1">1 - Required</option>
+          </select>
+        </div>
+
+        <h3>Goods Items</h3>
+        <div class="field"><label>Number of Items *</label><input type="number" id="s-item-count" value="1" min="1" max="999" onchange="generateItemFields()"></div>
+
+        <div id="goods-items-container">
+          <div class="item-field" data-item="1">
+            <h4>Item 1</h4>
+            <div class="field"><label>Excise Product Code *</label><input type="text" id="s-product-1" value="W200"></div>
+            <div class="field"><label>Goods Description *</label><input type="text" id="s-desc-1" value="Cigarettes"></div>
+            <div class="field"><label>Quantity *</label><input type="number" id="s-qty-1" value="1000" step="0.001"></div>
+            <div class="field"><label>Gross Weight (kg) *</label><input type="number" id="s-weight-1" value="50" step="0.001"></div>
+            <div class="field"><label>Net Weight (kg) *</label><input type="number" id="s-net-weight-1" value="45" step="0.001"></div>
+          </div>
+        </div>
+
+        <button id="submit-movement-btn" style="margin-top:20px;">Submit Movement</button>
         <button id="export-submit-btn" class="btn-green">Export CSV</button>
         <pre id="submit-output">Waiting...</pre>
+
         <div class="cheat-sheet">
           <h3>🧪 Sandbox Magic LRNs</h3>
           <table>
@@ -112,6 +165,12 @@
             <tr><td>lrnie8156540856</td><td>✅ 202 Success</td></tr>
             <tr><td>lrnie8155973812</td><td>✅ Success + IE818 Receipt</td></tr>
             <tr><td>lrnie8155743934</td><td>✅ Success + IE810 Cancel</td></tr>
+            <tr><td>lrnie8154968571</td><td>✅ Success + IE813 Change Consignee</td></tr>
+            <tr><td>lrnie8153786132</td><td>✅ Success + IE819 Rejection</td></tr>
+            <tr><td>lrnie8155755321</td><td>✅ Success + IE807 Interrupted</td></tr>
+            <tr><td>lrnie8155755325</td><td>✅ Success + IE803 Change Destination</td></tr>
+            <tr><td>lrnie8155755329</td><td>✅ Success + IE839 Custom Rejection</td></tr>
+            <tr><td>lrnie8155755330</td><td>✅ Success + IE881 Manual Closure</td></tr>
             <tr><td>SendA400</td><td>❌ 400 Bad Request</td></tr>
             <tr><td>SendA404</td><td>❌ 404 Not Found</td></tr>
             <tr><td>SendA500</td><td>❌ 500 Server Error</td></tr>
@@ -127,6 +186,10 @@
         <div class="field"><label>Search ERN</label><input type="text" id="gm-ern" value="GBWK002281023"></div>
         <div class="field"><label>Filter by ARC (optional)</label><input type="text" id="gm-arc"></div>
         <div class="field"><label>Filter by LRN (optional)</label><input type="text" id="gm-lrn"></div>
+        <div class="field"><label>Updated Since (optional)</label><input type="text" id="gm-since" placeholder="2024-01-17T15:27:29.540089Z"></div>
+        <div class="field"><label>Trader Type</label>
+          <select id="gm-type"><option value="">All</option><option value="consignor">Consignor</option><option value="consignee">Consignee</option></select>
+        </div>
         <button id="get-movements-btn">Get Movements</button>
         <button id="export-gm-btn" class="btn-green">Export CSV</button>
         <pre id="gm-output">Waiting...</pre>
@@ -154,6 +217,8 @@
             <option value="IE818">IE818 - Report of Receipt</option>
             <option value="IE813">IE813 - Change of Destination</option>
             <option value="IE819">IE819 - Alert or Rejection</option>
+            <option value="IE837">IE837 - Explain Delay</option>
+            <option value="IE871">IE871 - Reason for Shortage</option>
           </select>
         </div>
         <div class="field"><label>Message Identifier</label><input type="text" id="sm-msgid" value="SendA202"></div>
@@ -194,6 +259,8 @@
             <option value="UK Record">UK Record</option>
             <option value="EU Trader">EU Trader</option>
             <option value="EU Warehouse">EU Warehouse</option>
+            <option value="UK Temporary Authorisation">UK Temporary Authorisation</option>
+            <option value="EU Temporary Authorisation">EU Temporary Authorisation</option>
           </select>
         </div>
         <div class="field"><label>Product Code 1</label><input type="text" id="pv-p1" value="W200"></div>
@@ -226,374 +293,460 @@
 </div>
 
 <script>
-  // Wait for the DOM to be fully loaded before running any code
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ Script loaded successfully');
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('✅ Script loaded successfully');
 
-    // 1. AUTHENTICATION
-    const urlParams = new URLSearchParams(window.location.search);
-    const hmrcTokenFromUrl = urlParams.get('hmrc_token');
+  // ==================== AUTHENTICATION ====================
+  const urlParams = new URLSearchParams(window.location.search);
+  const hmrcTokenFromUrl = urlParams.get('hmrc_token');
 
-    if (hmrcTokenFromUrl) {
-      localStorage.setItem('hmrc_token', hmrcTokenFromUrl);
-      window.history.replaceState({}, document.title, window.location.pathname);
-      console.log('✅ HMRC Token saved to localStorage');
+  if (hmrcTokenFromUrl) {
+    localStorage.setItem('hmrc_token', hmrcTokenFromUrl);
+    window.history.replaceState({}, document.title, window.location.pathname);
+    console.log('✅ HMRC Token saved to localStorage');
+  }
+
+  function checkAuth() {
+    const dashAuth = localStorage.getItem('dashboard_auth');
+    if (dashAuth === 'authenticated') {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      updateHmrcStatus();
     }
+  }
 
-    function checkAuth() {
-      const dashAuth = localStorage.getItem('dashboard_auth');
-      if (dashAuth === 'authenticated') {
+  function updateHmrcStatus() {
+    const token = localStorage.getItem('hmrc_token');
+    const el = document.getElementById('hmrc-status');
+    if (token) {
+      el.innerText = 'HMRC: Logged In ✅';
+      el.className = 'token-status token-ok';
+    } else {
+      el.innerText = 'HMRC: Not Logged In';
+      el.className = 'token-status token-missing';
+    }
+  }
+
+  checkAuth();
+
+  // Login
+  document.getElementById('login-btn').addEventListener('click', async function() {
+    try {
+      const password = document.getElementById('password').value;
+      const totpCode = document.getElementById('totp-code').value;
+      const res = await fetch('/api/protect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password, totpCode })
+      });
+      const data = await res.json();
+      if (data.requires2FA) {
+        document.getElementById('totp-code').style.display = 'block';
+        document.getElementById('login-error').innerText = 'Enter your 2FA code';
+        return;
+      }
+      if (res.ok && data.success) {
+        localStorage.setItem('dashboard_auth', 'authenticated');
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         updateHmrcStatus();
-      }
-    }
-
-    function updateHmrcStatus() {
-      const token = localStorage.getItem('hmrc_token');
-      const el = document.getElementById('hmrc-status');
-      if (token) {
-        el.innerText = 'HMRC: Logged In ✅';
-        el.className = 'token-status token-ok';
       } else {
-        el.innerText = 'HMRC: Not Logged In';
-        el.className = 'token-status token-missing';
+        document.getElementById('login-error').innerText = data.error || 'Login failed';
       }
+    } catch (err) {
+      console.error('Login error:', err);
+      document.getElementById('login-error').innerText = 'Network error. Check console.';
     }
+  });
 
-    checkAuth();
+  // Logout
+  document.getElementById('logout-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    localStorage.removeItem('dashboard_auth');
+    localStorage.removeItem('hmrc_token');
+    location.reload();
+  });
 
-    // Login
-    document.getElementById('login-btn').addEventListener('click', async function() {
-      try {
-        const password = document.getElementById('password').value;
-        const totpCode = document.getElementById('totp-code').value;
-        const res = await fetch('/api/protect', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password, totpCode })
-        });
+  // 2FA Setup
+  document.getElementById('setup-2fa-btn').addEventListener('click', async function() {
+    try {
+      const res = await fetch('/api/setup-2fa', { method: 'POST' });
+      if (res.ok) {
         const data = await res.json();
-        
-        if (data.requires2FA) {
-          document.getElementById('totp-code').style.display = 'block';
-          document.getElementById('login-error').innerText = 'Enter your 2FA code';
-          return;
-        }
-        if (res.ok && data.success) {
-          localStorage.setItem('dashboard_auth', 'authenticated');
-          document.getElementById('login-screen').style.display = 'none';
-          document.getElementById('dashboard').style.display = 'block';
-          updateHmrcStatus();
-        } else {
-          document.getElementById('login-error').innerText = data.error || 'Login failed';
-        }
-      } catch (err) {
-        console.error('Login error:', err);
-        document.getElementById('login-error').innerText = 'Network error. Check console.';
+        document.getElementById('2fa-setup').style.display = 'block';
+        document.getElementById('qr-code').src = data.qrCode;
+        document.getElementById('secret-text').innerText = data.secret;
+        window.tempSecret = data.secret;
+      } else {
+        alert('Please login with your password first');
       }
-    });
+    } catch (err) {
+      console.error('2FA Setup error:', err);
+    }
+  });
 
-    // Logout
-    document.getElementById('logout-btn').addEventListener('click', function(e) {
-      e.preventDefault();
-      localStorage.removeItem('dashboard_auth');
-      localStorage.removeItem('hmrc_token');
-      location.reload();
-    });
-
-    // 2FA Setup
-    document.getElementById('setup-2fa-btn').addEventListener('click', async function() {
-      try {
-        const res = await fetch('/api/setup-2fa', { method: 'POST' });
-        if (res.ok) {
-          const data = await res.json();
-          document.getElementById('2fa-setup').style.display = 'block';
-          document.getElementById('qr-code').src = data.qrCode;
-          document.getElementById('secret-text').innerText = data.secret;
-          window.tempSecret = data.secret;
-        } else {
-          alert('Please login with your password first');
-        }
-      } catch (err) {
-        console.error('2FA Setup error:', err);
+  // 2FA Verify
+  document.getElementById('verify-2fa-btn').addEventListener('click', async function() {
+    try {
+      const code = document.getElementById('verify-code').value;
+      const res = await fetch('/api/setup-2fa', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: window.tempSecret, token: code })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('2fa-result').innerHTML =
+          '<span class="success">✅ Verified! Add to Vercel Env Vars:<br><b>Key:</b> TOTP_SECRET<br><b>Value:</b> ' + data.secret + '</span>';
+      } else {
+        document.getElementById('2fa-result').innerHTML = '<span class="error">❌ ' + data.error + '</span>';
       }
+    } catch (err) {
+      console.error('2FA Verify error:', err);
+    }
+  });
+
+  // ==================== TAB SWITCHING ====================
+  document.querySelectorAll('.nav-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.getElementById(this.getAttribute('data-tab')).classList.add('active');
+      this.classList.add('active');
+    });
+  });
+
+  // ==================== HELPERS ====================
+  async function getHeaders() {
+    let ip = '127.0.0.1';
+    try {
+      const r = await fetch('https://api.ipify.org?format=json');
+      const data = await r.json();
+      ip = data.ip;
+    } catch(e) {}
+
+    let deviceId = localStorage.getItem('emcs_device_id');
+    if (!deviceId) {
+      deviceId = 'dev-' + crypto.randomUUID();
+      localStorage.setItem('emcs_device_id', deviceId);
+    }
+
+    return {
+      'Authorization': 'Bearer ' + localStorage.getItem('hmrc_token'),
+      'x-client-ip': ip,
+      'x-client-ua': navigator.userAgent,
+      'x-device-id': deviceId,
+      'x-fingerprint': btoa(navigator.userAgent + navigator.language + screen.width + screen.height),
+      'x-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+      'x-window-width': String(window.innerWidth),
+      'x-window-height': String(window.innerHeight)
+    };
+  }
+
+  function exportResult(elementId, type) {
+    const text = document.getElementById(elementId).innerText;
+    let data;
+    try { data = JSON.parse(text.replace(/^Status: \d+\n\n/, '')); } catch(e) { alert('No valid JSON. Run a query first.'); return; }
+    if (!Array.isArray(data)) data = [data];
+    if (data.length === 0) { alert('No data.'); return; }
+    const headers = Object.keys(data[0]);
+    const rows = data.map(function(row) {
+      return headers.map(function(h) {
+        return '"' + String(row[h] || '').replace(/"/g, '""') + '"';
+      }).join(',');
+    });
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'emcs-' + type + '-' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+  }
+
+  // ==================== GENERATE ITEM FIELDS ====================
+  window.generateItemFields = function() {
+    const count = parseInt(document.getElementById('s-item-count').value) || 1;
+    const container = document.getElementById('goods-items-container');
+    container.innerHTML = '';
+
+    for (let i = 1; i <= count; i++) {
+      container.innerHTML += `
+        <div class="item-field" data-item="${i}">
+          <h4>Item ${i}</h4>
+          <div class="field"><label>Excise Product Code *</label><input type="text" id="s-product-${i}" value="W200"></div>
+          <div class="field"><label>Goods Description *</label><input type="text" id="s-desc-${i}" value="Cigarettes"></div>
+          <div class="field"><label>Quantity *</label><input type="number" id="s-qty-${i}" value="1000" step="0.001"></div>
+          <div class="field"><label>Gross Weight (kg) *</label><input type="number" id="s-weight-${i}" value="50" step="0.001"></div>
+          <div class="field"><label>Net Weight (kg) *</label><input type="number" id="s-net-weight-${i}" value="45" step="0.001"></div>
+        </div>
+      `;
+    }
+  };
+
+  // ==================== API FUNCTIONS ====================
+
+  // 1. Submit Movement (IE815)
+  document.getElementById('submit-movement-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+
+    const h = await getHeaders();
+
+    const consignorErn = document.getElementById('s-consignor-ern').value;
+    const consignorName = document.getElementById('s-consignor-name').value;
+    const consignorAddress = document.getElementById('s-consignor-address').value;
+    const consigneeErn = document.getElementById('s-consignee-ern').value;
+    const consigneeName = document.getElementById('s-consignee-name').value;
+    const consigneeAddress = document.getElementById('s-consignee-address').value;
+    const dispatchOffice = document.getElementById('s-dispatch-office').value;
+    const destinationOffice = document.getElementById('s-destination-office').value;
+    const placeOfDispatch = document.getElementById('s-place-dispatch').value;
+    const placeOfDelivery = document.getElementById('s-place-delivery').value;
+    const transportMode = document.getElementById('s-transport-mode').value;
+    const transportUnitId = document.getElementById('s-transport-unit').value;
+    const securityRequired = document.getElementById('s-security').value;
+
+    const uniqueLrn = 'LRN' + Date.now().toString().slice(-10) + '-' + Math.floor(Math.random() * 1000);
+    document.getElementById('s-lrn').value = uniqueLrn;
+
+    let d = document.getElementById('s-date').value;
+    const today = new Date().toISOString().slice(0, 10);
+    if (!d || d < today) {
+      d = today;
+      document.getElementById('s-date').value = d;
+    }
+
+    const itemCount = parseInt(document.getElementById('s-item-count').value) || 1;
+    let itemsXml = '';
+    for (let i = 1; i <= itemCount; i++) {
+      const productCode = document.getElementById('s-product-' + i).value;
+      const description = document.getElementById('s-desc-' + i).value;
+      const quantity = document.getElementById('s-qty-' + i).value;
+      const grossWeight = document.getElementById('s-weight-' + i).value;
+      const netWeight = document.getElementById('s-net-weight-' + i).value;
+
+      itemsXml += `
+        <urn:GoodsItem>
+          <urn:ItemSequenceNumber>${i}</urn:ItemSequenceNumber>
+          <urn:ExciseProductCode>${productCode}</urn:ExciseProductCode>
+          <urn:GoodsDescription>${description}</urn:GoodsDescription>
+          <urn:Quantity>${quantity}</urn:Quantity>
+          <urn:GrossMass>${grossWeight}</urn:GrossMass>
+          <urn:NetMass>${netWeight}</urn:NetMass>
+        </urn:GoodsItem>`;
+    }
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">
+  <urn:WCODataModelVersionCode>3.6</urn:WCODataModelVersionCode>
+  <urn:WCOTypeName>DESAD</urn:WCOTypeName>
+  <urn:ResponsibleCountryCode>GB</urn:ResponsibleCountryCode>
+  <urn:ResponsibleAgencyName>HMRC</urn:ResponsibleAgencyName>
+  <urn:AgencyAssignedCustomizationCode>GB</urn:AgencyAssignedCustomizationCode>
+  <urn:AgencyAssignedCustomizationVersionCode>v2.1</urn:AgencyAssignedCustomizationVersionCode>
+  <urn:SubmittedDraftOfEADESAD>
+    <urn1:Message>
+      <urn1:Header>
+        <urn1:MessageSender>${consignorErn}</urn1:MessageSender>
+        <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>
+        <urn1:DateOfPreparation>${today}</urn1:DateOfPreparation>
+        <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>
+        <urn1:MessageIdentifier>${uniqueLrn}</urn1:MessageIdentifier>
+      </urn1:Header>
+      <urn1:Body>
+        <urn:EadEsadDraft>
+          <urn:ConsignorDetails>
+            <urn:ExciseReferenceNumber>${consignorErn}</urn:ExciseReferenceNumber>
+            <urn:TraderName>${consignorName}</urn:TraderName>
+            <urn:StreetNameNumber>${consignorAddress}</urn:StreetNameNumber>
+          </urn:ConsignorDetails>
+          <urn:ConsigneeDetails>
+            <urn:ExciseReferenceNumber>${consigneeErn}</urn:ExciseReferenceNumber>
+            <urn:TraderName>${consigneeName}</urn:TraderName>
+            <urn:StreetNameNumber>${consigneeAddress}</urn:StreetNameNumber>
+          </urn:ConsigneeDetails>
+          <urn:DispatchImportOffice>
+            <urn:ReferenceNumber>${dispatchOffice}</urn:ReferenceNumber>
+          </urn:DispatchImportOffice>
+          <urn:DestinationOffice>
+            <urn:ReferenceNumber>${destinationOffice}</urn:ReferenceNumber>
+          </urn:DestinationOffice>
+          <urn:PlaceOfDispatch>
+            <urn:ReferenceNumber>${placeOfDispatch}</urn:ReferenceNumber>
+          </urn:PlaceOfDispatch>
+          <urn:PlaceOfDelivery>
+            <urn:ReferenceNumber>${placeOfDelivery}</urn:ReferenceNumber>
+          </urn:PlaceOfDelivery>
+          <urn:DateOfDispatch>${d}</urn:DateOfDispatch>
+          <urn:TransportModeCode>${transportMode}</urn:TransportModeCode>
+          <urn:TransportUnit>
+            <urn:TypeOfUnit>${transportMode}</urn:TypeOfUnit>
+            <urn:IdentityOfTransportUnit>${transportUnitId}</urn:IdentityOfTransportUnit>
+          </urn:TransportUnit>
+          <urn:SecurityRequiredFlag>${securityRequired}</urn:SecurityRequiredFlag>
+          <urn:LocalReferenceNumber>${uniqueLrn}</urn:LocalReferenceNumber>
+          ${itemsXml}
+        </urn:EadEsadDraft>
+      </urn1:Body>
+    </urn1:Message>
+  </urn:SubmittedDraftOfEADESAD>
+</urn:IE815>`;
+
+    console.log('Sending comprehensive IE815 XML:', xml);
+
+    const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', {
+      method: 'POST',
+      headers: { ...h, 'Content-Type': 'application/xml' },
+      body: xml
     });
 
-    // 2FA Verify
-    document.getElementById('verify-2fa-btn').addEventListener('click', async function() {
-      try {
-        const code = document.getElementById('verify-code').value;
-        const res = await fetch('/api/setup-2fa', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ secret: window.tempSecret, token: code })
+    const responseText = await res.text();
+    console.log('HMRC Response:', res.status, responseText);
+    document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
+  });
+
+  document.getElementById('export-submit-btn').addEventListener('click', function() { exportResult('submit-output', 'movement'); });
+
+  // 2. Get Movements
+  document.getElementById('get-movements-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+    const h = await getHeaders();
+    const ern = document.getElementById('gm-ern').value;
+    const arc = document.getElementById('gm-arc').value;
+    const lrn = document.getElementById('gm-lrn').value;
+    const since = document.getElementById('gm-since').value;
+    const type = document.getElementById('gm-type').value;
+    let q = '?ern=' + ern;
+    if (arc) q += '&arc=' + arc;
+    if (lrn) q += '&lrn=' + lrn;
+    if (since) q += '&updatedSince=' + encodeURIComponent(since);
+    if (type) q += '&traderType=' + type;
+    const res = await fetch('/api/emcs?endpoint=/customs/excise/movements' + q, { headers: h });
+    document.getElementById('gm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+  });
+  document.getElementById('export-gm-btn').addEventListener('click', function() { exportResult('gm-output', 'movements'); });
+
+  // 3. Get Single Movement
+  document.getElementById('get-single-movement-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+    const h = await getHeaders();
+    const id = document.getElementById('gsm-id').value;
+    const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + id, { headers: h });
+    document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+  });
+
+  // 4. Submit Message
+  document.getElementById('submit-message-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+    const h = await getHeaders();
+    const movId = document.getElementById('sm-id').value;
+    const msgType = document.getElementById('sm-type').value;
+    const msgId = document.getElementById('sm-msgid').value;
+    const today = new Date().toISOString().slice(0, 10);
+    let body = '';
+
+    if (msgType === 'IE810') body = '<urn:CancellationOfEADESAD><urn:MovementId>' + movId + '</urn:MovementId></urn:CancellationOfEADESAD>';
+    else if (msgType === 'IE818') body = '<urn:AcceptedOrRejectedReportOfReceiptExport><urn:MovementId>' + movId + '</urn:MovementId><urn:DestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:DestinationOffice></urn:AcceptedOrRejectedReportOfReceiptExport>';
+    else if (msgType === 'IE813') body = '<urn:ChangeOfDestination><urn:MovementId>' + movId + '</urn:MovementId><urn:NewDestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:NewDestinationOffice></urn:ChangeOfDestination>';
+    else if (msgType === 'IE819') body = '<urn:AlertOrRejectionOfMovement><urn:MovementId>' + movId + '</urn:MovementId></urn:AlertOrRejectionOfMovement>';
+    else if (msgType === 'IE837') body = '<urn:ExplanationOfDelay><urn:MovementId>' + movId + '</urn:MovementId></urn:ExplanationOfDelay>';
+    else if (msgType === 'IE871') body = '<urn:ReasonForShortage><urn:MovementId>' + movId + '</urn:MovementId></urn:ReasonForShortage>';
+
+    const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<urn:' + msgType + ' xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
+      '  <urn:Message>\n' +
+      '    <urn:Header>\n' +
+      '      <urn1:MessageSender>GBWK002281023</urn1:MessageSender>\n' +
+      '      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n' +
+      '      <urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation>\n' +
+      '      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n' +
+      '      <urn1:MessageIdentifier>' + msgId + '</urn1:MessageIdentifier>\n' +
+      '    </urn:Header>\n' +
+      '    <urn:Body>' + body + '</urn:Body>\n' +
+      '  </urn:Message>\n' +
+      '</urn:' + msgType + '>';
+
+    const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { method: 'POST', headers: { ...h, 'Content-Type': 'application/xml' }, body: xml });
+    document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+  });
+
+  // 5. Get Messages
+  document.getElementById('get-messages-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+    const h = await getHeaders();
+    const movId = document.getElementById('gmsg-id').value;
+    const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { headers: h });
+    const text = await res.text();
+    try {
+      const msgs = JSON.parse(text);
+      if (Array.isArray(msgs)) {
+        msgs.forEach(function(m) {
+          if (m.encodedMessage) {
+            try { m.decodedXml = atob(m.encodedMessage); } catch(e) { m.decodedXml = 'Decode failed'; }
+          }
         });
-        const data = await res.json();
-        if (data.success) {
-          document.getElementById('2fa-result').innerHTML =
-            '<span class="success">✅ Verified! Add to Vercel Env Vars:<br><b>Key:</b> TOTP_SECRET<br><b>Value:</b> ' + data.secret + '</span>';
-        } else {
-          document.getElementById('2fa-result').innerHTML = '<span class="error">❌ ' + data.error + '</span>';
-        }
-      } catch (err) {
-        console.error('2FA Verify error:', err);
+        document.getElementById('gmsg-output').innerText = JSON.stringify(msgs, null, 2);
+        return;
       }
+    } catch(e) {}
+    document.getElementById('gmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+  });
+  document.getElementById('export-gmsg-btn').addEventListener('click', function() { exportResult('gmsg-output', 'messages'); });
+
+  // 6. Get Single Message
+  document.getElementById('get-single-message-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+    const h = await getHeaders();
+    h['Accept'] = 'application/vnd.hmrc.1.0+xml';
+    const movId = document.getElementById('gsmsg-mid').value;
+    const msgId = document.getElementById('gsmsg-id').value;
+    const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages/' + msgId, { headers: h });
+    document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+  });
+
+  // 7. Pre-Validate
+  document.getElementById('pre-validate-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+    const h = await getHeaders();
+    h['x-correlation-id'] = crypto.randomUUID();
+    const ern = document.getElementById('pv-ern').value;
+    const group = document.getElementById('pv-group').value;
+    const p1 = document.getElementById('pv-p1').value;
+    const p2 = document.getElementById('pv-p2').value;
+    const products = [];
+    if (p1) products.push({ product: { exciseProductCode: p1 } });
+    if (p2) products.push({ product: { exciseProductCode: p2 } });
+    const res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', {
+      method: 'POST',
+      headers: { ...h, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ exciseRegistrationNumber: ern, entityGroup: group, validateProductAuthorisationRequest: products })
     });
+    document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+  });
 
-    // Tab Switching
-    document.querySelectorAll('.nav-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
-        document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
-        document.getElementById(this.getAttribute('data-tab')).classList.add('active');
-        this.classList.add('active');
-      });
+  // 8. Subscribe
+  document.getElementById('subscribe-ern-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+    const h = await getHeaders();
+    const ern = document.getElementById('sub-ern').value;
+    const res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + ern + '/subscription', {
+      method: 'POST',
+      headers: { ...h, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ boxId: '42c75e22-7bba-44f2-a610-4b4c3b262e3e' })
     });
+    document.getElementById('sub-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+  });
 
-    // Helper: Get Headers
-    async function getHeaders() {
-      let ip = '127.0.0.1';
-      try { 
-        const r = await fetch('https://api.ipify.org?format=json'); 
-        const data = await r.json();
-        ip = data.ip; 
-      } catch(e) {}
-      
-      let deviceId = localStorage.getItem('emcs_device_id');
-      if (!deviceId) { 
-        deviceId = 'dev-' + crypto.randomUUID(); 
-        localStorage.setItem('emcs_device_id', deviceId); 
-      }
-      
-      return {
-        'Authorization': 'Bearer ' + localStorage.getItem('hmrc_token'),
-        'x-client-ip': ip,
-        'x-client-ua': navigator.userAgent,
-        'x-device-id': deviceId,
-        'x-fingerprint': btoa(navigator.userAgent + navigator.language + screen.width + screen.height),
-        'x-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
-        'x-window-width': String(window.innerWidth),
-        'x-window-height': String(window.innerHeight)
-      };
-    }
+  // 9. Unsubscribe
+  document.getElementById('unsubscribe-ern-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+    const h = await getHeaders();
+    const ern = document.getElementById('unsub-ern').value;
+    const res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + ern + '/subscription', { method: 'DELETE', headers: h });
+    const text = await res.text();
+    document.getElementById('unsub-output').innerText = res.status === 202 ? 'Successfully unsubscribed' : 'Status: ' + res.status + '\n\n' + text;
+  });
 
-    // Helper: Export CSV
-    function exportResult(elementId, type) {
-      const text = document.getElementById(elementId).innerText;
-      let data;
-      try { data = JSON.parse(text.replace(/^Status: \d+\n\n/, '')); } catch(e) { alert('No valid JSON. Run a query first.'); return; }
-      if (!Array.isArray(data)) data = [data];
-      if (data.length === 0) { alert('No data.'); return; }
-      const headers = Object.keys(data[0]);
-      const rows = data.map(function(row) {
-        return headers.map(function(h) {
-          return '"' + String(row[h] || '').replace(/"/g, '""') + '"';
-        }).join(',');
-      });
-      const csv = [headers.join(','), ...rows].join('\n');
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'emcs-' + type + '-' + new Date().toISOString().slice(0,10) + '.csv';
-      a.click();
-    }
-
-    // --- API FUNCTIONS ---
-
-    // 1. Submit Movement
-    document.getElementById('submit-movement-btn').addEventListener('click', async function() {
-      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-      const h = await getHeaders();
-      const c = document.getElementById('s-consignor').value;
-      const e = document.getElementById('s-consignee').value;
-      
-      const uniqueLrn = 'LRN' + Date.now().toString().slice(-10);
-      document.getElementById('s-lrn').value = uniqueLrn;
-      
-      let d = document.getElementById('s-date').value;
-      const today = new Date().toISOString().slice(0, 10);
-      if (!d || d < today) {
-        d = today;
-        document.getElementById('s-date').value = d;
-      }
-      
-      const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-        '<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
-        '  <urn:WCODataModelVersionCode>3.6</urn:WCODataModelVersionCode>\n' +
-        '  <urn:WCOTypeName>DESAD</urn:WCOTypeName>\n' +
-        '  <urn:ResponsibleCountryCode>GB</urn:ResponsibleCountryCode>\n' +
-        '  <urn:ResponsibleAgencyName>HMRC</urn:ResponsibleAgencyName>\n' +
-        '  <urn:AgencyAssignedCustomizationCode>GB</urn:AgencyAssignedCustomizationCode>\n' +
-        '  <urn:AgencyAssignedCustomizationVersionCode>v2.1</urn:AgencyAssignedCustomizationVersionCode>\n' +
-        '  <urn:SubmittedDraftOfEADESAD>\n' +
-        '    <urn1:Message>\n' +
-        '      <urn1:Header>\n' +
-        '        <urn1:MessageSender>' + c + '</urn1:MessageSender>\n' +
-        '        <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n' +
-        '        <urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation>\n' +
-        '        <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n' +
-        '        <urn1:MessageIdentifier>' + uniqueLrn + '</urn1:MessageIdentifier>\n' +
-        '      </urn1:Header>\n' +
-        '      <urn1:Body>\n' +
-        '        <urn:EadEsadDraft>\n' +
-        '          <urn:ConsignorDetails><urn:ExciseReferenceNumber>' + c + '</urn:ExciseReferenceNumber></urn:ConsignorDetails>\n' +
-        '          <urn:ConsigneeDetails><urn:ExciseReferenceNumber>' + e + '</urn:ExciseReferenceNumber></urn:ConsigneeDetails>\n' +
-        '          <urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>\n' +
-        '          <urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>\n' +
-        '        </urn:EadEsadDraft>\n' +
-        '      </urn1:Body>\n' +
-        '    </urn1:Message>\n' +
-        '  </urn:SubmittedDraftOfEADESAD>\n' +
-        '</urn:IE815>';
-      
-      console.log('Sending XML:', xml);
-      const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { 
-        method: 'POST', 
-        headers: { ...h, 'Content-Type': 'application/xml' }, 
-        body: xml 
-      });
-      
-      document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-    });
-
-    document.getElementById('export-submit-btn').addEventListener('click', function() { exportResult('submit-output', 'movement'); });
-
-    // 2. Get Movements
-    document.getElementById('get-movements-btn').addEventListener('click', async function() {
-      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-      const h = await getHeaders();
-      const ern = document.getElementById('gm-ern').value;
-      const arc = document.getElementById('gm-arc').value;
-      const lrn = document.getElementById('gm-lrn').value;
-      let q = '?ern=' + ern;
-      if (arc) q += '&arc=' + arc;
-      if (lrn) q += '&lrn=' + lrn;
-      const res = await fetch('/api/emcs?endpoint=/customs/excise/movements' + q, { headers: h });
-      document.getElementById('gm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-    });
-    document.getElementById('export-gm-btn').addEventListener('click', function() { exportResult('gm-output', 'movements'); });
-
-    // 3. Get Single Movement
-    document.getElementById('get-single-movement-btn').addEventListener('click', async function() {
-      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-      const h = await getHeaders();
-      const id = document.getElementById('gsm-id').value;
-      const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + id, { headers: h });
-      document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-    });
-
-    // 4. Submit Message
-    document.getElementById('submit-message-btn').addEventListener('click', async function() {
-      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-      const h = await getHeaders();
-      const movId = document.getElementById('sm-id').value;
-      const msgType = document.getElementById('sm-type').value;
-      const msgId = document.getElementById('sm-msgid').value;
-      const today = new Date().toISOString().slice(0, 10);
-      let body = '';
-      
-      if (msgType === 'IE810') body = '<urn:CancellationOfEADESAD><urn:MovementId>' + movId + '</urn:MovementId></urn:CancellationOfEADESAD>';
-      else if (msgType === 'IE818') body = '<urn:AcceptedOrRejectedReportOfReceiptExport><urn:MovementId>' + movId + '</urn:MovementId><urn:DestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:DestinationOffice></urn:AcceptedOrRejectedReportOfReceiptExport>';
-      else if (msgType === 'IE813') body = '<urn:ChangeOfDestination><urn:MovementId>' + movId + '</urn:MovementId><urn:NewDestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:NewDestinationOffice></urn:ChangeOfDestination>';
-      else if (msgType === 'IE819') body = '<urn:AlertOrRejectionOfMovement><urn:MovementId>' + movId + '</urn:MovementId></urn:AlertOrRejectionOfMovement>';
-      
-      const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-        '<urn:' + msgType + ' xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
-        '  <urn:Message>\n' +
-        '    <urn:Header>\n' +
-        '      <urn1:MessageSender>GBWK002281023</urn1:MessageSender>\n' +
-        '      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n' +
-        '      <urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation>\n' +
-        '      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n' +
-        '      <urn1:MessageIdentifier>' + msgId + '</urn1:MessageIdentifier>\n' +
-        '    </urn:Header>\n' +
-        '    <urn:Body>' + body + '</urn:Body>\n' +
-        '  </urn:Message>\n' +
-        '</urn:' + msgType + '>';
-      
-      const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { method: 'POST', headers: { ...h, 'Content-Type': 'application/xml' }, body: xml });
-      document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-    });
-
-    // 5. Get Messages
-    document.getElementById('get-messages-btn').addEventListener('click', async function() {
-      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-      const h = await getHeaders();
-      const movId = document.getElementById('gmsg-id').value;
-      const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { headers: h });
-      const text = await res.text();
-      try {
-        const msgs = JSON.parse(text);
-        if (Array.isArray(msgs)) {
-          msgs.forEach(function(m) { 
-            if (m.encodedMessage) { 
-              try { m.decodedXml = atob(m.encodedMessage); } catch(e) { m.decodedXml = 'Decode failed'; } 
-            } 
-          });
-          document.getElementById('gmsg-output').innerText = JSON.stringify(msgs, null, 2);
-          return;
-        }
-      } catch(e) {}
-      document.getElementById('gmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
-    });
-    document.getElementById('export-gmsg-btn').addEventListener('click', function() { exportResult('gmsg-output', 'messages'); });
-
-    // 6. Get Single Message
-    document.getElementById('get-single-message-btn').addEventListener('click', async function() {
-      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-      const h = await getHeaders();
-      h['Accept'] = 'application/vnd.hmrc.1.0+xml';
-      const movId = document.getElementById('gsmsg-mid').value;
-      const msgId = document.getElementById('gsmsg-id').value;
-      const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages/' + msgId, { headers: h });
-      document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-    });
-
-    // 7. Pre-Validate
-    document.getElementById('pre-validate-btn').addEventListener('click', async function() {
-      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-      const h = await getHeaders();
-      h['x-correlation-id'] = crypto.randomUUID();
-      const ern = document.getElementById('pv-ern').value;
-      const group = document.getElementById('pv-group').value;
-      const p1 = document.getElementById('pv-p1').value;
-      const p2 = document.getElementById('pv-p2').value;
-      const products = [];
-      if (p1) products.push({ product: { exciseProductCode: p1 } });
-      if (p2) products.push({ product: { exciseProductCode: p2 } });
-      const res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', { 
-        method: 'POST', 
-        headers: { ...h, 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ exciseRegistrationNumber: ern, entityGroup: group, validateProductAuthorisationRequest: products }) 
-      });
-      document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-    });
-
-    // 8. Subscribe
-    document.getElementById('subscribe-ern-btn').addEventListener('click', async function() {
-      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-      const h = await getHeaders();
-      const ern = document.getElementById('sub-ern').value;
-      const res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + ern + '/subscription', { 
-        method: 'POST', 
-        headers: { ...h, 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ boxId: '42c75e22-7bba-44f2-a610-4b4c3b262e3e' }) 
-      });
-      document.getElementById('sub-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-    });
-
-    // 9. Unsubscribe
-    document.getElementById('unsubscribe-ern-btn').addEventListener('click', async function() {
-      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-      const h = await getHeaders();
-      const ern = document.getElementById('unsub-ern').value;
-      const res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + ern + '/subscription', { method: 'DELETE', headers: h });
-      const text = await res.text();
-      document.getElementById('unsub-output').innerText = res.status === 202 ? 'Successfully unsubscribed' : 'Status: ' + res.status + '\n\n' + text;
-    });
-
-  }); // End DOMContentLoaded
+});
 </script>
 </body>
 </html>
