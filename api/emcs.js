@@ -1,16 +1,17 @@
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
-  // 1. Check Authentication
-  const cookies = req.headers.cookie || '';
-  const tokenMatch = cookies.match(/hmrc_token=([^;]+)/);
-  const token = tokenMatch ? tokenMatch[1] : null;
+  // 1. Check Authentication from the Authorization Header
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.startsWith('Bearer ') 
+    ? authHeader.substring(7) 
+    : null;
 
   if (!token) {
     return res.status(401).json({ error: "Not logged in to HMRC. Click 'Login to HMRC' first." });
   }
 
-  // 2. Collect Fraud Prevention Headers
+  // 2. Collect Fraud Prevention Headers from the frontend
   const clientIp = req.headers['x-client-ip'] || '127.0.0.1';
   const userAgent = req.headers['x-client-ua'] || 'Unknown';
   const deviceId = req.headers['x-device-id'] || 'unknown';
@@ -22,6 +23,7 @@ export default async function handler(req, res) {
   const endpoint = req.query.endpoint || '/customs/excise/movements';
   const url = `https://test-api.service.hmrc.gov.uk${endpoint}`;
   
+  // 3. Build the headers for HMRC
   const headers = {
     'Authorization': `Bearer ${token}`,
     'Accept': req.headers['accept'] || 'application/vnd.hmrc.1.0+json',
@@ -45,7 +47,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 3. CRITICAL FIX: Read the raw body stream for application/xml
+    // 4. Read the raw body stream for application/xml (Critical for Vercel)
     let rawBody = req.body;
     if (rawBody && typeof rawBody.on === 'function') {
       rawBody = await new Promise((resolve, reject) => {
@@ -56,7 +58,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // 4. Forward to HMRC
+    // 5. Forward the request to HMRC
     const response = await fetch(url, {
       method: req.method,
       headers: headers,
