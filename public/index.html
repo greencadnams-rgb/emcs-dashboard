@@ -390,17 +390,75 @@ function exportResult(elementId, type) {
 // ALL 9 API ENDPOINTS
 // =============================================
 
+// 1. Submit Movement (IE815)
 async function submitMovement() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+  if (!localStorage.getItem('hmrc_token')) { 
+    alert('Please click "Login to HMRC" first!'); 
+    return; 
+  }
+  
   const h = await getHeaders();
-  const c = document.getElementById('s-consignor').value;
-  const e = document.getElementById('s-consignee').value;
-  const l = document.getElementById('s-lrn').value;
-  const d = document.getElementById('s-date').value;
-  const t = new Date().toISOString().slice(0,10);
-  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n  <urn:Message>\n    <urn:Header>\n      <urn1:MessageSender>' + c + '</urn1:MessageSender>\n      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n      <urn1:DateOfPreparation>' + t + '</urn1:DateOfPreparation>\n      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n      <urn1:MessageIdentifier>' + l + '</urn1:MessageIdentifier>\n    </urn:Header>\n    <urn:Body>\n      <urn:SubmittedDraftOfEADESAD>\n        <urn:EadEsadDraft>\n          <urn:ConsignorDetails><urn:ExciseReferenceNumber>' + c + '</urn:ExciseReferenceNumber></urn:ConsignorDetails>\n          <urn:ConsigneeDetails><urn:ExciseReferenceNumber>' + e + '</urn:ExciseReferenceNumber></urn:ConsigneeDetails>\n          <urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>\n          <urn:LocalReferenceNumber>' + l + '</urn:LocalReferenceNumber>\n        </urn:EadEsadDraft>\n      </urn:SubmittedDraftOfEADESAD>\n    </urn:Body>\n  </urn:Message>\n</urn:IE815>';
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { method: 'POST', headers: { ...h, 'Content-Type': 'application/xml' }, body: xml });
-  document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+  const consignor = document.getElementById('s-consignor').value.trim();
+  const consignee = document.getElementById('s-consignee').value.trim();
+  const lrn = document.getElementById('s-lrn').value.trim();
+  
+  // --- SMART DATE FORMATTER ---
+  let rawDate = document.getElementById('s-date').value.trim();
+  let formattedDate = rawDate;
+
+  // If user typed DD/MM/YYYY, convert to YYYY-MM-DD
+  if (rawDate.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+      const parts = rawDate.split('/');
+      formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+  } 
+  // If it's not already YYYY-MM-DD, default to today to prevent schema errors
+  else if (!rawDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      formattedDate = new Date().toISOString().split('T')[0];
+      document.getElementById('s-date').value = formattedDate; // Update UI
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // Build the strictly validated XML
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">
+  <urn:Message>
+    <urn:Header>
+      <urn1:MessageSender>${consignor}</urn1:MessageSender>
+      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>
+      <urn1:DateOfPreparation>${today}</urn1:DateOfPreparation>
+      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>
+      <urn1:MessageIdentifier>${lrn}</urn1:MessageIdentifier>
+    </urn:Header>
+    <urn:Body>
+      <urn:SubmittedDraftOfEADESAD>
+        <urn:EadEsadDraft>
+          <urn:ConsignorDetails><urn:ExciseReferenceNumber>${consignor}</urn:ExciseReferenceNumber></urn:ConsignorDetails>
+          <urn:ConsigneeDetails><urn:ExciseReferenceNumber>${consignee}</urn:ExciseReferenceNumber></urn:ConsigneeDetails>
+          <urn:DateOfDispatch>${formattedDate}</urn:DateOfDispatch>
+          <urn:LocalReferenceNumber>${lrn}</urn:LocalReferenceNumber>
+        </urn:EadEsadDraft>
+      </urn:SubmittedDraftOfEADESAD>
+    </urn:Body>
+  </urn:Message>
+</urn:IE815>`;
+
+  // Log the exact XML to the browser console for debugging
+  console.log('--- SENDING XML TO HMRC ---');
+  console.log(xml);
+  console.log('---------------------------');
+
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', {
+    method: 'POST', 
+    headers: { ...h, 'Content-Type': 'application/xml' }, 
+    body: xml 
+  });
+  
+  const responseText = await res.text();
+  console.log('HMRC Response Status:', res.status);
+  console.log('HMRC Response Body:', responseText);
+  
+  document.getElementById('submit-output').innerText = `Status: ${res.status}\n\n${responseText}`;
 }
 
 async function getMovements() {
