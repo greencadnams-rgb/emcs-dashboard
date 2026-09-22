@@ -1,6 +1,10 @@
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
+  console.log('--- API EMCS CALLED ---');
+  console.log('Method:', req.method);
+  console.log('Endpoint:', req.query.endpoint);
+
   // 1. Check Authentication from the Authorization Header
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.startsWith('Bearer ') 
@@ -8,6 +12,7 @@ export default async function handler(req, res) {
     : null;
 
   if (!token) {
+    console.log('No token found');
     return res.status(401).json({ error: "Not logged in to HMRC. Click 'Login to HMRC' first." });
   }
 
@@ -26,7 +31,7 @@ export default async function handler(req, res) {
   // 3. Build the headers for HMRC
   const headers = {
     'Authorization': `Bearer ${token}`,
-    'Accept': req.headers['accept'] || 'application/vnd.hmrc.1.0+json',
+    'Accept': req.headers['accept']?.includes('xml') ? 'application/vnd.hmrc.1.0+xml' : 'application/vnd.hmrc.1.0+json',
     'CLIENT_PUBLIC_IP': clientIp,
     'USER_AGENT': userAgent,
     'DEVICE_ID': deviceId,
@@ -53,10 +58,17 @@ export default async function handler(req, res) {
       rawBody = await new Promise((resolve, reject) => {
         let data = '';
         rawBody.on('data', chunk => data += chunk);
-        rawBody.on('end', () => resolve(data));
+        rawBody.on('end', () => {
+          console.log('Raw body received, length:', data.length);
+          resolve(data);
+        });
         rawBody.on('error', reject);
       });
+    } else if (typeof rawBody === 'string') {
+      console.log('Raw body is string, length:', rawBody.length);
     }
+
+    console.log('Forwarding to HMRC:', url);
 
     // 5. Forward the request to HMRC
     const response = await fetch(url, {
@@ -66,6 +78,12 @@ export default async function handler(req, res) {
     });
 
     const data = await response.text();
+    console.log('HMRC Response Status:', response.status);
+    console.log('HMRC Response Body:', data);
+
+    // Force the correct Content-Type so the browser doesn't show it as HTML
+    const contentType = response.headers.get('content-type') || 'application/json';
+    res.setHeader('Content-Type', contentType);
     res.status(response.status).send(data);
     
   } catch (error) {
