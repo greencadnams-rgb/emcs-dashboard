@@ -47,12 +47,13 @@
 </head>
 <body>
 
+<!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-box">
     <h1>🔒 EMCS Dashboard</h1>
     <p style="margin-bottom:20px; color:#666;">Enter your password to continue</p>
-    <input type="password" id="password" placeholder="Dashboard Password" onkeypress="if(event.key==='Enter')login()">
-    <input type="text" id="totp-code" placeholder="6-digit 2FA code (if enabled)" maxlength="6" style="display:none;" onkeypress="if(event.key==='Enter')login()">
+    <input type="password" id="password" placeholder="Dashboard Password" onkeypress="if(event.key==='Enter') login()">
+    <input type="text" id="totp-code" placeholder="6-digit 2FA code (if enabled)" maxlength="6" style="display:none;" onkeypress="if(event.key==='Enter') login()">
     <button onclick="login()" style="width:100%; margin-top:10px;">Login</button>
     <p id="login-error" class="error" style="margin-top:10px;"></p>
     <hr style="margin:25px 0;">
@@ -69,6 +70,7 @@
   </div>
 </div>
 
+<!-- MAIN DASHBOARD -->
 <div id="dashboard" style="display:none;">
   <div class="status-bar">
     <span>🇬🇧 HMRC EMCS Dashboard</span>
@@ -92,6 +94,7 @@
       <button onclick="showTab('tab-unsubscribe',this)">9. Unsubscribe ERN</button>
     </div>
 
+    <!-- TAB 1: SUBMIT MOVEMENT -->
     <div id="tab-submit" class="tab active">
       <div class="card">
         <h2>Submit Draft Movement (IE815)</h2>
@@ -117,6 +120,7 @@
       </div>
     </div>
 
+    <!-- TAB 2: GET MOVEMENTS -->
     <div id="tab-get-movements" class="tab">
       <div class="card">
         <h2>Get All Movements</h2>
@@ -129,6 +133,7 @@
       </div>
     </div>
 
+    <!-- TAB 3: GET SINGLE MOVEMENT -->
     <div id="tab-get-movement" class="tab">
       <div class="card">
         <h2>Get Single Movement</h2>
@@ -138,6 +143,7 @@
       </div>
     </div>
 
+    <!-- TAB 4: SUBMIT MESSAGE -->
     <div id="tab-submit-msg" class="tab">
       <div class="card">
         <h2>Submit Message</h2>
@@ -148,8 +154,6 @@
             <option value="IE818">IE818 - Report of Receipt</option>
             <option value="IE813">IE813 - Change of Destination</option>
             <option value="IE819">IE819 - Alert or Rejection</option>
-            <option value="IE837">IE837 - Explain Delay</option>
-            <option value="IE871">IE871 - Reason for Shortage</option>
           </select>
         </div>
         <div class="field"><label>Message Identifier</label><input type="text" id="sm-msgid" value="SendA202"></div>
@@ -158,6 +162,7 @@
       </div>
     </div>
 
+    <!-- TAB 5: GET MESSAGES -->
     <div id="tab-get-messages" class="tab">
       <div class="card">
         <h2>Get All Messages</h2>
@@ -168,6 +173,7 @@
       </div>
     </div>
 
+    <!-- TAB 6: GET SINGLE MESSAGE -->
     <div id="tab-get-message" class="tab">
       <div class="card">
         <h2>Get Single Message (XML)</h2>
@@ -178,6 +184,7 @@
       </div>
     </div>
 
+    <!-- TAB 7: PRE-VALIDATE -->
     <div id="tab-validate" class="tab">
       <div class="card">
         <h2>Pre-Validate Trader</h2>
@@ -196,6 +203,7 @@
       </div>
     </div>
 
+    <!-- TAB 8: SUBSCRIBE -->
     <div id="tab-subscribe" class="tab">
       <div class="card">
         <h2>Subscribe ERN</h2>
@@ -205,6 +213,7 @@
       </div>
     </div>
 
+    <!-- TAB 9: UNSUBSCRIBE -->
     <div id="tab-unsubscribe" class="tab">
       <div class="card">
         <h2>Unsubscribe ERN</h2>
@@ -217,6 +226,9 @@
 </div>
 
 <script>
+console.log('✅ Script loaded successfully');
+
+// 1. AUTHENTICATION
 const urlParams = new URLSearchParams(window.location.search);
 const hmrcTokenFromUrl = urlParams.get('hmrc_token');
 
@@ -250,26 +262,32 @@ function updateHmrcStatus() {
 checkAuth();
 
 async function login() {
-  const password = document.getElementById('password').value;
-  const totpCode = document.getElementById('totp-code').value;
-  const res = await fetch('/api/protect', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password, totpCode })
-  });
-  const data = await res.json();
-  if (data.requires2FA) {
-    document.getElementById('totp-code').style.display = 'block';
-    document.getElementById('login-error').innerText = 'Enter your 2FA code';
-    return;
-  }
-  if (res.ok && data.success) {
-    localStorage.setItem('dashboard_auth', 'authenticated');
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-    updateHmrcStatus();
-  } else {
-    document.getElementById('login-error').innerText = data.error || 'Login failed';
+  try {
+    const password = document.getElementById('password').value;
+    const totpCode = document.getElementById('totp-code').value;
+    const res = await fetch('/api/protect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, totpCode })
+    });
+    const data = await res.json();
+    
+    if (data.requires2FA) {
+      document.getElementById('totp-code').style.display = 'block';
+      document.getElementById('login-error').innerText = 'Enter your 2FA code';
+      return;
+    }
+    if (res.ok && data.success) {
+      localStorage.setItem('dashboard_auth', 'authenticated');
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      updateHmrcStatus();
+    } else {
+      document.getElementById('login-error').innerText = data.error || 'Login failed';
+    }
+  } catch (err) {
+    console.error('Login error:', err);
+    document.getElementById('login-error').innerText = 'Network error. Check console.';
   }
 }
 
@@ -279,33 +297,45 @@ function logout() {
   location.reload();
 }
 
+// 2. 2FA SETUP
 async function setup2FA() {
-  const res = await fetch('/api/setup-2fa', { method: 'POST' });
-  if (res.ok) {
-    const data = await res.json();
-    document.getElementById('2fa-setup').style.display = 'block';
-    document.getElementById('qr-code').src = data.qrCode;
-    document.getElementById('secret-text').innerText = data.secret;
-    window.tempSecret = data.secret;
-  } else { alert('Login with password first'); }
-}
-
-async function verify2FA() {
-  const code = document.getElementById('verify-code').value;
-  const res = await fetch('/api/setup-2fa', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ secret: window.tempSecret, token: code })
-  });
-  const data = await res.json();
-  if (data.success) {
-    document.getElementById('2fa-result').innerHTML =
-      '<span class="success">✅ Verified! Add to Vercel Env Vars:<br><b>Key:</b> TOTP_SECRET<br><b>Value:</b> ' + data.secret + '</span>';
-  } else {
-    document.getElementById('2fa-result').innerHTML = '<span class="error">❌ ' + data.error + '</span>';
+  try {
+    const res = await fetch('/api/setup-2fa', { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById('2fa-setup').style.display = 'block';
+      document.getElementById('qr-code').src = data.qrCode;
+      document.getElementById('secret-text').innerText = data.secret;
+      window.tempSecret = data.secret;
+    } else {
+      alert('Please login with your password first');
+    }
+  } catch (err) {
+    console.error('2FA Setup error:', err);
   }
 }
 
+async function verify2FA() {
+  try {
+    const code = document.getElementById('verify-code').value;
+    const res = await fetch('/api/setup-2fa', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: window.tempSecret, token: code })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('2fa-result').innerHTML =
+        '<span class="success">✅ Verified! Add to Vercel Env Vars:<br><b>Key:</b> TOTP_SECRET<br><b>Value:</b> ' + data.secret + '</span>';
+    } else {
+      document.getElementById('2fa-result').innerHTML = '<span class="error">❌ ' + data.error + '</span>';
+    }
+  } catch (err) {
+    console.error('2FA Verify error:', err);
+  }
+}
+
+// 3. UI HELPERS
 function showTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
@@ -315,9 +345,17 @@ function showTab(id, btn) {
 
 async function getHeaders() {
   let ip = '127.0.0.1';
-  try { const r = await fetch('https://api.ipify.org?format=json'); ip = (await r.json()).ip; } catch(e) {}
+  try { 
+    const r = await fetch('https://api.ipify.org?format=json'); 
+    ip = (await r.json()).ip; 
+  } catch(e) {}
+  
   let deviceId = localStorage.getItem('emcs_device_id');
-  if (!deviceId) { deviceId = 'dev-' + crypto.randomUUID(); localStorage.setItem('emcs_device_id', deviceId); }
+  if (!deviceId) { 
+    deviceId = 'dev-' + crypto.randomUUID(); 
+    localStorage.setItem('emcs_device_id', deviceId); 
+  }
+  
   return {
     'Authorization': 'Bearer ' + localStorage.getItem('hmrc_token'),
     'x-client-ip': ip,
@@ -346,28 +384,21 @@ function exportResult(elementId, type) {
   a.click();
 }
 
-// 1. Submit Movement (IE815) - FULLY COMPLIANT SCHEMA
+// 4. API FUNCTIONS
 async function submitMovement() {
-  if (!localStorage.getItem('hmrc_token')) { 
-    alert('Please click "Login to HMRC" first!'); 
-    return; 
-  }
-  
+  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
   const h = await getHeaders();
-  const c = document.getElementById('s-consignor').value.trim();
-  const e = document.getElementById('s-consignee').value.trim();
-  const l = document.getElementById('s-lrn').value.trim();
-  let d = document.getElementById('s-date').value.trim();
+  const c = document.getElementById('s-consignor').value;
+  const e = document.getElementById('s-consignee').value;
+  const l = document.getElementById('s-lrn').value;
+  let d = document.getElementById('s-date').value;
   
-  // Ensure date is strictly YYYY-MM-DD
   if (!d.match(/^\d{4}-\d{2}-\d{2}$/)) {
     d = new Date().toISOString().slice(0,10);
     document.getElementById('s-date').value = d;
   }
   
   const t = new Date().toISOString().slice(0,10);
-  
-  // FULLY COMPLIANT HMRC IE815 XML SCHEMA
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
     '  <urn:WCODataModelVersionCode>3.6</urn:WCODataModelVersionCode>\n' +
@@ -387,12 +418,8 @@ async function submitMovement() {
     '      </urn:Header>\n' +
     '      <urn:Body>\n' +
     '        <urn:EadEsadDraft>\n' +
-    '          <urn:ConsignorDetails>\n' +
-    '            <urn:ExciseReferenceNumber>' + c + '</urn:ExciseReferenceNumber>\n' +
-    '          </urn:ConsignorDetails>\n' +
-    '          <urn:ConsigneeDetails>\n' +
-    '            <urn:ExciseReferenceNumber>' + e + '</urn:ExciseReferenceNumber>\n' +
-    '          </urn:ConsigneeDetails>\n' +
+    '          <urn:ConsignorDetails><urn:ExciseReferenceNumber>' + c + '</urn:ExciseReferenceNumber></urn:ConsignorDetails>\n' +
+    '          <urn:ConsigneeDetails><urn:ExciseReferenceNumber>' + e + '</urn:ExciseReferenceNumber></urn:ConsigneeDetails>\n' +
     '          <urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>\n' +
     '          <urn:LocalReferenceNumber>' + l + '</urn:LocalReferenceNumber>\n' +
     '        </urn:EadEsadDraft>\n' +
@@ -401,22 +428,9 @@ async function submitMovement() {
     '  </urn:SubmittedDraftOfEADESAD>\n' +
     '</urn:IE815>';
   
-  console.log('--- SENDING COMPLIANT XML TO HMRC ---');
-  console.log(xml);
-  console.log('-------------------------------------');
-
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { 
-    method: 'POST', 
-    headers: { ...h, 'Content-Type': 'application/xml' }, 
-    body: xml 
-  });
-  
-  const responseText = await res.text();
-  console.log('HMRC Response Status:', res.status);
-  console.log('HMRC Response Body:', responseText);
-  
-  document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
-}
+  console.log('Sending XML:', xml);
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { method: 'POST', headers: { ...h, 'Content-Type': 'application/xml' }, body: xml });
+  document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
 }
 
 async function getMovements() {
@@ -449,19 +463,10 @@ async function submitMessage() {
   const t = new Date().toISOString().slice(0,10);
   let body = '';
   
-  if (msgType === 'IE810') {
-    body = '<urn:CancellationOfEADESAD><urn:MovementId>' + movId + '</urn:MovementId></urn:CancellationOfEADESAD>';
-  } else if (msgType === 'IE818') {
-    body = '<urn:AcceptedOrRejectedReportOfReceiptExport><urn:MovementId>' + movId + '</urn:MovementId><urn:DestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:DestinationOffice></urn:AcceptedOrRejectedReportOfReceiptExport>';
-  } else if (msgType === 'IE813') {
-    body = '<urn:ChangeOfDestination><urn:MovementId>' + movId + '</urn:MovementId><urn:NewDestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:NewDestinationOffice></urn:ChangeOfDestination>';
-  } else if (msgType === 'IE819') {
-    body = '<urn:AlertOrRejectionOfMovement><urn:MovementId>' + movId + '</urn:MovementId></urn:AlertOrRejectionOfMovement>';
-  } else if (msgType === 'IE837') {
-    body = '<urn:ExplanationOfDelay><urn:MovementId>' + movId + '</urn:MovementId></urn:ExplanationOfDelay>';
-  } else if (msgType === 'IE871') {
-    body = '<urn:ReasonForShortage><urn:MovementId>' + movId + '</urn:MovementId></urn:ReasonForShortage>';
-  }
+  if (msgType === 'IE810') body = '<urn:CancellationOfEADESAD><urn:MovementId>' + movId + '</urn:MovementId></urn:CancellationOfEADESAD>';
+  else if (msgType === 'IE818') body = '<urn:AcceptedOrRejectedReportOfReceiptExport><urn:MovementId>' + movId + '</urn:MovementId><urn:DestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:DestinationOffice></urn:AcceptedOrRejectedReportOfReceiptExport>';
+  else if (msgType === 'IE813') body = '<urn:ChangeOfDestination><urn:MovementId>' + movId + '</urn:MovementId><urn:NewDestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:NewDestinationOffice></urn:ChangeOfDestination>';
+  else if (msgType === 'IE819') body = '<urn:AlertOrRejectionOfMovement><urn:MovementId>' + movId + '</urn:MovementId></urn:AlertOrRejectionOfMovement>';
   
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<urn:' + msgType + ' xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
