@@ -3,34 +3,57 @@ export default async function handler(req, res) {
   const clientSecret = process.env.HMRC_CLIENT_SECRET;
   const redirectUri = process.env.HMRC_REDIRECT_URI;
 
-  // If HMRC sends us back an authorization code, exchange it for a token
-  if (req.query.code) {
-    const response = await fetch('https://test-api.service.hmrc.gov.uk/oauth/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        code: req.query.code,
-        client_id: clientId,
-        client_secret: clientSecret,
-        redirect_uri: redirectUri
-      })
-    });
-    const data = await response.json();
+  console.log('Auth handler called with query:', req.query);
 
-    if (data.access_token) {
-      // Store token in a secure HttpOnly cookie (expires in 4 hours)
-      res.setHeader('Set-Cookie',
-        `hmrc_token=${data.access_token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=14400`
-      );
-      res.redirect('/');
-    } else {
-      res.status(400).send('Login failed: ' + JSON.stringify(data));
+  // If HMRC sends us back an authorization code
+  if (req.query.code) {
+    try {
+      console.log('Exchanging code for token...');
+      
+      const response = await fetch('https://test-api.service.hmrc.gov.uk/oauth/token', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          code: req.query.code,
+          client_id: clientId,
+          client_secret: clientSecret,
+          redirect_uri: redirectUri
+        })
+      });
+
+      const data = await response.json();
+      console.log('Token response:', data);
+
+      if (data.access_token) {
+        // Set cookie with proper settings
+        const cookieValue = `hmrc_token=${data.access_token}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=14400`;
+        res.setHeader('Set-Cookie', cookieValue);
+        
+        console.log('Token saved, redirecting to home...');
+        res.redirect(302, '/');
+      } else {
+        console.error('No access token in response:', data);
+        res.status(400).send('Login failed: ' + JSON.stringify(data));
+      }
+    } catch (error) {
+      console.error('Token exchange error:', error);
+      res.status(500).send('Error: ' + error.message);
     }
-  } else {
-    // No code yet — redirect user to HMRC's official login page
+  } 
+  // If there's an error from HMRC
+  else if (req.query.error) {
+    console.error('HMRC auth error:', req.query);
+    res.status(400).send('Auth error: ' + req.query.error_description);
+  }
+  // Start the OAuth flow
+  else {
     const scope = 'excise-movement-control-system';
     const authUrl = `https://test-www.tax.service.gov.uk/oauth/authorize?response_type=code&client_id=${clientId}&scope=${scope}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-    res.redirect(authUrl);
+    console.log('Redirecting to HMRC auth:', authUrl);
+    res.redirect(302, authUrl);
   }
 }
