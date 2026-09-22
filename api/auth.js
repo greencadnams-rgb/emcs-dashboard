@@ -2,12 +2,22 @@ export default async function handler(req, res) {
   const clientId = process.env.HMRC_CLIENT_ID;
   const clientSecret = process.env.HMRC_CLIENT_SECRET;
   const redirectUri = process.env.HMRC_REDIRECT_URI;
+  const environment = process.env.HMRC_ENVIRONMENT || 'test';
 
-  // 1. HMRC redirected back to us with a 'code'
+  // Choose the correct HMRC URLs based on environment
+  const isProduction = environment === 'production';
+  const authBaseUrl = isProduction 
+    ? 'https://www.tax.service.gov.uk' 
+    : 'https://test-www.tax.service.gov.uk';
+  const tokenUrl = isProduction 
+    ? 'https://api.service.hmrc.gov.uk/oauth/token' 
+    : 'https://test-api.service.hmrc.gov.uk/oauth/token';
+
+  console.log(`--- AUTH HANDLER (${environment} mode) ---`);
+
   if (req.query.code) {
     try {
-      // Exchange the code for an access token
-      const response = await fetch('https://test-api.service.hmrc.gov.uk/oauth/token', {
+      const response = await fetch(tokenUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
@@ -22,25 +32,24 @@ export default async function handler(req, res) {
       const data = await response.json();
 
       if (data.access_token) {
-        // SUCCESS! Redirect to the homepage with the token in the URL
-        const token = encodeURIComponent(data.access_token);
-        res.redirect(302, `/?hmrc_token=${token}`);
+        const redirectUrl = `/?hmrc_token=${encodeURIComponent(data.access_token)}`;
+        console.log('✅ Token received, redirecting...');
+        res.redirect(302, redirectUrl);
       } else {
-        // Show the error on screen so we know what went wrong
-        res.status(400).send('HMRC Login Failed: ' + JSON.stringify(data));
+        console.error('❌ No access token:', data);
+        res.status(400).json({ error: 'Login failed', details: data });
       }
     } catch (error) {
-      res.status(500).send('Server Error: ' + error.message);
+      console.error('❌ Token exchange error:', error);
+      res.status(500).json({ error: error.message });
     }
-  } 
-  // 2. HMRC returned an error (e.g., user denied access)
-  else if (req.query.error) {
-    res.status(400).send('HMRC Error: ' + req.query.error_description);
-  } 
-  // 3. No code yet? Send the user to HMRC to log in
-  else {
+  } else if (req.query.error) {
+    console.error('❌ HMRC error:', req.query);
+    res.status(400).json({ error: req.query.error_description || 'Auth failed' });
+  } else {
     const scope = 'excise-movement-control-system';
-    const authUrl = `https://test-www.tax.service.gov.uk/oauth/authorize?response_type=code&client_id=${clientId}&scope=${scope}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    const authUrl = `${authBaseUrl}/oauth/authorize?response_type=code&client_id=${clientId}&scope=${scope}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    console.log('🔄 Redirecting to HMRC...');
     res.redirect(302, authUrl);
   }
 }
