@@ -21,6 +21,9 @@
     .btn-red:hover { background: #aa2a16; }
     input, select { padding: 8px 12px; margin: 5px 0; border: 2px solid #b1b4b6; border-radius: 4px; font-size: 14px; width: 100%; max-width: 400px; }
     input:focus, select:focus { border-color: #005ea5; outline: none; }
+    input.invalid { border-color: #d4351c; background: #fff5f5; }
+    input.valid { border-color: #00703c; }
+    .validation-msg { font-size: 12px; color: #d4351c; margin-top: 2px; min-height: 16px; }
     pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; overflow-x: auto; max-height: 400px; font-size: 13px; white-space: pre-wrap; word-wrap: break-word; margin-top: 15px; }
     .success { color: #00703c; font-weight: bold; }
     .error { color: #d4351c; font-weight: bold; }
@@ -30,8 +33,13 @@
     .nav button:hover { background: #005ea5; }
     .tab { display: none; }
     .tab.active { display: block; }
-    .field { margin-bottom: 10px; }
+    .field { margin-bottom: 10px; position: relative; }
     .field label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 14px; }
+    .field-help { display: inline-block; width: 18px; height: 18px; background: #005ea5; color: white; border-radius: 50%; text-align: center; line-height: 18px; font-size: 12px; font-weight: bold; cursor: help; margin-left: 5px; position: relative; }
+    .field-help:hover .tooltip { visibility: visible; opacity: 1; }
+    .tooltip { visibility: hidden; opacity: 0; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 12px; border-radius: 5px; font-size: 12px; font-weight: normal; width: 300px; z-index: 1000; transition: opacity 0.3s; line-height: 1.4; }
+    .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
+    .format-badge { display: inline-block; background: #e8f4fd; color: #005ea5; padding: 2px 6px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace; }
     .cheat-sheet { background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin-top: 15px; font-size: 13px; }
     .cheat-sheet h3 { margin-bottom: 8px; margin-top: 0; }
     .cheat-sheet table { width: 100%; border-collapse: collapse; }
@@ -49,6 +57,7 @@
     .mode-indicator { padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; }
     .mode-test { background: #ff9800; color: white; }
     .mode-prod { background: #d32f2f; color: white; }
+    .required-asterisk { color: #d4351c; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -105,129 +114,472 @@
       <div class="card">
         <h2>Submit Draft Movement (IE815) - EMCS Phase 4 V3.23</h2>
 
-        <h3>Consignor Trader</h3>
-        <div class="field"><label>Trader Excise Number (ERN) *</label><input type="text" id="s-consignor-ern" value="GBWK002281023"></div>
-        <div class="field"><label>Trader Name *</label><input type="text" id="s-consignor-name" value="Test Consignor Ltd"></div>
-        <div class="field"><label>Street Name *</label><input type="text" id="s-consignor-street" value="Test Street"></div>
-        <div class="field"><label>Street Number *</label><input type="text" id="s-consignor-street-num" value="123"></div>
-        <div class="field"><label>Postcode *</label><input type="text" id="s-consignor-postcode" value="E1 8QS"></div>
-        <div class="field"><label>City *</label><input type="text" id="s-consignor-city" value="London"></div>
+        <h3>Box 1: eAD Header <span class="format-badge">Required</span></h3>
+        <div class="field">
+          <label>Destination Type Code <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">The type of destination for the movement. Must match the consignee's excise authorisation. Check SEED database to verify. <b>Format: n1 (1 digit)</b></span></span>
+          </label>
+          <select id="s-dest-type" required>
+            <option value="1" selected>1 - Tax Warehouse</option>
+            <option value="2">2 - Registered Consignee</option>
+            <option value="3">3 - Temporary Registered Consignee</option>
+            <option value="4">4 - Direct Delivery</option>
+            <option value="5">5 - Exempted Organisation</option>
+            <option value="6">6 - Export</option>
+            <option value="8">8 - Unknown destination (energy products)</option>
+          </select>
+          <div class="validation-msg"></div>
+        </div>
 
-        <h3>Consignee Trader</h3>
-        <div class="field"><label>Trader ID (ERN) *</label><input type="text" id="s-consignee-ern" value="GBWKQOZ8OVLYR"></div>
-        <div class="field"><label>Trader Name *</label><input type="text" id="s-consignee-name" value="Test Consignee Ltd"></div>
-        <div class="field"><label>Street Name *</label><input type="text" id="s-consignee-street" value="Delivery Road"></div>
-        <div class="field"><label>Street Number *</label><input type="text" id="s-consignee-street-num" value="456"></div>
-        <div class="field"><label>Postcode *</label><input type="text" id="s-consignee-postcode" value="M1 1AA"></div>
-        <div class="field"><label>City *</label><input type="text" id="s-consignee-city" value="Manchester"></div>
+        <div class="field">
+          <label>Journey Time <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Expected duration of the journey in hours (H) or days (D). Maximum 45 days. Examples: '14D' for 14 days, '12H' for 12 hours. <b>Format: an3 (3 alphanumeric)</b></span></span>
+          </label>
+          <input type="text" id="s-journey-time" value="D07" pattern="^[HD]\d{1,2}$" maxlength="3" required>
+          <div class="validation-msg"></div>
+        </div>
 
-        <h3>Place of Dispatch Trader</h3>
-        <div class="field"><label>Tax Warehouse Reference *</label><input type="text" id="s-dispatch-warehouse" value="GB00DO459DMNX"></div>
-        <div class="field"><label>Trader Name *</label><input type="text" id="s-dispatch-name" value="Dispatch Warehouse"></div>
-        <div class="field"><label>Street Name *</label><input type="text" id="s-dispatch-street" value="Warehouse Lane"></div>
-        <div class="field"><label>Street Number *</label><input type="text" id="s-dispatch-street-num" value="1"></div>
-        <div class="field"><label>Postcode *</label><input type="text" id="s-dispatch-postcode" value="E2 9BB"></div>
-        <div class="field"><label>City *</label><input type="text" id="s-dispatch-city" value="London"></div>
+        <div class="field">
+          <label>Transport Arrangement <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Who is responsible for arranging the first transport. <b>Format: n1 (1 digit)</b></span></span>
+          </label>
+          <select id="s-transport-arrangement" required>
+            <option value="1" selected>1 - Consignor</option>
+            <option value="2">2 - Consignee</option>
+            <option value="3">3 - Owner of Goods</option>
+            <option value="4">4 - Other</option>
+          </select>
+          <div class="validation-msg"></div>
+        </div>
 
-        <h3>Delivery Place Trader</h3>
-        <div class="field"><label>Trader ID *</label><input type="text" id="s-delivery-trader-id" value="GB00AIP67RAO3"></div>
-        <div class="field"><label>Trader Name *</label><input type="text" id="s-delivery-name" value="Delivery Point"></div>
-        <div class="field"><label>Street Name *</label><input type="text" id="s-delivery-street" value="Arrival Street"></div>
-        <div class="field"><label>Street Number *</label><input type="text" id="s-delivery-street-num" value="77"></div>
-        <div class="field"><label>Postcode *</label><input type="text" id="s-delivery-postcode" value="M2 2BB"></div>
-        <div class="field"><label>City *</label><input type="text" id="s-delivery-city" value="Manchester"></div>
+        <h3>Box 2: Consignor <span class="format-badge">Required</span></h3>
+        <div class="field">
+          <label>Trader Excise Number (ERN) <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">13 digit Excise ID of the Authorised Warehouse keeper or Registered Consignor dispatching the goods. Format: 2 letters + 11 alphanumeric (e.g., GBWK002281023). <b>Format: an13</b></span></span>
+          </label>
+          <input type="text" id="s-consignor-ern" value="GBWK002281023" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Trader Name <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Full name of the company of the dispatching Authorised Warehouse keeper or Registered Consignor. <b>Format: an..182 (max 182 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-consignor-name" value="Test Consignor Ltd" maxlength="182" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Street Name <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Street name of the consignor's address. <b>Format: an..65 (max 65 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-consignor-street" value="Test Street" maxlength="65" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Street Number
+            <span class="field-help">?<span class="tooltip">Street number of the consignor's address. Optional. <b>Format: an..11 (max 11 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-consignor-street-num" value="123" maxlength="11">
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Postcode <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Postcode of the consignor's address. <b>Format: an..10 (max 10 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-consignor-postcode" value="E1 8QS" maxlength="10" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>City <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">City of the consignor's address. <b>Format: an..50 (max 50 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-consignor-city" value="London" maxlength="50" required>
+          <div class="validation-msg"></div>
+        </div>
 
-        <h3>Dispatch Office and Transporter</h3>
-        <div class="field"><label>Competent Authority Dispatch Office Ref *</label><input type="text" id="s-dispatch-office" value="GB004098"></div>
-        <div class="field"><label>Transporter VAT Number *</label><input type="text" id="s-transporter-vat" value="123798354"></div>
-        <div class="field"><label>Transporter Name *</label><input type="text" id="s-transporter-name" value="Fast Freight Ltd"></div>
-        <div class="field"><label>Transporter Street *</label><input type="text" id="s-transporter-street" value="Logistics Way"></div>
-        <div class="field"><label>Transporter Street Number *</label><input type="text" id="s-transporter-street-num" value="5"></div>
-        <div class="field"><label>Transporter Postcode *</label><input type="text" id="s-transporter-postcode" value="FR5 4RN"></div>
-        <div class="field"><label>Transporter City *</label><input type="text" id="s-transporter-city" value="Dover"></div>
+        <h3>Box 3: Place of Dispatch <span class="format-badge">Conditional</span></h3>
+        <div class="field">
+          <label>Tax Warehouse Reference <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">13 digit Excise ID of the Tax Warehouse of dispatch. Only required when goods dispatched from a Tax Warehouse. <b>Format: an13</b></span></span>
+          </label>
+          <input type="text" id="s-dispatch-warehouse" value="GB00DO459DMNX" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Trader Name
+            <span class="field-help">?<span class="tooltip">Name of the Tax Warehouse. Optional. <b>Format: an..182</b></span></span>
+          </label>
+          <input type="text" id="s-dispatch-name" value="Dispatch Warehouse" maxlength="182">
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Street Name
+            <span class="field-help">?<span class="tooltip">Street name of Tax Warehouse. Optional. <b>Format: an..65</b></span></span>
+          </label>
+          <input type="text" id="s-dispatch-street" value="Warehouse Lane" maxlength="65">
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Street Number
+            <span class="field-help">?<span class="tooltip">Street number of Tax Warehouse. Optional. <b>Format: an..11</b></span></span>
+          </label>
+          <input type="text" id="s-dispatch-street-num" value="1" maxlength="11">
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Postcode
+            <span class="field-help">?<span class="tooltip">Postcode of Tax Warehouse. Optional. <b>Format: an..10</b></span></span>
+          </label>
+          <input type="text" id="s-dispatch-postcode" value="E2 9BB" maxlength="10">
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>City
+            <span class="field-help">?<span class="tooltip">City of Tax Warehouse. Optional. <b>Format: an..50</b></span></span>
+          </label>
+          <input type="text" id="s-dispatch-city" value="London" maxlength="50">
+          <div class="validation-msg"></div>
+        </div>
 
-        <h3>Document and Journey Details</h3>
-        <div class="field"><label>Document Type *</label>
+        <h3>Box 5: Consignee <span class="format-badge">Required</span></h3>
+        <div class="field">
+          <label>Trader ID (ERN or VAT/EORI) <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">13 digit Excise ID of the consignee (for Tax Warehouse/Registered Consignee) OR VAT/EORI number (for export). <b>Format: an..16 (max 16 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-consignee-ern" value="GBWKQOZ8OVLYR" maxlength="16" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Trader Name <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Full company name of the consignee. <b>Format: an..182 (max 182 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-consignee-name" value="Test Consignee Ltd" maxlength="182" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Street Name <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Street name of consignee address. <b>Format: an..65 (max 65 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-consignee-street" value="Delivery Road" maxlength="65" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Street Number
+            <span class="field-help">?<span class="tooltip">Street number of consignee address. Optional. <b>Format: an..11 (max 11 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-consignee-street-num" value="456" maxlength="11">
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Postcode <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Postcode of consignee address. <b>Format: an..10 (max 10 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-consignee-postcode" value="M1 1AA" maxlength="10" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>City <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">City of consignee address. <b>Format: an..50 (max 50 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-consignee-city" value="Manchester" maxlength="50" required>
+          <div class="validation-msg"></div>
+        </div>
+
+        <h3>Box 7: Place of Delivery <span class="format-badge">Required</span></h3>
+        <div class="field">
+          <label>Trader ID (Warehouse ERN or VAT) <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">13 digit Excise ID of destination Tax Warehouse OR VAT number for Direct Delivery. <b>Format: an..16 (max 16 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-delivery-trader-id" value="GB00AIP67RAO3" maxlength="16" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Trader Name <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Name of the delivery location. <b>Format: an..182 (max 182 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-delivery-name" value="Delivery Point" maxlength="182" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Street Name <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Street name of delivery location. <b>Format: an..65 (max 65 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-delivery-street" value="Arrival Street" maxlength="65" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Street Number
+            <span class="field-help">?<span class="tooltip">Street number of delivery location. Optional. <b>Format: an..11 (max 11 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-delivery-street-num" value="77" maxlength="11">
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Postcode <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Postcode of delivery location. <b>Format: an..10 (max 10 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-delivery-postcode" value="M2 2BB" maxlength="10" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>City <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">City of delivery location. <b>Format: an..50 (max 50 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-delivery-city" value="Manchester" maxlength="50" required>
+          <div class="validation-msg"></div>
+        </div>
+
+        <h3>Box 10: Competent Authority of Dispatch <span class="format-badge">Required</span></h3>
+        <div class="field">
+          <label>Office Reference Number <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Code of UK office responsible for excise control at dispatch. GB004098 for Great Britain, XI004098 for Northern Ireland. <b>Format: an8</b></span></span>
+          </label>
+          <input type="text" id="s-dispatch-office" value="GB004098" maxlength="8" required>
+          <div class="validation-msg"></div>
+        </div>
+
+        <h3>Box 15: First Transporter <span class="format-badge">Required</span></h3>
+        <div class="field">
+          <label>VAT Number <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">VAT number of the first transporter. Use 'NONGBVAT' if not VAT registered in UK. <b>Format: an..35 (max 35 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-transporter-vat" value="123798354" maxlength="35" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Trader Name <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Full company name of first transporter. <b>Format: an..182 (max 182 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-transporter-name" value="Fast Freight Ltd" maxlength="182" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Street Name <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Street name of transporter's office. <b>Format: an..65 (max 65 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-transporter-street" value="Logistics Way" maxlength="65" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Street Number
+            <span class="field-help">?<span class="tooltip">Street number of transporter's office. Optional. <b>Format: an..11 (max 11 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-transporter-street-num" value="5" maxlength="11">
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Postcode <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Postcode of transporter's office. <b>Format: an..10 (max 10 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-transporter-postcode" value="FR5 4RN" maxlength="10" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>City <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">City of transporter's office. <b>Format: an..50 (max 50 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-transporter-city" value="Dover" maxlength="50" required>
+          <div class="validation-msg"></div>
+        </div>
+
+        <h3>Box 18: Document Certificate <span class="format-badge">Optional</span></h3>
+        <div class="field">
+          <label>Document Type
+            <span class="field-help">?<span class="tooltip">Type of accompanying certificate document. <b>Format: an..4 (max 4 chars)</b></span></span>
+          </label>
           <select id="s-doc-type">
             <option value="9" selected>9 - Other</option>
             <option value="1">1 - Invoice</option>
             <option value="2">2 - Delivery note</option>
           </select>
+          <div class="validation-msg"></div>
         </div>
-        <div class="field"><label>Document Reference *</label><input type="text" id="s-doc-ref" value="DOC20260923001"></div>
-        <div class="field"><label>Destination Type Code *</label>
-          <select id="s-dest-type">
-            <option value="1" selected>1 - Tax warehouse</option>
-            <option value="2">2 - Registered consignee</option>
-            <option value="3">3 - Temporary registered consignee</option>
-          </select>
-        </div>
-        <div class="field"><label>Journey Time (e.g., D07 = 7 days) *</label><input type="text" id="s-journey-time" value="D07"></div>
-        <div class="field"><label>Transport Arrangement *</label>
-          <select id="s-transport-arrangement">
-            <option value="1" selected>1 - Consignor</option>
-            <option value="2">2 - Consignee</option>
-            <option value="3">3 - Owner of goods</option>
-            <option value="4">4 - Other</option>
-          </select>
-        </div>
-        <div class="field"><label>Transport Mode Code *</label>
-          <select id="s-transport-mode">
-            <option value="1">1 - Sea</option>
-            <option value="2">2 - Rail</option>
-            <option value="3" selected>3 - Road</option>
-            <option value="4">4 - Air</option>
-            <option value="5">5 - Post</option>
-            <option value="7">7 - Fixed installations</option>
-            <option value="8">8 - Inland waterway</option>
-          </select>
-        </div>
-        <div class="field"><label>Guarantor Type Code *</label>
-          <select id="s-guarantor-type">
-            <option value="1" selected>1 - Consignor</option>
-            <option value="2">2 - Consignee</option>
-            <option value="3">3 - Owner of goods</option>
-            <option value="4">4 - Other</option>
-          </select>
+        <div class="field">
+          <label>Document Reference
+            <span class="field-help">?<span class="tooltip">Reference number for the certificate document. <b>Format: an..35 (max 35 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-doc-ref" value="DOC20260923001" maxlength="35">
+          <div class="validation-msg"></div>
         </div>
 
-        <h3>Invoice and Dispatch Details</h3>
-        <div class="field"><label>Local Reference Number (LRN)</label><input type="text" id="s-lrn" value="" readonly placeholder="Auto-generated on submit"></div>
-        <div class="field"><label>Invoice Number *</label><input type="text" id="s-invoice-number" value="INV-2026-001"></div>
-        <div class="field"><label>Origin Type Code *</label>
-          <select id="s-origin-type">
+        <h3>Box 11: Movement Guarantee <span class="format-badge">Required</span></h3>
+        <div class="field">
+          <label>Guarantor Type Code <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Who provides the movement guarantee. <b>Format: n..4</b></span></span>
+          </label>
+          <select id="s-guarantor-type" required>
+            <option value="1" selected>1 - Consignor</option>
+            <option value="2">2 - Transporter of goods</option>
+            <option value="3">3 - Owner of goods</option>
+            <option value="4">4 - Consignee</option>
+          </select>
+          <div class="validation-msg"></div>
+        </div>
+
+        <h3>Box 9: e-AD <span class="format-badge">Required</span></h3>
+        <div class="field">
+          <label>Local Reference Number (LRN)
+            <span class="field-help">?<span class="tooltip">Unique serial number assigned by consignor to identify the consignment. Auto-generated if left blank. Max 22 chars (20 for exports under fallback). <b>Format: an..22</b></span></span>
+          </label>
+          <input type="text" id="s-lrn" value="" maxlength="22" placeholder="Auto-generated on submit">
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Invoice Number <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Number of the invoice relating to the goods. If no invoice yet, use delivery note or order number. Must be reconcilable with your records. <b>Format: an..35 (max 35 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-invoice-number" value="INV-2026-001" maxlength="35" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Invoice Date <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Date of the document shown in Invoice Number field. <b>Format: YYYY-MM-DD</b></span></span>
+          </label>
+          <input type="date" id="s-invoice-date" value="" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Origin Type Code <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">1 = Tax Warehouse (dispatched from warehouse), 2 = Import (dispatched from port/airport). <b>Format: n1</b></span></span>
+          </label>
+          <select id="s-origin-type" required>
             <option value="1" selected>1 - Tax warehouse</option>
             <option value="2">2 - Import</option>
           </select>
+          <div class="validation-msg"></div>
         </div>
-        <div class="field"><label>Date of Dispatch *</label><input type="date" id="s-date" value="2026-12-01"></div>
-        <div class="field"><label>Time of Dispatch *</label><input type="time" id="s-time" value="12:00"></div>
+        <div class="field">
+          <label>Date of Dispatch <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Date the movement begins. Must be today or future date. <b>Format: YYYY-MM-DD</b></span></span>
+          </label>
+          <input type="date" id="s-date" value="" required>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Time of Dispatch <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Time the movement begins in HH:MM format (24-hour). <b>Format: HH:MM</b></span></span>
+          </label>
+          <input type="time" id="s-time" value="12:00" required>
+          <div class="validation-msg"></div>
+        </div>
 
-        <h3>Transport Details</h3>
-        <div class="field"><label>Transport Unit Code *</label>
-          <select id="s-transport-unit-code">
-            <option value="1" selected>1 - Container</option>
-            <option value="2">2 - Railway wagon</option>
-            <option value="3">3 - Road vehicle</option>
-            <option value="4">4 - Air vehicle</option>
+        <h3>Box 13: Transport <span class="format-badge">Required</span></h3>
+        <div class="field">
+          <label>Transport Mode Code <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Mode of transport at start of movement. <b>Format: n2 (2 digits)</b></span></span>
+          </label>
+          <select id="s-transport-mode" required>
+            <option value="0">0 - Other</option>
+            <option value="1">1 - Sea transport</option>
+            <option value="2">2 - Rail transport</option>
+            <option value="3" selected>3 - Road transport</option>
+            <option value="4">4 - Air transport</option>
+            <option value="5">5 - Postal consignment</option>
+            <option value="7">7 - Fixed transport installations</option>
+            <option value="8">8 - Inland waterway transport</option>
           </select>
+          <div class="validation-msg"></div>
         </div>
-        <div class="field"><label>Identity of Transport Units *</label><input type="text" id="s-identity-transport" value="AB12CDE"></div>
 
-        <h3>Goods Items</h3>
-        <div class="field"><label>Number of Items *</label><input type="number" id="s-item-count" value="1" min="1" max="999" onchange="generateItemFields()"></div>
+        <h3>Box 16: Transport Details <span class="format-badge">Required</span></h3>
+        <div class="field">
+          <label>Transport Unit Code <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Type of transport unit used for first transport. <b>Format: n..2</b></span></span>
+          </label>
+          <select id="s-transport-unit-code" required>
+            <option value="1" selected>1 - Container</option>
+            <option value="2">2 - Vehicle</option>
+            <option value="3">3 - Trailer</option>
+            <option value="4">4 - Tractor</option>
+            <option value="5">5 - Fixed Transport Installations</option>
+          </select>
+          <div class="validation-msg"></div>
+        </div>
+        <div class="field">
+          <label>Identity of Transport Units <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Registration Number/Unique Identifier of the first transport units (vehicle reg, container number, trailer number). <b>Format: an..35 (max 35 chars)</b></span></span>
+          </label>
+          <input type="text" id="s-identity-transport" value="AB12CDE" maxlength="35" required>
+          <div class="validation-msg"></div>
+        </div>
+
+        <h3>Box 17: e-AD Body (Goods Items) <span class="format-badge">Required</span></h3>
+        <div class="field">
+          <label>Number of Items <span class="required-asterisk">*</span>
+            <span class="field-help">?<span class="tooltip">Number of product line items. A separate data group required for each product. <b>Format: n..3</b></span></span>
+          </label>
+          <input type="number" id="s-item-count" value="1" min="1" max="999" onchange="generateItemFields()">
+          <div class="validation-msg"></div>
+        </div>
+
         <div id="goods-items-container">
           <div class="item-field">
             <h4>Item 1</h4>
-            <div class="field"><label>Excise Product Code *</label><input type="text" id="s-product-1" value="B000"></div>
-            <div class="field"><label>CN Code *</label><input type="text" id="s-cn-1" value="22030001"></div>
-            <div class="field"><label>Quantity *</label><input type="number" id="s-qty-1" value="2000" step="0.001"></div>
-            <div class="field"><label>Gross Mass (kg) *</label><input type="number" id="s-weight-1" value="20000" step="0.001"></div>
-            <div class="field"><label>Net Mass (kg) *</label><input type="number" id="s-net-weight-1" value="19999" step="0.001"></div>
-            <div class="field"><label>ABV % *</label><input type="number" id="s-abv-1" value="0.5" step="0.1"></div>
-            <div class="field"><label>Fiscal Mark Used Flag *</label><select id="s-fiscal-1"><option value="0" selected>0 - No</option><option value="1">1 - Yes</option></select></div>
-            <div class="field"><label>Kind of Packages *</label><input type="text" id="s-package-kind-1" value="BA"></div>
-            <div class="field"><label>Number of Packages *</label><input type="number" id="s-package-count-1" value="2"></div>
+            <div class="field">
+              <label>Excise Product Code <span class="required-asterisk">*</span>
+                <span class="field-help">?<span class="tooltip">4-character code: T200 (Cigarettes), T300 (Cigars), T400 (Fine-cut tobacco), T500 (Other smoking tobacco), B000 (Beer), W200 (Still wine), W300 (Sparkling wine), I000 (Intermediate), S200 (Spirits), S300 (Ethyl alcohol), S400 (Partially denatured), S500 (Other ethyl alcohol), E200-E920 (Energy products). <b>Format: an4</b></span></span>
+              </label>
+              <input type="text" id="s-product-1" value="B000" pattern="^[A-Z][0-9]{3}$" maxlength="4" required>
+              <div class="validation-msg"></div>
+            </div>
+            <div class="field">
+              <label>CN Code (Commodity Code) <span class="required-asterisk">*</span>
+                <span class="field-help">?<span class="tooltip">8-digit CN Code applicable at date of dispatch. For S500 products use 10000000. <b>Format: n8 (8 digits)</b></span></span>
+              </label>
+              <input type="text" id="s-cn-1" value="22030001" pattern="^\d{8}$" maxlength="8" required>
+              <div class="validation-msg"></div>
+            </div>
+            <div class="field">
+              <label>Quantity <span class="required-asterisk">*</span>
+                <span class="field-help">?<span class="tooltip">Quantity in units: thousands of items (T200/T300), kg (T400/T500/E470/E500/E600), litres at 15°C (E200/E300/E410-E460/E480-E490/E700-E920), litres at 20°C (B000/W200/W300/I000/S200-S500). <b>Format: n..15.3</b></span></span>
+              </label>
+              <input type="number" id="s-qty-1" value="2000" step="0.001" required>
+              <div class="validation-msg"></div>
+            </div>
+            <div class="field">
+              <label>Gross Mass (kg) <span class="required-asterisk">*</span>
+                <span class="field-help">?<span class="tooltip">Gross weight including packaging in kilograms. Bulk goods = same as net mass. <b>Format: n..16.6</b></span></span>
+              </label>
+              <input type="number" id="s-weight-1" value="20000" step="0.000001" required>
+              <div class="validation-msg"></div>
+            </div>
+            <div class="field">
+              <label>Net Mass (kg) <span class="required-asterisk">*</span>
+                <span class="field-help">?<span class="tooltip">Net weight without packaging in kilograms. <b>Format: n..16.6</b></span></span>
+              </label>
+              <input type="number" id="s-net-weight-1" value="19999" step="0.000001" required>
+              <div class="validation-msg"></div>
+            </div>
+            <div class="field">
+              <label>Alcoholic Strength (% ABV)
+                <span class="field-help">?<span class="tooltip">Percentage by volume at 20°C. Required for: B000, W200, W300, I000, S200, S300, S400, S500. <b>Format: n..5.2</b></span></span>
+              </label>
+              <input type="number" id="s-abv-1" value="0.5" step="0.01">
+              <div class="validation-msg"></div>
+            </div>
+            <div class="field">
+              <label>Fiscal Mark Used Flag
+                <span class="field-help">?<span class="tooltip">Whether goods carry fiscal marks. 0 = No, 1 = Yes. <b>Format: n1</b></span></span>
+              </label>
+              <select id="s-fiscal-1">
+                <option value="0" selected>0 - No fiscal marks</option>
+                <option value="1">1 - Goods carry fiscal marks</option>
+              </select>
+              <div class="validation-msg"></div>
+            </div>
+            <div class="field">
+              <label>Kind of Packages <span class="required-asterisk">*</span>
+                <span class="field-help">?<span class="tooltip">2-letter package code from UK Trade Tariff list (e.g., BA = Barrel, BX = Box, CT = Carton, DR = Drum). <b>Format: a2 (2 letters)</b></span></span>
+              </label>
+              <input type="text" id="s-package-kind-1" value="BA" pattern="^[A-Z]{2}$" maxlength="2" required>
+              <div class="validation-msg"></div>
+            </div>
+            <div class="field">
+              <label>Number of Packages
+                <span class="field-help">?<span class="tooltip">Count of packages for this line item. Conditional - required for countable packages. <b>Format: n..15</b></span></span>
+              </label>
+              <input type="number" id="s-package-count-1" value="2" min="0">
+              <div class="validation-msg"></div>
+            </div>
           </div>
         </div>
 
@@ -236,7 +588,7 @@
         <pre id="submit-output">Waiting...</pre>
 
         <div class="cheat-sheet">
-          <h3>Sandbox Magic LRNs (type into LRN field, then submit)</h3>
+          <h3>Sandbox Magic LRNs (for testing specific scenarios)</h3>
           <table>
             <tr><th>LRN Value</th><th>Result</th></tr>
             <tr><td>lrnie8156540856</td><td>202 Success</td></tr>
@@ -283,9 +635,9 @@
     <div id="tab-submit-msg" class="tab">
       <div class="card">
         <h2>Submit Message (IE810/813/818/819/837/871)</h2>
-        <div class="field"><label>Administrative Reference Code (ARC) *</label><input type="text" id="sm-arc" placeholder="e.g., 23GB00000000000377161"></div>
-        <div class="field"><label>Sequence Number *</label><input type="number" id="sm-seq" value="1" min="1"></div>
-        <div class="field"><label>Message Type *</label>
+        <div class="field"><label>Administrative Reference Code (ARC) <span class="required-asterisk">*</span></label><input type="text" id="sm-arc" placeholder="e.g., 23GB00000000000377161"></div>
+        <div class="field"><label>Sequence Number <span class="required-asterisk">*</span></label><input type="number" id="sm-seq" value="1" min="1"></div>
+        <div class="field"><label>Message Type <span class="required-asterisk">*</span></label>
           <select id="sm-type">
             <option value="IE810">IE810 - Cancellation</option>
             <option value="IE818">IE818 - Report of Receipt</option>
@@ -295,7 +647,7 @@
             <option value="IE871">IE871 - Reason for Shortage</option>
           </select>
         </div>
-        <div class="field"><label>Message Identifier *</label><input type="text" id="sm-msgid" value="GB100000000302249"></div>
+        <div class="field"><label>Message Identifier <span class="required-asterisk">*</span></label><input type="text" id="sm-msgid" value="GB100000000302249"></div>
         <div id="msg-specific-fields"></div>
         <button id="submit-message-btn" style="margin-top:20px;">Submit Message</button>
         <pre id="sm-output">Waiting...</pre>
@@ -371,7 +723,49 @@
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Script loaded successfully');
 
+  // Set default dates to today
+  var today = new Date().toISOString().slice(0, 10);
+  document.getElementById('s-date').value = today;
+  document.getElementById('s-invoice-date').value = today;
+
   var TMS_NS = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.23';
+
+  // ==================== VALIDATION ====================
+  function validateField(input) {
+    var msgEl = input.parentElement.querySelector('.validation-msg');
+    if (!msgEl) return true;
+
+    input.classList.remove('valid', 'invalid');
+    msgEl.textContent = '';
+
+    if (!input.value && input.required) {
+      input.classList.add('invalid');
+      msgEl.textContent = 'This field is required';
+      return false;
+    }
+
+    if (input.value && input.pattern) {
+      var regex = new RegExp(input.pattern);
+      if (!regex.test(input.value)) {
+        input.classList.add('invalid');
+        msgEl.textContent = 'Invalid format (see ? for requirements)';
+        return false;
+      }
+    }
+
+    if (input.value) {
+      input.classList.add('valid');
+    }
+    return true;
+  }
+
+  // Add validation listeners to all inputs
+  document.querySelectorAll('input').forEach(function(input) {
+    input.addEventListener('blur', function() { validateField(this); });
+    input.addEventListener('input', function() {
+      if (this.classList.contains('invalid')) validateField(this);
+    });
+  });
 
   // ==================== AUTH ====================
   var urlParams = new URLSearchParams(window.location.search);
@@ -515,18 +909,23 @@ document.addEventListener('DOMContentLoaded', function() {
     var html = '';
     for (var i = 1; i <= count; i++) {
       html += '<div class="item-field"><h4>Item ' + i + '</h4>' +
-        '<div class="field"><label>Excise Product Code *</label><input type="text" id="s-product-' + i + '" value="B000"></div>' +
-        '<div class="field"><label>CN Code *</label><input type="text" id="s-cn-' + i + '" value="22030001"></div>' +
-        '<div class="field"><label>Quantity *</label><input type="number" id="s-qty-' + i + '" value="2000" step="0.001"></div>' +
-        '<div class="field"><label>Gross Mass (kg) *</label><input type="number" id="s-weight-' + i + '" value="20000" step="0.001"></div>' +
-        '<div class="field"><label>Net Mass (kg) *</label><input type="number" id="s-net-weight-' + i + '" value="19999" step="0.001"></div>' +
-        '<div class="field"><label>ABV % *</label><input type="number" id="s-abv-' + i + '" value="0.5" step="0.1"></div>' +
-        '<div class="field"><label>Fiscal Mark Used Flag *</label><select id="s-fiscal-' + i + '"><option value="0" selected>0 - No</option><option value="1">1 - Yes</option></select></div>' +
-        '<div class="field"><label>Kind of Packages *</label><input type="text" id="s-package-kind-' + i + '" value="BA"></div>' +
-        '<div class="field"><label>Number of Packages *</label><input type="number" id="s-package-count-' + i + '" value="2"></div>' +
+        '<div class="field"><label>Excise Product Code <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">4-char code: T200 (Cigarettes), T300 (Cigars), T400 (Fine-cut), T500 (Other tobacco), B000 (Beer), W200 (Still wine), W300 (Sparkling wine), I000 (Intermediate), S200 (Spirits), S300-S500 (Ethyl alcohol), E200-E920 (Energy). <b>Format: an4</b></span></span></label><input type="text" id="s-product-' + i + '" value="B000" pattern="^[A-Z][0-9]{3}$" maxlength="4" required><div class="validation-msg"></div></div>' +
+        '<div class="field"><label>CN Code <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">8-digit commodity code applicable at date of dispatch. <b>Format: n8</b></span></span></label><input type="text" id="s-cn-' + i + '" value="22030001" pattern="^\\d{8}$" maxlength="8" required><div class="validation-msg"></div></div>' +
+        '<div class="field"><label>Quantity <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">In units based on product: thousands (T200/T300), kg (T400/T500/E470/E500/E600), litres at 15°C (energy products), litres at 20°C (B000/W200/W300/I000/S200-S500). <b>Format: n..15.3</b></span></span></label><input type="number" id="s-qty-' + i + '" value="2000" step="0.001" required><div class="validation-msg"></div></div>' +
+        '<div class="field"><label>Gross Mass (kg) <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">Gross weight including packaging in kg. <b>Format: n..16.6</b></span></span></label><input type="number" id="s-weight-' + i + '" value="20000" step="0.000001" required><div class="validation-msg"></div></div>' +
+        '<div class="field"><label>Net Mass (kg) <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">Net weight without packaging in kg. <b>Format: n..16.6</b></span></span></label><input type="number" id="s-net-weight-' + i + '" value="19999" step="0.000001" required><div class="validation-msg"></div></div>' +
+        '<div class="field"><label>Alcoholic Strength (% ABV) <span class="field-help">?<span class="tooltip">Percentage by volume at 20°C. Required for B000/W200/W300/I000/S200-S500. <b>Format: n..5.2</b></span></span></label><input type="number" id="s-abv-' + i + '" value="0.5" step="0.01"><div class="validation-msg"></div></div>' +
+        '<div class="field"><label>Fiscal Mark Used Flag <span class="field-help">?<span class="tooltip">Whether goods carry fiscal marks. <b>Format: n1</b></span></span></label><select id="s-fiscal-' + i + '"><option value="0" selected>0 - No</option><option value="1">1 - Yes</option></select><div class="validation-msg"></div></div>' +
+        '<div class="field"><label>Kind of Packages <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">2-letter code from UK Trade Tariff (BA=Barrel, BX=Box, CT=Carton, DR=Drum). <b>Format: a2</b></span></span></label><input type="text" id="s-package-kind-' + i + '" value="BA" pattern="^[A-Z]{2}$" maxlength="2" required><div class="validation-msg"></div></div>' +
+        '<div class="field"><label>Number of Packages <span class="field-help">?<span class="tooltip">Count of packages. <b>Format: n..15</b></span></span></label><input type="number" id="s-package-count-' + i + '" value="2" min="0"><div class="validation-msg"></div></div>' +
         '</div>';
     }
     container.innerHTML = html;
+
+    // Re-attach validation listeners to new fields
+    container.querySelectorAll('input').forEach(function(input) {
+      input.addEventListener('blur', function() { validateField(this); });
+    });
   };
 
   // ==================== MESSAGE SPECIFIC FIELDS ====================
@@ -535,30 +934,30 @@ document.addEventListener('DOMContentLoaded', function() {
     var container = document.getElementById('msg-specific-fields');
     var html = '<h3 style="margin-top:20px;">Message-Specific Fields</h3>';
     if (msgType === 'IE810') {
-      html += '<div class="field"><label>Cancellation Reason Code *</label><select id="msg-cancel-reason"><option value="1">1 - Duplicate</option><option value="2">2 - Erroneous movement</option><option value="3" selected>3 - Cancelled before dispatch</option><option value="4">4 - Cancelled during transit</option></select></div>';
+      html += '<div class="field"><label>Cancellation Reason Code <span class="required-asterisk">*</span></label><select id="msg-cancel-reason"><option value="1">1 - Duplicate</option><option value="2">2 - Erroneous movement</option><option value="3" selected>3 - Cancelled before dispatch</option><option value="4">4 - Cancelled during transit</option></select></div>';
     } else if (msgType === 'IE818') {
-      html += '<div class="field"><label>Date of Arrival *</label><input type="date" id="msg-arrival-date" value="' + new Date().toISOString().slice(0,10) + '"></div>';
-      html += '<div class="field"><label>Global Conclusion of Receipt *</label><select id="msg-receipt-conclusion"><option value="1">1 - Acceptable</option><option value="2">2 - Unacceptable with reservations</option><option value="3">3 - Unacceptable - refusal</option></select></div>';
+      html += '<div class="field"><label>Date of Arrival <span class="required-asterisk">*</span></label><input type="date" id="msg-arrival-date" value="' + today + '"></div>';
+      html += '<div class="field"><label>Global Conclusion of Receipt <span class="required-asterisk">*</span></label><select id="msg-receipt-conclusion"><option value="1">1 - Acceptable</option><option value="2">2 - Unacceptable with reservations</option><option value="3">3 - Unacceptable - refusal</option></select></div>';
     } else if (msgType === 'IE813') {
-      html += '<div class="field"><label>New Destination Type *</label><select id="msg-dest-type"><option value="1" selected>1 - Tax warehouse</option><option value="2">2 - Registered consignee</option><option value="3">3 - Temporary registered consignee</option></select></div>';
-      html += '<div class="field"><label>New Consignee ERN *</label><input type="text" id="msg-new-consignee" value="GBWK240176600"></div>';
-      html += '<div class="field"><label>New Consignee Name *</label><input type="text" id="msg-new-consignee-name" value="New Consignee Ltd"></div>';
-      html += '<div class="field"><label>New Consignee Street *</label><input type="text" id="msg-new-consignee-street" value="New Street"></div>';
-      html += '<div class="field"><label>New Consignee Street Number *</label><input type="text" id="msg-new-consignee-street-num" value="10"></div>';
-      html += '<div class="field"><label>New Consignee Postcode *</label><input type="text" id="msg-new-consignee-postcode" value="MK4 4NW"></div>';
-      html += '<div class="field"><label>New Consignee City *</label><input type="text" id="msg-new-consignee-city" value="Milton Keynes"></div>';
+      html += '<div class="field"><label>New Destination Type <span class="required-asterisk">*</span></label><select id="msg-dest-type"><option value="1" selected>1 - Tax warehouse</option><option value="2">2 - Registered consignee</option><option value="3">3 - Temporary registered consignee</option></select></div>';
+      html += '<div class="field"><label>New Consignee ERN <span class="required-asterisk">*</span></label><input type="text" id="msg-new-consignee" value="GBWK240176600"></div>';
+      html += '<div class="field"><label>New Consignee Name <span class="required-asterisk">*</span></label><input type="text" id="msg-new-consignee-name" value="New Consignee Ltd"></div>';
+      html += '<div class="field"><label>New Consignee Street <span class="required-asterisk">*</span></label><input type="text" id="msg-new-consignee-street" value="New Street"></div>';
+      html += '<div class="field"><label>New Consignee Street Number</label><input type="text" id="msg-new-consignee-street-num" value="10"></div>';
+      html += '<div class="field"><label>New Consignee Postcode <span class="required-asterisk">*</span></label><input type="text" id="msg-new-consignee-postcode" value="MK4 4NW"></div>';
+      html += '<div class="field"><label>New Consignee City <span class="required-asterisk">*</span></label><input type="text" id="msg-new-consignee-city" value="Milton Keynes"></div>';
     } else if (msgType === 'IE819') {
-      html += '<div class="field"><label>Date of Alert/Rejection *</label><input type="date" id="msg-alert-date" value="' + new Date().toISOString().slice(0,10) + '"></div>';
-      html += '<div class="field"><label>EAD/ESAD Rejected Flag *</label><select id="msg-rejected-flag"><option value="0">0 - No</option><option value="1" selected>1 - Yes</option></select></div>';
-      html += '<div class="field"><label>Rejection Reason Code *</label><select id="msg-rejection-reason"><option value="1">1 - Other</option><option value="2" selected>2 - Quantity discrepancies</option><option value="3">3 - Product type discrepancy</option></select></div>';
+      html += '<div class="field"><label>Date of Alert/Rejection <span class="required-asterisk">*</span></label><input type="date" id="msg-alert-date" value="' + today + '"></div>';
+      html += '<div class="field"><label>EAD/ESAD Rejected Flag <span class="required-asterisk">*</span></label><select id="msg-rejected-flag"><option value="0">0 - No</option><option value="1" selected>1 - Yes</option></select></div>';
+      html += '<div class="field"><label>Rejection Reason Code <span class="required-asterisk">*</span></label><select id="msg-rejection-reason"><option value="1">1 - Other</option><option value="2" selected>2 - Quantity discrepancies</option><option value="3">3 - Product type discrepancy</option></select></div>';
       html += '<div class="field"><label>Complementary Information</label><input type="text" id="msg-rejection-info" value="Goods rejected due to damage"></div>';
     } else if (msgType === 'IE837') {
-      html += '<div class="field"><label>Submitter Type *</label><select id="msg-submitter-type"><option value="1" selected>1 - Consignor</option><option value="2">2 - Consignee</option></select></div>';
-      html += '<div class="field"><label>Explanation Code *</label><select id="msg-explanation-code"><option value="1">1 - Transport problems</option><option value="2">2 - Force majeure</option><option value="6" selected>6 - Other</option></select></div>';
-      html += '<div class="field"><label>Complementary Information *</label><input type="text" id="msg-delay-info" value="Accident on M5"></div>';
+      html += '<div class="field"><label>Submitter Type <span class="required-asterisk">*</span></label><select id="msg-submitter-type"><option value="1" selected>1 - Consignor</option><option value="2">2 - Consignee</option></select></div>';
+      html += '<div class="field"><label>Explanation Code <span class="required-asterisk">*</span></label><select id="msg-explanation-code"><option value="1">1 - Transport problems</option><option value="2">2 - Force majeure</option><option value="6" selected>6 - Other</option></select></div>';
+      html += '<div class="field"><label>Complementary Information <span class="required-asterisk">*</span></label><input type="text" id="msg-delay-info" value="Accident on M5"></div>';
     } else if (msgType === 'IE871') {
-      html += '<div class="field"><label>Date of Analysis *</label><input type="date" id="msg-analysis-date" value="' + new Date().toISOString().slice(0,10) + '"></div>';
-      html += '<div class="field"><label>Global Explanation *</label><input type="text" id="msg-shortage-explanation" value="Courier drank the wine"></div>';
+      html += '<div class="field"><label>Date of Analysis <span class="required-asterisk">*</span></label><input type="date" id="msg-analysis-date" value="' + today + '"></div>';
+      html += '<div class="field"><label>Global Explanation <span class="required-asterisk">*</span></label><input type="text" id="msg-shortage-explanation" value="Courier drank the wine"></div>';
     }
     container.innerHTML = html;
   });
@@ -567,14 +966,30 @@ document.addEventListener('DOMContentLoaded', function() {
   // ==================== 1. SUBMIT MOVEMENT (IE815) ====================
   document.getElementById('submit-movement-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+
+    // Validate all required fields
+    var isValid = true;
+    document.querySelectorAll('#tab-submit input[required], #tab-submit select[required]').forEach(function(input) {
+      if (!validateField(input)) isValid = false;
+    });
+    if (!isValid) {
+      alert('Please fix the validation errors (shown in red) before submitting.');
+      return;
+    }
+
     var h = await getHeaders();
-    var today = new Date().toISOString().slice(0, 10);
-    var uniqueLrn = 'LRN' + Date.now().toString().slice(-10) + '-' + Math.floor(Math.random() * 1000);
+    var submitDate = new Date().toISOString().slice(0, 10);
+
+    // Use LRN from form if provided, otherwise generate
+    var lrnInput = document.getElementById('s-lrn').value.trim();
+    var uniqueLrn = lrnInput || ('LRN' + Date.now().toString().slice(-10) + '-' + Math.floor(Math.random() * 1000));
     document.getElementById('s-lrn').value = uniqueLrn;
+
     var d = document.getElementById('s-date').value;
     if (!d || d < today) { d = today; document.getElementById('s-date').value = d; }
     var dispatchTime = document.getElementById('s-time').value || '12:00';
     if (dispatchTime.length === 5) dispatchTime = dispatchTime + ':00';
+    var invoiceDate = document.getElementById('s-invoice-date').value || submitDate;
 
     var itemCount = parseInt(document.getElementById('s-item-count').value) || 1;
     var bodyEadEsadXml = '';
@@ -599,7 +1014,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '<urn:Header>' +
       '<urn1:MessageSender>NDEA.GB</urn1:MessageSender>' +
       '<urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>' +
-      '<urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation>' +
+      '<urn1:DateOfPreparation>' + submitDate + '</urn1:DateOfPreparation>' +
       '<urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>' +
       '<urn1:MessageIdentifier>' + uniqueLrn + '</urn1:MessageIdentifier>' +
       '<urn1:CorrelationIdentifier>PORTAL' + uniqueLrn + '</urn1:CorrelationIdentifier>' +
@@ -663,7 +1078,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '<urn:EadEsadDraft>' +
       '<urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>' +
       '<urn:InvoiceNumber>' + document.getElementById('s-invoice-number').value + '</urn:InvoiceNumber>' +
-      '<urn:InvoiceDate>' + today + '</urn:InvoiceDate>' +
+      '<urn:InvoiceDate>' + invoiceDate + '</urn:InvoiceDate>' +
       '<urn:OriginTypeCode>' + document.getElementById('s-origin-type').value + '</urn:OriginTypeCode>' +
       '<urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>' +
       '<urn:TimeOfDispatch>' + dispatchTime + '</urn:TimeOfDispatch>' +
@@ -713,7 +1128,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var msgId = document.getElementById('sm-msgid').value;
     var arc = document.getElementById('sm-arc').value;
     var seq = document.getElementById('sm-seq').value;
-    var today = new Date().toISOString().slice(0, 10);
+    var submitDate = new Date().toISOString().slice(0, 10);
     var now = new Date().toISOString().slice(0, 19);
     var namespace = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:' + msgType + ':V3.23';
     var bodyXml = '';
@@ -777,7 +1192,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '<urn:Header>' +
       '<urn1:MessageSender>NDEA.GB</urn1:MessageSender>' +
       '<urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>' +
-      '<urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation>' +
+      '<urn1:DateOfPreparation>' + submitDate + '</urn1:DateOfPreparation>' +
       '<urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>' +
       '<urn1:MessageIdentifier>' + msgId + '</urn1:MessageIdentifier>' +
       '<urn1:CorrelationIdentifier>PORTAL' + msgId + '</urn1:CorrelationIdentifier>' +
@@ -786,8 +1201,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '</urn:' + msgType + '>';
 
     console.log('Sending ' + msgType + ' XML:', xml);
-    var movId = document.getElementById('sm-id') ? document.getElementById('sm-id').value : '';
-    var endpoint = movId ? '/customs/excise/movements/' + movId + '/messages' : '/customs/excise/movements';
+    var endpoint = arc ? '/customs/excise/movements/messages' : '/customs/excise/movements';
     var res = await fetch('/api/emcs?endpoint=' + endpoint, { method: 'POST', headers: Object.assign({}, h, { 'Content-Type': 'application/xml' }), body: xml });
     var responseText = await res.text();
     console.log('HMRC Response:', res.status, responseText);
