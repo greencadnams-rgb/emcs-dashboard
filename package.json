@@ -1,0 +1,9 @@
+{
+  "name": "emcs-dashboard",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "otplib": "^12.0.1",
+    "qrcode": "^1.5.3"
+  }
+}
