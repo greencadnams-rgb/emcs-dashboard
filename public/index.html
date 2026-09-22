@@ -52,19 +52,19 @@
   <div class="login-box">
     <h1>🔒 EMCS Dashboard</h1>
     <p style="margin-bottom:20px; color:#666;">Enter your password to continue</p>
-    <input type="password" id="password" placeholder="Dashboard Password" onkeypress="if(event.key==='Enter') login()">
-    <input type="text" id="totp-code" placeholder="6-digit 2FA code (if enabled)" maxlength="6" style="display:none;" onkeypress="if(event.key==='Enter') login()">
-    <button onclick="login()" style="width:100%; margin-top:10px;">Login</button>
+    <input type="password" id="password" placeholder="Dashboard Password">
+    <input type="text" id="totp-code" placeholder="6-digit 2FA code (if enabled)" maxlength="6" style="display:none;">
+    <button id="login-btn" style="width:100%; margin-top:10px;">Login</button>
     <p id="login-error" class="error" style="margin-top:10px;"></p>
     <hr style="margin:25px 0;">
     <h3 style="font-size:1em; color:#666;">First Time? Setup 2FA</h3>
-    <button class="btn-green" onclick="setup2FA()" style="font-size:13px; width:100%;">Setup 2FA</button>
+    <button id="setup-2fa-btn" class="btn-green" style="font-size:13px; width:100%;">Setup 2FA</button>
     <div id="2fa-setup" style="display:none; margin-top:15px; text-align:left;">
       <p>Scan this QR code with your authenticator app:</p>
       <img id="qr-code" style="max-width:250px; display:block; margin:10px auto; border:1px solid #ddd; padding:10px;">
       <p>Or enter this secret: <code id="secret-text" style="background:#f4f4f4; padding:3px 6px; border-radius:3px;"></code></p>
       <input type="text" id="verify-code" placeholder="Enter 6-digit code" maxlength="6" style="width:100%;">
-      <button class="btn-green" onclick="verify2FA()" style="width:100%; margin-top:10px;">Verify & Enable 2FA</button>
+      <button id="verify-2fa-btn" class="btn-green" style="width:100%; margin-top:10px;">Verify & Enable 2FA</button>
       <p id="2fa-result" style="margin-top:10px;"></p>
     </div>
   </div>
@@ -77,21 +77,21 @@
     <div>
       <span id="hmrc-status" class="token-status token-missing">HMRC: Not Logged In</span>
       <a href="/api/auth">Login to HMRC</a>
-      <a href="#" onclick="logout()">Logout</a>
+      <a href="#" id="logout-btn">Logout</a>
     </div>
   </div>
 
   <div class="container">
     <div class="nav">
-      <button class="active" onclick="showTab('tab-submit',this)">1. Submit Movement</button>
-      <button onclick="showTab('tab-get-movements',this)">2. Get Movements</button>
-      <button onclick="showTab('tab-get-movement',this)">3. Get Single Movement</button>
-      <button onclick="showTab('tab-submit-msg',this)">4. Submit Message</button>
-      <button onclick="showTab('tab-get-messages',this)">5. Get Messages</button>
-      <button onclick="showTab('tab-get-message',this)">6. Get Single Message</button>
-      <button onclick="showTab('tab-validate',this)">7. Pre-Validate Trader</button>
-      <button onclick="showTab('tab-subscribe',this)">8. Subscribe ERN</button>
-      <button onclick="showTab('tab-unsubscribe',this)">9. Unsubscribe ERN</button>
+      <button class="nav-btn active" data-tab="tab-submit">1. Submit Movement</button>
+      <button class="nav-btn" data-tab="tab-get-movements">2. Get Movements</button>
+      <button class="nav-btn" data-tab="tab-get-movement">3. Get Single Movement</button>
+      <button class="nav-btn" data-tab="tab-submit-msg">4. Submit Message</button>
+      <button class="nav-btn" data-tab="tab-get-messages">5. Get Messages</button>
+      <button class="nav-btn" data-tab="tab-get-message">6. Get Single Message</button>
+      <button class="nav-btn" data-tab="tab-validate">7. Pre-Validate Trader</button>
+      <button class="nav-btn" data-tab="tab-subscribe">8. Subscribe ERN</button>
+      <button class="nav-btn" data-tab="tab-unsubscribe">9. Unsubscribe ERN</button>
     </div>
 
     <!-- TAB 1: SUBMIT MOVEMENT -->
@@ -102,8 +102,8 @@
         <div class="field"><label>Consignee ERN</label><input type="text" id="s-consignee" value="GBWKQOZ8OVLYR"></div>
         <div class="field"><label>Local Reference Number (LRN)</label><input type="text" id="s-lrn" value="lrnie8156540856"></div>
         <div class="field"><label>Date of Dispatch (YYYY-MM-DD)</label><input type="text" id="s-date" value="2026-12-01" placeholder="YYYY-MM-DD"></div>
-        <button onclick="submitMovement()">Submit Movement</button>
-        <button class="btn-green" onclick="exportResult('submit-output','movement')">Export CSV</button>
+        <button id="submit-movement-btn">Submit Movement</button>
+        <button id="export-submit-btn" class="btn-green">Export CSV</button>
         <pre id="submit-output">Waiting...</pre>
         <div class="cheat-sheet">
           <h3>🧪 Sandbox Magic LRNs</h3>
@@ -127,8 +127,8 @@
         <div class="field"><label>Search ERN</label><input type="text" id="gm-ern" value="GBWK002281023"></div>
         <div class="field"><label>Filter by ARC (optional)</label><input type="text" id="gm-arc"></div>
         <div class="field"><label>Filter by LRN (optional)</label><input type="text" id="gm-lrn"></div>
-        <button onclick="getMovements()">Get Movements</button>
-        <button class="btn-green" onclick="exportResult('gm-output','movements')">Export CSV</button>
+        <button id="get-movements-btn">Get Movements</button>
+        <button id="export-gm-btn" class="btn-green">Export CSV</button>
         <pre id="gm-output">Waiting...</pre>
       </div>
     </div>
@@ -138,7 +138,7 @@
       <div class="card">
         <h2>Get Single Movement</h2>
         <div class="field"><label>Movement ID</label><input type="text" id="gsm-id" placeholder="Paste a Movement ID from Tab 1 or 2"></div>
-        <button onclick="getSingleMovement()">Get Movement</button>
+        <button id="get-single-movement-btn">Get Movement</button>
         <pre id="gsm-output">Waiting...</pre>
       </div>
     </div>
@@ -157,7 +157,7 @@
           </select>
         </div>
         <div class="field"><label>Message Identifier</label><input type="text" id="sm-msgid" value="SendA202"></div>
-        <button onclick="submitMessage()">Submit Message</button>
+        <button id="submit-message-btn">Submit Message</button>
         <pre id="sm-output">Waiting...</pre>
       </div>
     </div>
@@ -167,8 +167,8 @@
       <div class="card">
         <h2>Get All Messages</h2>
         <div class="field"><label>Movement ID</label><input type="text" id="gmsg-id" placeholder="Paste a Movement ID"></div>
-        <button onclick="getMessages()">Get Messages</button>
-        <button class="btn-green" onclick="exportResult('gmsg-output','messages')">Export CSV</button>
+        <button id="get-messages-btn">Get Messages</button>
+        <button id="export-gmsg-btn" class="btn-green">Export CSV</button>
         <pre id="gmsg-output">Waiting...</pre>
       </div>
     </div>
@@ -179,7 +179,7 @@
         <h2>Get Single Message (XML)</h2>
         <div class="field"><label>Movement ID</label><input type="text" id="gsmsg-mid" placeholder="Paste a Movement ID"></div>
         <div class="field"><label>Message ID</label><input type="text" id="gsmsg-id" placeholder="e.g. XI00005"></div>
-        <button onclick="getSingleMessage()">Get Message</button>
+        <button id="get-single-message-btn">Get Message</button>
         <pre id="gsmsg-output">Waiting...</pre>
       </div>
     </div>
@@ -198,7 +198,7 @@
         </div>
         <div class="field"><label>Product Code 1</label><input type="text" id="pv-p1" value="W200"></div>
         <div class="field"><label>Product Code 2 (optional)</label><input type="text" id="pv-p2"></div>
-        <button onclick="preValidate()">Validate Trader</button>
+        <button id="pre-validate-btn">Validate Trader</button>
         <pre id="pv-output">Waiting...</pre>
       </div>
     </div>
@@ -208,7 +208,7 @@
       <div class="card">
         <h2>Subscribe ERN</h2>
         <div class="field"><label>ERN</label><input type="text" id="sub-ern" value="GBWK002281023"></div>
-        <button class="btn-green" onclick="subscribeErn()">Subscribe</button>
+        <button id="subscribe-ern-btn" class="btn-green">Subscribe</button>
         <pre id="sub-output">Waiting...</pre>
       </div>
     </div>
@@ -218,7 +218,7 @@
       <div class="card">
         <h2>Unsubscribe ERN</h2>
         <div class="field"><label>ERN</label><input type="text" id="unsub-ern" value="GBWK002281023"></div>
-        <button class="btn-red" onclick="unsubscribeErn()">Unsubscribe</button>
+        <button id="unsubscribe-ern-btn" class="btn-red">Unsubscribe</button>
         <pre id="unsub-output">Waiting...</pre>
       </div>
     </div>
@@ -226,385 +226,374 @@
 </div>
 
 <script>
-console.log('✅ Script loaded successfully');
+  // Wait for the DOM to be fully loaded before running any code
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Script loaded successfully');
 
-// 1. AUTHENTICATION
-const urlParams = new URLSearchParams(window.location.search);
-const hmrcTokenFromUrl = urlParams.get('hmrc_token');
+    // 1. AUTHENTICATION
+    const urlParams = new URLSearchParams(window.location.search);
+    const hmrcTokenFromUrl = urlParams.get('hmrc_token');
 
-if (hmrcTokenFromUrl) {
-  localStorage.setItem('hmrc_token', hmrcTokenFromUrl);
-  window.history.replaceState({}, document.title, window.location.pathname);
-  console.log('✅ HMRC Token saved to localStorage');
-}
+    if (hmrcTokenFromUrl) {
+      localStorage.setItem('hmrc_token', hmrcTokenFromUrl);
+      window.history.replaceState({}, document.title, window.location.pathname);
+      console.log('✅ HMRC Token saved to localStorage');
+    }
 
-function checkAuth() {
-  const dashAuth = localStorage.getItem('dashboard_auth');
-  if (dashAuth === 'authenticated') {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-    updateHmrcStatus();
-  }
-}
+    function checkAuth() {
+      const dashAuth = localStorage.getItem('dashboard_auth');
+      if (dashAuth === 'authenticated') {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        updateHmrcStatus();
+      }
+    }
 
-function updateHmrcStatus() {
-  const token = localStorage.getItem('hmrc_token');
-  const el = document.getElementById('hmrc-status');
-  if (token) {
-    el.innerText = 'HMRC: Logged In ✅';
-    el.className = 'token-status token-ok';
-  } else {
-    el.innerText = 'HMRC: Not Logged In';
-    el.className = 'token-status token-missing';
-  }
-}
+    function updateHmrcStatus() {
+      const token = localStorage.getItem('hmrc_token');
+      const el = document.getElementById('hmrc-status');
+      if (token) {
+        el.innerText = 'HMRC: Logged In ✅';
+        el.className = 'token-status token-ok';
+      } else {
+        el.innerText = 'HMRC: Not Logged In';
+        el.className = 'token-status token-missing';
+      }
+    }
 
-checkAuth();
+    checkAuth();
 
-async function login() {
-  try {
-    const password = document.getElementById('password').value;
-    const totpCode = document.getElementById('totp-code').value;
-    const res = await fetch('/api/protect', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, totpCode })
+    // Login
+    document.getElementById('login-btn').addEventListener('click', async function() {
+      try {
+        const password = document.getElementById('password').value;
+        const totpCode = document.getElementById('totp-code').value;
+        const res = await fetch('/api/protect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password, totpCode })
+        });
+        const data = await res.json();
+        
+        if (data.requires2FA) {
+          document.getElementById('totp-code').style.display = 'block';
+          document.getElementById('login-error').innerText = 'Enter your 2FA code';
+          return;
+        }
+        if (res.ok && data.success) {
+          localStorage.setItem('dashboard_auth', 'authenticated');
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
+          updateHmrcStatus();
+        } else {
+          document.getElementById('login-error').innerText = data.error || 'Login failed';
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        document.getElementById('login-error').innerText = 'Network error. Check console.';
+      }
     });
-    const data = await res.json();
-    
-    if (data.requires2FA) {
-      document.getElementById('totp-code').style.display = 'block';
-      document.getElementById('login-error').innerText = 'Enter your 2FA code';
-      return;
-    }
-    if (res.ok && data.success) {
-      localStorage.setItem('dashboard_auth', 'authenticated');
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
-      updateHmrcStatus();
-    } else {
-      document.getElementById('login-error').innerText = data.error || 'Login failed';
-    }
-  } catch (err) {
-    console.error('Login error:', err);
-    document.getElementById('login-error').innerText = 'Network error. Check console.';
-  }
-}
 
-function logout() {
-  localStorage.removeItem('dashboard_auth');
-  localStorage.removeItem('hmrc_token');
-  location.reload();
-}
-
-// 2. 2FA SETUP
-async function setup2FA() {
-  try {
-    const res = await fetch('/api/setup-2fa', { method: 'POST' });
-    if (res.ok) {
-      const data = await res.json();
-      document.getElementById('2fa-setup').style.display = 'block';
-      document.getElementById('qr-code').src = data.qrCode;
-      document.getElementById('secret-text').innerText = data.secret;
-      window.tempSecret = data.secret;
-    } else {
-      alert('Please login with your password first');
-    }
-  } catch (err) {
-    console.error('2FA Setup error:', err);
-  }
-}
-
-async function verify2FA() {
-  try {
-    const code = document.getElementById('verify-code').value;
-    const res = await fetch('/api/setup-2fa', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret: window.tempSecret, token: code })
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      localStorage.removeItem('dashboard_auth');
+      localStorage.removeItem('hmrc_token');
+      location.reload();
     });
-    const data = await res.json();
-    if (data.success) {
-      document.getElementById('2fa-result').innerHTML =
-        '<span class="success">✅ Verified! Add to Vercel Env Vars:<br><b>Key:</b> TOTP_SECRET<br><b>Value:</b> ' + data.secret + '</span>';
-    } else {
-      document.getElementById('2fa-result').innerHTML = '<span class="error">❌ ' + data.error + '</span>';
+
+    // 2FA Setup
+    document.getElementById('setup-2fa-btn').addEventListener('click', async function() {
+      try {
+        const res = await fetch('/api/setup-2fa', { method: 'POST' });
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('2fa-setup').style.display = 'block';
+          document.getElementById('qr-code').src = data.qrCode;
+          document.getElementById('secret-text').innerText = data.secret;
+          window.tempSecret = data.secret;
+        } else {
+          alert('Please login with your password first');
+        }
+      } catch (err) {
+        console.error('2FA Setup error:', err);
+      }
+    });
+
+    // 2FA Verify
+    document.getElementById('verify-2fa-btn').addEventListener('click', async function() {
+      try {
+        const code = document.getElementById('verify-code').value;
+        const res = await fetch('/api/setup-2fa', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ secret: window.tempSecret, token: code })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('2fa-result').innerHTML =
+            '<span class="success">✅ Verified! Add to Vercel Env Vars:<br><b>Key:</b> TOTP_SECRET<br><b>Value:</b> ' + data.secret + '</span>';
+        } else {
+          document.getElementById('2fa-result').innerHTML = '<span class="error">❌ ' + data.error + '</span>';
+        }
+      } catch (err) {
+        console.error('2FA Verify error:', err);
+      }
+    });
+
+    // Tab Switching
+    document.querySelectorAll('.nav-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+        document.getElementById(this.getAttribute('data-tab')).classList.add('active');
+        this.classList.add('active');
+      });
+    });
+
+    // Helper: Get Headers
+    async function getHeaders() {
+      let ip = '127.0.0.1';
+      try { 
+        const r = await fetch('https://api.ipify.org?format=json'); 
+        const data = await r.json();
+        ip = data.ip; 
+      } catch(e) {}
+      
+      let deviceId = localStorage.getItem('emcs_device_id');
+      if (!deviceId) { 
+        deviceId = 'dev-' + crypto.randomUUID(); 
+        localStorage.setItem('emcs_device_id', deviceId); 
+      }
+      
+      return {
+        'Authorization': 'Bearer ' + localStorage.getItem('hmrc_token'),
+        'x-client-ip': ip,
+        'x-client-ua': navigator.userAgent,
+        'x-device-id': deviceId,
+        'x-fingerprint': btoa(navigator.userAgent + navigator.language + screen.width + screen.height),
+        'x-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+        'x-window-width': String(window.innerWidth),
+        'x-window-height': String(window.innerHeight)
+      };
     }
-  } catch (err) {
-    console.error('2FA Verify error:', err);
-  }
-}
 
-// 3. UI HELPERS
-function showTab(id, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
-}
-
-async function getHeaders() {
-  let ip = '127.0.0.1';
-  try { 
-    const r = await fetch('https://api.ipify.org?format=json'); 
-    ip = (await r.json()).ip; 
-  } catch(e) {}
-  
-  let deviceId = localStorage.getItem('emcs_device_id');
-  if (!deviceId) { 
-    deviceId = 'dev-' + crypto.randomUUID(); 
-    localStorage.setItem('emcs_device_id', deviceId); 
-  }
-  
-  return {
-    'Authorization': 'Bearer ' + localStorage.getItem('hmrc_token'),
-    'x-client-ip': ip,
-    'x-client-ua': navigator.userAgent,
-    'x-device-id': deviceId,
-    'x-fingerprint': btoa(navigator.userAgent + navigator.language + screen.width + screen.height),
-    'x-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
-    'x-window-width': String(window.innerWidth),
-    'x-window-height': String(window.innerHeight)
-  };
-}
-
-function exportResult(elementId, type) {
-  const text = document.getElementById(elementId).innerText;
-  let data;
-  try { data = JSON.parse(text.replace(/^Status: \d+\n\n/, '')); } catch(e) { alert('No valid JSON. Run a query first.'); return; }
-  if (!Array.isArray(data)) data = [data];
-  if (data.length === 0) { alert('No data.'); return; }
-  const headers = Object.keys(data[0]);
-  const rows = data.map(row => headers.map(h => '"' + String(row[h] || '').replace(/"/g, '""') + '"').join(','));
-  const csv = [headers.join(','), ...rows].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'emcs-' + type + '-' + new Date().toISOString().slice(0,10) + '.csv';
-  a.click();
-}
-
-// 4. API FUNCTIONS
-async function submitMovement() {
-  if (!localStorage.getItem('hmrc_token')) { 
-    alert('Click "Login to HMRC" first!'); 
-    return; 
-  }
-  
-  const h = await getHeaders();
-  const c = document.getElementById('s-consignor').value;
-  const e = document.getElementById('s-consignee').value;
-  
-  // 1. Generate a UNIQUE LRN to avoid "Duplicate LRN" 400 errors
-  const uniqueLrn = 'LRN' + Date.now().toString().slice(-10);
-  document.getElementById('s-lrn').value = uniqueLrn;
-  
-  // 2. Ensure Date of Dispatch is TODAY or in the FUTURE to avoid 422 validation errors
-  let d = document.getElementById('s-date').value;
-  const today = new Date().toISOString().slice(0, 10);
-  if (!d || d < today) {
-    d = today;
-    document.getElementById('s-date').value = d; // Update the UI to show the corrected date
-  }
-  
-  // 3. Build the fully compliant XML with CORRECT namespaces (urn1 for Message, Header, Body)
-  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-    '<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
-    '  <urn:WCODataModelVersionCode>3.6</urn:WCODataModelVersionCode>\n' +
-    '  <urn:WCOTypeName>DESAD</urn:WCOTypeName>\n' +
-    '  <urn:ResponsibleCountryCode>GB</urn:ResponsibleCountryCode>\n' +
-    '  <urn:ResponsibleAgencyName>HMRC</urn:ResponsibleAgencyName>\n' +
-    '  <urn:AgencyAssignedCustomizationCode>GB</urn:AgencyAssignedCustomizationCode>\n' +
-    '  <urn:AgencyAssignedCustomizationVersionCode>v2.1</urn:AgencyAssignedCustomizationVersionCode>\n' +
-    '  <urn:SubmittedDraftOfEADESAD>\n' +
-    '    <urn1:Message>\n' +
-    '      <urn1:Header>\n' +
-    '        <urn1:MessageSender>' + c + '</urn1:MessageSender>\n' +
-    '        <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n' +
-    '        <urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation>\n' +
-    '        <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n' +
-    '        <urn1:MessageIdentifier>' + uniqueLrn + '</urn1:MessageIdentifier>\n' +
-    '      </urn1:Header>\n' +
-    '      <urn1:Body>\n' +
-    '        <urn:EadEsadDraft>\n' +
-    '          <urn:ConsignorDetails>\n' +
-    '            <urn:ExciseReferenceNumber>' + c + '</urn:ExciseReferenceNumber>\n' +
-    '          </urn:ConsignorDetails>\n' +
-    '          <urn:ConsigneeDetails>\n' +
-    '            <urn:ExciseReferenceNumber>' + e + '</urn:ExciseReferenceNumber>\n' +
-    '          </urn:ConsigneeDetails>\n' +
-    '          <urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>\n' +
-    '          <urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>\n' +
-    '        </urn:EadEsadDraft>\n' +
-    '      </urn1:Body>\n' +
-    '    </urn1:Message>\n' +
-    '  </urn:SubmittedDraftOfEADESAD>\n' +
-    '</urn:IE815>';
-  
-  console.log('Sending Compliant XML:', xml);
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { 
-    method: 'POST', 
-    headers: { ...h, 'Content-Type': 'application/xml' }, 
-    body: xml 
-  });
-  
-  const responseText = await res.text();
-  console.log('HMRC Response Status:', res.status);
-  console.log('HMRC Response Body:', responseText);
-  
-  document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
-}
-  
-  // 3. Build the fully compliant XML
-  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-    '<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
-    '  <urn:WCODataModelVersionCode>3.6</urn:WCODataModelVersionCode>\n' +
-    '  <urn:WCOTypeName>DESAD</urn:WCOTypeName>\n' +
-    '  <urn:ResponsibleCountryCode>GB</urn:ResponsibleCountryCode>\n' +
-    '  <urn:ResponsibleAgencyName>HMRC</urn:ResponsibleAgencyName>\n' +
-    '  <urn:AgencyAssignedCustomizationCode>GB</urn:AgencyAssignedCustomizationCode>\n' +
-    '  <urn:AgencyAssignedCustomizationVersionCode>v2.1</urn:AgencyAssignedCustomizationVersionCode>\n' +
-    '  <urn:SubmittedDraftOfEADESAD>\n' +
-    '    <urn:Message>\n' +
-    '      <urn:Header>\n' +
-    '        <urn1:MessageSender>' + c + '</urn1:MessageSender>\n' +
-    '        <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n' +
-    '        <urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation>\n' +
-    '        <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n' +
-    '        <urn1:MessageIdentifier>' + uniqueLrn + '</urn1:MessageIdentifier>\n' +
-    '      </urn:Header>\n' +
-    '      <urn:Body>\n' +
-    '        <urn:EadEsadDraft>\n' +
-    '          <urn:ConsignorDetails><urn:ExciseReferenceNumber>' + c + '</urn:ExciseReferenceNumber></urn:ConsignorDetails>\n' +
-    '          <urn:ConsigneeDetails><urn:ExciseReferenceNumber>' + e + '</urn:ExciseReferenceNumber></urn:ConsigneeDetails>\n' +
-    '          <urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>\n' +
-    '          <urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>\n' +
-    '        </urn:EadEsadDraft>\n' +
-    '      </urn:Body>\n' +
-    '    </urn:Message>\n' +
-    '  </urn:SubmittedDraftOfEADESAD>\n' +
-    '</urn:IE815>';
-  
-  console.log('Sending XML:', xml);
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { 
-    method: 'POST', 
-    headers: { ...h, 'Content-Type': 'application/xml' }, 
-    body: xml 
-  });
-  
-  document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-}
-
-async function getMovements() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-  const h = await getHeaders();
-  const ern = document.getElementById('gm-ern').value;
-  const arc = document.getElementById('gm-arc').value;
-  const lrn = document.getElementById('gm-lrn').value;
-  let q = '?ern=' + ern;
-  if (arc) q += '&arc=' + arc;
-  if (lrn) q += '&lrn=' + lrn;
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements' + q, { headers: h });
-  document.getElementById('gm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-}
-
-async function getSingleMovement() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-  const h = await getHeaders();
-  const id = document.getElementById('gsm-id').value;
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + id, { headers: h });
-  document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-}
-
-async function submitMessage() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-  const h = await getHeaders();
-  const movId = document.getElementById('sm-id').value;
-  const msgType = document.getElementById('sm-type').value;
-  const msgId = document.getElementById('sm-msgid').value;
-  const t = new Date().toISOString().slice(0,10);
-  let body = '';
-  
-  if (msgType === 'IE810') body = '<urn:CancellationOfEADESAD><urn:MovementId>' + movId + '</urn:MovementId></urn:CancellationOfEADESAD>';
-  else if (msgType === 'IE818') body = '<urn:AcceptedOrRejectedReportOfReceiptExport><urn:MovementId>' + movId + '</urn:MovementId><urn:DestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:DestinationOffice></urn:AcceptedOrRejectedReportOfReceiptExport>';
-  else if (msgType === 'IE813') body = '<urn:ChangeOfDestination><urn:MovementId>' + movId + '</urn:MovementId><urn:NewDestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:NewDestinationOffice></urn:ChangeOfDestination>';
-  else if (msgType === 'IE819') body = '<urn:AlertOrRejectionOfMovement><urn:MovementId>' + movId + '</urn:MovementId></urn:AlertOrRejectionOfMovement>';
-  
-  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-    '<urn:' + msgType + ' xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
-    '  <urn:Message>\n' +
-    '    <urn:Header>\n' +
-    '      <urn1:MessageSender>GBWK002281023</urn1:MessageSender>\n' +
-    '      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n' +
-    '      <urn1:DateOfPreparation>' + t + '</urn1:DateOfPreparation>\n' +
-    '      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n' +
-    '      <urn1:MessageIdentifier>' + msgId + '</urn1:MessageIdentifier>\n' +
-    '    </urn:Header>\n' +
-    '    <urn:Body>' + body + '</urn:Body>\n' +
-    '  </urn:Message>\n' +
-    '</urn:' + msgType + '>';
-  
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { method: 'POST', headers: { ...h, 'Content-Type': 'application/xml' }, body: xml });
-  document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-}
-
-async function getMessages() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-  const h = await getHeaders();
-  const movId = document.getElementById('gmsg-id').value;
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { headers: h });
-  const text = await res.text();
-  try {
-    const msgs = JSON.parse(text);
-    if (Array.isArray(msgs)) {
-      msgs.forEach(m => { if (m.encodedMessage) { try { m.decodedXml = atob(m.encodedMessage); } catch(e) { m.decodedXml = 'Decode failed'; } } });
-      document.getElementById('gmsg-output').innerText = JSON.stringify(msgs, null, 2);
-      return;
+    // Helper: Export CSV
+    function exportResult(elementId, type) {
+      const text = document.getElementById(elementId).innerText;
+      let data;
+      try { data = JSON.parse(text.replace(/^Status: \d+\n\n/, '')); } catch(e) { alert('No valid JSON. Run a query first.'); return; }
+      if (!Array.isArray(data)) data = [data];
+      if (data.length === 0) { alert('No data.'); return; }
+      const headers = Object.keys(data[0]);
+      const rows = data.map(function(row) {
+        return headers.map(function(h) {
+          return '"' + String(row[h] || '').replace(/"/g, '""') + '"';
+        }).join(',');
+      });
+      const csv = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'emcs-' + type + '-' + new Date().toISOString().slice(0,10) + '.csv';
+      a.click();
     }
-  } catch(e) {}
-  document.getElementById('gmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
-}
 
-async function getSingleMessage() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-  const h = await getHeaders();
-  h['Accept'] = 'application/vnd.hmrc.1.0+xml';
-  const movId = document.getElementById('gsmsg-mid').value;
-  const msgId = document.getElementById('gsmsg-id').value;
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages/' + msgId, { headers: h });
-  document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-}
+    // --- API FUNCTIONS ---
 
-async function preValidate() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-  const h = await getHeaders();
-  h['x-correlation-id'] = crypto.randomUUID();
-  const ern = document.getElementById('pv-ern').value;
-  const group = document.getElementById('pv-group').value;
-  const p1 = document.getElementById('pv-p1').value;
-  const p2 = document.getElementById('pv-p2').value;
-  const products = [];
-  if (p1) products.push({ product: { exciseProductCode: p1 } });
-  if (p2) products.push({ product: { exciseProductCode: p2 } });
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', { method: 'POST', headers: { ...h, 'Content-Type': 'application/json' }, body: JSON.stringify({ exciseRegistrationNumber: ern, entityGroup: group, validateProductAuthorisationRequest: products }) });
-  document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-}
+    // 1. Submit Movement
+    document.getElementById('submit-movement-btn').addEventListener('click', async function() {
+      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+      const h = await getHeaders();
+      const c = document.getElementById('s-consignor').value;
+      const e = document.getElementById('s-consignee').value;
+      
+      const uniqueLrn = 'LRN' + Date.now().toString().slice(-10);
+      document.getElementById('s-lrn').value = uniqueLrn;
+      
+      let d = document.getElementById('s-date').value;
+      const today = new Date().toISOString().slice(0, 10);
+      if (!d || d < today) {
+        d = today;
+        document.getElementById('s-date').value = d;
+      }
+      
+      const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+        '<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
+        '  <urn:WCODataModelVersionCode>3.6</urn:WCODataModelVersionCode>\n' +
+        '  <urn:WCOTypeName>DESAD</urn:WCOTypeName>\n' +
+        '  <urn:ResponsibleCountryCode>GB</urn:ResponsibleCountryCode>\n' +
+        '  <urn:ResponsibleAgencyName>HMRC</urn:ResponsibleAgencyName>\n' +
+        '  <urn:AgencyAssignedCustomizationCode>GB</urn:AgencyAssignedCustomizationCode>\n' +
+        '  <urn:AgencyAssignedCustomizationVersionCode>v2.1</urn:AgencyAssignedCustomizationVersionCode>\n' +
+        '  <urn:SubmittedDraftOfEADESAD>\n' +
+        '    <urn1:Message>\n' +
+        '      <urn1:Header>\n' +
+        '        <urn1:MessageSender>' + c + '</urn1:MessageSender>\n' +
+        '        <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n' +
+        '        <urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation>\n' +
+        '        <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n' +
+        '        <urn1:MessageIdentifier>' + uniqueLrn + '</urn1:MessageIdentifier>\n' +
+        '      </urn1:Header>\n' +
+        '      <urn1:Body>\n' +
+        '        <urn:EadEsadDraft>\n' +
+        '          <urn:ConsignorDetails><urn:ExciseReferenceNumber>' + c + '</urn:ExciseReferenceNumber></urn:ConsignorDetails>\n' +
+        '          <urn:ConsigneeDetails><urn:ExciseReferenceNumber>' + e + '</urn:ExciseReferenceNumber></urn:ConsigneeDetails>\n' +
+        '          <urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>\n' +
+        '          <urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>\n' +
+        '        </urn:EadEsadDraft>\n' +
+        '      </urn1:Body>\n' +
+        '    </urn1:Message>\n' +
+        '  </urn:SubmittedDraftOfEADESAD>\n' +
+        '</urn:IE815>';
+      
+      console.log('Sending XML:', xml);
+      const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { 
+        method: 'POST', 
+        headers: { ...h, 'Content-Type': 'application/xml' }, 
+        body: xml 
+      });
+      
+      document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+    });
 
-async function subscribeErn() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-  const h = await getHeaders();
-  const ern = document.getElementById('sub-ern').value;
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + ern + '/subscription', { method: 'POST', headers: { ...h, 'Content-Type': 'application/json' }, body: JSON.stringify({ boxId: '42c75e22-7bba-44f2-a610-4b4c3b262e3e' }) });
-  document.getElementById('sub-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-}
+    document.getElementById('export-submit-btn').addEventListener('click', function() { exportResult('submit-output', 'movement'); });
 
-async function unsubscribeErn() {
-  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
-  const h = await getHeaders();
-  const ern = document.getElementById('unsub-ern').value;
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + ern + '/subscription', { method: 'DELETE', headers: h });
-  document.getElementById('unsub-output').innerText = res.status === 202 ? 'Successfully unsubscribed' : 'Status: ' + res.status + '\n\n' + await res.text();
-}
+    // 2. Get Movements
+    document.getElementById('get-movements-btn').addEventListener('click', async function() {
+      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+      const h = await getHeaders();
+      const ern = document.getElementById('gm-ern').value;
+      const arc = document.getElementById('gm-arc').value;
+      const lrn = document.getElementById('gm-lrn').value;
+      let q = '?ern=' + ern;
+      if (arc) q += '&arc=' + arc;
+      if (lrn) q += '&lrn=' + lrn;
+      const res = await fetch('/api/emcs?endpoint=/customs/excise/movements' + q, { headers: h });
+      document.getElementById('gm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+    });
+    document.getElementById('export-gm-btn').addEventListener('click', function() { exportResult('gm-output', 'movements'); });
+
+    // 3. Get Single Movement
+    document.getElementById('get-single-movement-btn').addEventListener('click', async function() {
+      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+      const h = await getHeaders();
+      const id = document.getElementById('gsm-id').value;
+      const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + id, { headers: h });
+      document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+    });
+
+    // 4. Submit Message
+    document.getElementById('submit-message-btn').addEventListener('click', async function() {
+      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+      const h = await getHeaders();
+      const movId = document.getElementById('sm-id').value;
+      const msgType = document.getElementById('sm-type').value;
+      const msgId = document.getElementById('sm-msgid').value;
+      const today = new Date().toISOString().slice(0, 10);
+      let body = '';
+      
+      if (msgType === 'IE810') body = '<urn:CancellationOfEADESAD><urn:MovementId>' + movId + '</urn:MovementId></urn:CancellationOfEADESAD>';
+      else if (msgType === 'IE818') body = '<urn:AcceptedOrRejectedReportOfReceiptExport><urn:MovementId>' + movId + '</urn:MovementId><urn:DestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:DestinationOffice></urn:AcceptedOrRejectedReportOfReceiptExport>';
+      else if (msgType === 'IE813') body = '<urn:ChangeOfDestination><urn:MovementId>' + movId + '</urn:MovementId><urn:NewDestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:NewDestinationOffice></urn:ChangeOfDestination>';
+      else if (msgType === 'IE819') body = '<urn:AlertOrRejectionOfMovement><urn:MovementId>' + movId + '</urn:MovementId></urn:AlertOrRejectionOfMovement>';
+      
+      const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+        '<urn:' + msgType + ' xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
+        '  <urn:Message>\n' +
+        '    <urn:Header>\n' +
+        '      <urn1:MessageSender>GBWK002281023</urn1:MessageSender>\n' +
+        '      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n' +
+        '      <urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation>\n' +
+        '      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n' +
+        '      <urn1:MessageIdentifier>' + msgId + '</urn1:MessageIdentifier>\n' +
+        '    </urn:Header>\n' +
+        '    <urn:Body>' + body + '</urn:Body>\n' +
+        '  </urn:Message>\n' +
+        '</urn:' + msgType + '>';
+      
+      const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { method: 'POST', headers: { ...h, 'Content-Type': 'application/xml' }, body: xml });
+      document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+    });
+
+    // 5. Get Messages
+    document.getElementById('get-messages-btn').addEventListener('click', async function() {
+      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+      const h = await getHeaders();
+      const movId = document.getElementById('gmsg-id').value;
+      const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { headers: h });
+      const text = await res.text();
+      try {
+        const msgs = JSON.parse(text);
+        if (Array.isArray(msgs)) {
+          msgs.forEach(function(m) { 
+            if (m.encodedMessage) { 
+              try { m.decodedXml = atob(m.encodedMessage); } catch(e) { m.decodedXml = 'Decode failed'; } 
+            } 
+          });
+          document.getElementById('gmsg-output').innerText = JSON.stringify(msgs, null, 2);
+          return;
+        }
+      } catch(e) {}
+      document.getElementById('gmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+    });
+    document.getElementById('export-gmsg-btn').addEventListener('click', function() { exportResult('gmsg-output', 'messages'); });
+
+    // 6. Get Single Message
+    document.getElementById('get-single-message-btn').addEventListener('click', async function() {
+      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+      const h = await getHeaders();
+      h['Accept'] = 'application/vnd.hmrc.1.0+xml';
+      const movId = document.getElementById('gsmsg-mid').value;
+      const msgId = document.getElementById('gsmsg-id').value;
+      const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages/' + msgId, { headers: h });
+      document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+    });
+
+    // 7. Pre-Validate
+    document.getElementById('pre-validate-btn').addEventListener('click', async function() {
+      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+      const h = await getHeaders();
+      h['x-correlation-id'] = crypto.randomUUID();
+      const ern = document.getElementById('pv-ern').value;
+      const group = document.getElementById('pv-group').value;
+      const p1 = document.getElementById('pv-p1').value;
+      const p2 = document.getElementById('pv-p2').value;
+      const products = [];
+      if (p1) products.push({ product: { exciseProductCode: p1 } });
+      if (p2) products.push({ product: { exciseProductCode: p2 } });
+      const res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', { 
+        method: 'POST', 
+        headers: { ...h, 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ exciseRegistrationNumber: ern, entityGroup: group, validateProductAuthorisationRequest: products }) 
+      });
+      document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+    });
+
+    // 8. Subscribe
+    document.getElementById('subscribe-ern-btn').addEventListener('click', async function() {
+      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+      const h = await getHeaders();
+      const ern = document.getElementById('sub-ern').value;
+      const res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + ern + '/subscription', { 
+        method: 'POST', 
+        headers: { ...h, 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ boxId: '42c75e22-7bba-44f2-a610-4b4c3b262e3e' }) 
+      });
+      document.getElementById('sub-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+    });
+
+    // 9. Unsubscribe
+    document.getElementById('unsubscribe-ern-btn').addEventListener('click', async function() {
+      if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+      const h = await getHeaders();
+      const ern = document.getElementById('unsub-ern').value;
+      const res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + ern + '/subscription', { method: 'DELETE', headers: h });
+      const text = await res.text();
+      document.getElementById('unsub-output').innerText = res.status === 202 ? 'Successfully unsubscribed' : 'Status: ' + res.status + '\n\n' + text;
+    });
+
+  }); // End DOMContentLoaded
 </script>
 </body>
 </html>
