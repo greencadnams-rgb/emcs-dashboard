@@ -47,7 +47,6 @@
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-box">
     <h1>🔒 EMCS Dashboard</h1>
@@ -70,7 +69,6 @@
   </div>
 </div>
 
-<!-- MAIN DASHBOARD -->
 <div id="dashboard" style="display:none;">
   <div class="status-bar">
     <span>🇬🇧 HMRC EMCS Dashboard</span>
@@ -94,14 +92,13 @@
       <button onclick="showTab('tab-unsubscribe',this)">9. Unsubscribe ERN</button>
     </div>
 
-    <!-- TAB 1: SUBMIT MOVEMENT -->
     <div id="tab-submit" class="tab active">
       <div class="card">
         <h2>Submit Draft Movement (IE815)</h2>
         <div class="field"><label>Consignor ERN</label><input type="text" id="s-consignor" value="GBWK002281023"></div>
         <div class="field"><label>Consignee ERN</label><input type="text" id="s-consignee" value="GBWKQOZ8OVLYR"></div>
         <div class="field"><label>Local Reference Number (LRN)</label><input type="text" id="s-lrn" value="lrnie8156540856"></div>
-        <div class="field"><label>Date of Dispatch</label><input type="date" id="s-date" value="2026-12-01"></div>
+        <div class="field"><label>Date of Dispatch (YYYY-MM-DD)</label><input type="text" id="s-date" value="2026-12-01" placeholder="YYYY-MM-DD"></div>
         <button onclick="submitMovement()">Submit Movement</button>
         <button class="btn-green" onclick="exportResult('submit-output','movement')">Export CSV</button>
         <pre id="submit-output">Waiting...</pre>
@@ -112,8 +109,6 @@
             <tr><td>lrnie8156540856</td><td>✅ 202 Success</td></tr>
             <tr><td>lrnie8155973812</td><td>✅ Success + IE818 Receipt</td></tr>
             <tr><td>lrnie8155743934</td><td>✅ Success + IE810 Cancel</td></tr>
-            <tr><td>lrnie8154968571</td><td>✅ Success + IE813 Change</td></tr>
-            <tr><td>lrnie8153786132</td><td>✅ Success + IE819 Reject</td></tr>
             <tr><td>SendA400</td><td>❌ 400 Bad Request</td></tr>
             <tr><td>SendA404</td><td>❌ 404 Not Found</td></tr>
             <tr><td>SendA500</td><td>❌ 500 Server Error</td></tr>
@@ -122,24 +117,18 @@
       </div>
     </div>
 
-    <!-- TAB 2: GET MOVEMENTS -->
     <div id="tab-get-movements" class="tab">
       <div class="card">
         <h2>Get All Movements</h2>
         <div class="field"><label>Search ERN</label><input type="text" id="gm-ern" value="GBWK002281023"></div>
         <div class="field"><label>Filter by ARC (optional)</label><input type="text" id="gm-arc"></div>
         <div class="field"><label>Filter by LRN (optional)</label><input type="text" id="gm-lrn"></div>
-        <div class="field"><label>Updated Since (optional)</label><input type="text" id="gm-since" placeholder="2024-01-17T15:27:29.540089Z"></div>
-        <div class="field"><label>Trader Type</label>
-          <select id="gm-type"><option value="">All</option><option value="consignor">Consignor</option><option value="consignee">Consignee</option></select>
-        </div>
         <button onclick="getMovements()">Get Movements</button>
         <button class="btn-green" onclick="exportResult('gm-output','movements')">Export CSV</button>
         <pre id="gm-output">Waiting...</pre>
       </div>
     </div>
 
-    <!-- TAB 3: GET SINGLE MOVEMENT -->
     <div id="tab-get-movement" class="tab">
       <div class="card">
         <h2>Get Single Movement</h2>
@@ -149,7 +138,6 @@
       </div>
     </div>
 
-    <!-- TAB 4: SUBMIT MESSAGE -->
     <div id="tab-submit-msg" class="tab">
       <div class="card">
         <h2>Submit Message</h2>
@@ -170,7 +158,6 @@
       </div>
     </div>
 
-    <!-- TAB 5: GET MESSAGES -->
     <div id="tab-get-messages" class="tab">
       <div class="card">
         <h2>Get All Messages</h2>
@@ -181,7 +168,6 @@
       </div>
     </div>
 
-    <!-- TAB 6: GET SINGLE MESSAGE -->
     <div id="tab-get-message" class="tab">
       <div class="card">
         <h2>Get Single Message (XML)</h2>
@@ -192,7 +178,6 @@
       </div>
     </div>
 
-    <!-- TAB 7: PRE-VALIDATE -->
     <div id="tab-validate" class="tab">
       <div class="card">
         <h2>Pre-Validate Trader</h2>
@@ -202,27 +187,15 @@
             <option value="UK Record">UK Record</option>
             <option value="EU Trader">EU Trader</option>
             <option value="EU Warehouse">EU Warehouse</option>
-            <option value="UK Temporary Authorisation">UK Temporary Authorisation</option>
-            <option value="EU Temporary Authorisation">EU Temporary Authorisation</option>
           </select>
         </div>
         <div class="field"><label>Product Code 1</label><input type="text" id="pv-p1" value="W200"></div>
         <div class="field"><label>Product Code 2 (optional)</label><input type="text" id="pv-p2"></div>
         <button onclick="preValidate()">Validate Trader</button>
         <pre id="pv-output">Waiting...</pre>
-        <div class="cheat-sheet">
-          <h3>🧪 Test Values</h3>
-          <table>
-            <tr><th>Field</th><th>Value</th><th>Result</th></tr>
-            <tr><td>ERN</td><td>GBWK000000000</td><td>❌ Invalid Trader</td></tr>
-            <tr><td>ERN</td><td>SendA400</td><td>❌ 400 Bad Request</td></tr>
-            <tr><td>Product</td><td>W300 or S200</td><td>❌ Invalid Product</td></tr>
-          </table>
-        </div>
       </div>
     </div>
 
-    <!-- TAB 8: SUBSCRIBE -->
     <div id="tab-subscribe" class="tab">
       <div class="card">
         <h2>Subscribe ERN</h2>
@@ -232,7 +205,6 @@
       </div>
     </div>
 
-    <!-- TAB 9: UNSUBSCRIBE -->
     <div id="tab-unsubscribe" class="tab">
       <div class="card">
         <h2>Unsubscribe ERN</h2>
@@ -245,21 +217,15 @@
 </div>
 
 <script>
-// =============================================
-// AUTHENTICATION (Fixed: uses localStorage)
-// =============================================
-
-// 1. Check if HMRC redirected back with a token
 const urlParams = new URLSearchParams(window.location.search);
 const hmrcTokenFromUrl = urlParams.get('hmrc_token');
 
 if (hmrcTokenFromUrl) {
   localStorage.setItem('hmrc_token', hmrcTokenFromUrl);
   window.history.replaceState({}, document.title, window.location.pathname);
-  console.log('HMRC Token saved!');
+  console.log('✅ HMRC Token saved to localStorage');
 }
 
-// 2. Show dashboard if user is logged in
 function checkAuth() {
   const dashAuth = localStorage.getItem('dashboard_auth');
   if (dashAuth === 'authenticated') {
@@ -313,9 +279,6 @@ function logout() {
   location.reload();
 }
 
-// =============================================
-// 2FA SETUP
-// =============================================
 async function setup2FA() {
   const res = await fetch('/api/setup-2fa', { method: 'POST' });
   if (res.ok) {
@@ -343,9 +306,6 @@ async function verify2FA() {
   }
 }
 
-// =============================================
-// HELPERS
-// =============================================
 function showTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
@@ -386,79 +346,47 @@ function exportResult(elementId, type) {
   a.click();
 }
 
-// =============================================
-// ALL 9 API ENDPOINTS
-// =============================================
-
-// 1. Submit Movement (IE815)
 async function submitMovement() {
-  if (!localStorage.getItem('hmrc_token')) { 
-    alert('Please click "Login to HMRC" first!'); 
-    return; 
-  }
-  
+  if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
   const h = await getHeaders();
-  const consignor = document.getElementById('s-consignor').value.trim();
-  const consignee = document.getElementById('s-consignee').value.trim();
-  const lrn = document.getElementById('s-lrn').value.trim();
+  const c = document.getElementById('s-consignor').value;
+  const e = document.getElementById('s-consignee').value;
+  const l = document.getElementById('s-lrn').value;
+  let d = document.getElementById('s-date').value;
   
-  // --- SMART DATE FORMATTER ---
-  let rawDate = document.getElementById('s-date').value.trim();
-  let formattedDate = rawDate;
-
-  // If user typed DD/MM/YYYY, convert to YYYY-MM-DD
-  if (rawDate.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-      const parts = rawDate.split('/');
-      formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
-  } 
-  // If it's not already YYYY-MM-DD, default to today to prevent schema errors
-  else if (!rawDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      formattedDate = new Date().toISOString().split('T')[0];
-      document.getElementById('s-date').value = formattedDate; // Update UI
+  if (!d.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    d = new Date().toISOString().slice(0,10);
+    document.getElementById('s-date').value = d;
   }
-
-  const today = new Date().toISOString().split('T')[0];
-
-  // Build the strictly validated XML
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">
-  <urn:Message>
-    <urn:Header>
-      <urn1:MessageSender>${consignor}</urn1:MessageSender>
-      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>
-      <urn1:DateOfPreparation>${today}</urn1:DateOfPreparation>
-      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>
-      <urn1:MessageIdentifier>${lrn}</urn1:MessageIdentifier>
-    </urn:Header>
-    <urn:Body>
-      <urn:SubmittedDraftOfEADESAD>
-        <urn:EadEsadDraft>
-          <urn:ConsignorDetails><urn:ExciseReferenceNumber>${consignor}</urn:ExciseReferenceNumber></urn:ConsignorDetails>
-          <urn:ConsigneeDetails><urn:ExciseReferenceNumber>${consignee}</urn:ExciseReferenceNumber></urn:ConsigneeDetails>
-          <urn:DateOfDispatch>${formattedDate}</urn:DateOfDispatch>
-          <urn:LocalReferenceNumber>${lrn}</urn:LocalReferenceNumber>
-        </urn:EadEsadDraft>
-      </urn:SubmittedDraftOfEADESAD>
-    </urn:Body>
-  </urn:Message>
-</urn:IE815>`;
-
-  // Log the exact XML to the browser console for debugging
-  console.log('--- SENDING XML TO HMRC ---');
-  console.log(xml);
-  console.log('---------------------------');
-
-  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', {
-    method: 'POST', 
-    headers: { ...h, 'Content-Type': 'application/xml' }, 
-    body: xml 
-  });
   
-  const responseText = await res.text();
-  console.log('HMRC Response Status:', res.status);
-  console.log('HMRC Response Body:', responseText);
+  const t = new Date().toISOString().slice(0,10);
   
-  document.getElementById('submit-output').innerText = `Status: ${res.status}\n\n${responseText}`;
+  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<urn:IE815 xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
+    '  <urn:Message>\n' +
+    '    <urn:Header>\n' +
+    '      <urn1:MessageSender>' + c + '</urn1:MessageSender>\n' +
+    '      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n' +
+    '      <urn1:DateOfPreparation>' + t + '</urn1:DateOfPreparation>\n' +
+    '      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n' +
+    '      <urn1:MessageIdentifier>' + l + '</urn1:MessageIdentifier>\n' +
+    '    </urn:Header>\n' +
+    '    <urn:Body>\n' +
+    '      <urn:SubmittedDraftOfEADESAD>\n' +
+    '        <urn:EadEsadDraft>\n' +
+    '          <urn:ConsignorDetails><urn:ExciseReferenceNumber>' + c + '</urn:ExciseReferenceNumber></urn:ConsignorDetails>\n' +
+    '          <urn:ConsigneeDetails><urn:ExciseReferenceNumber>' + e + '</urn:ExciseReferenceNumber></urn:ConsigneeDetails>\n' +
+    '          <urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>\n' +
+    '          <urn:LocalReferenceNumber>' + l + '</urn:LocalReferenceNumber>\n' +
+    '        </urn:EadEsadDraft>\n' +
+    '      </urn:SubmittedDraftOfEADESAD>\n' +
+    '    </urn:Body>\n' +
+    '  </urn:Message>\n' +
+    '</urn:IE815>';
+  
+  console.log('Sending XML:', xml);
+  const res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { method: 'POST', headers: { ...h, 'Content-Type': 'application/xml' }, body: xml });
+  document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
 }
 
 async function getMovements() {
@@ -467,13 +395,9 @@ async function getMovements() {
   const ern = document.getElementById('gm-ern').value;
   const arc = document.getElementById('gm-arc').value;
   const lrn = document.getElementById('gm-lrn').value;
-  const since = document.getElementById('gm-since').value;
-  const type = document.getElementById('gm-type').value;
   let q = '?ern=' + ern;
   if (arc) q += '&arc=' + arc;
   if (lrn) q += '&lrn=' + lrn;
-  if (since) q += '&updatedSince=' + encodeURIComponent(since);
-  if (type) q += '&traderType=' + type;
   const res = await fetch('/api/emcs?endpoint=/customs/excise/movements' + q, { headers: h });
   document.getElementById('gm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
 }
@@ -494,13 +418,35 @@ async function submitMessage() {
   const msgId = document.getElementById('sm-msgid').value;
   const t = new Date().toISOString().slice(0,10);
   let body = '';
-  if (msgType === 'IE810') body = '<urn:CancellationOfEADESAD><urn:MovementId>' + movId + '</urn:MovementId></urn:CancellationOfEADESAD>';
-  else if (msgType === 'IE818') body = '<urn:AcceptedOrRejectedReportOfReceiptExport><urn:MovementId>' + movId + '</urn:MovementId><urn:DestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:DestinationOffice></urn:AcceptedOrRejectedReportOfReceiptExport>';
-  else if (msgType === 'IE813') body = '<urn:ChangeOfDestination><urn:MovementId>' + movId + '</urn:MovementId><urn:NewDestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:NewDestinationOffice></urn:ChangeOfDestination>';
-  else if (msgType === 'IE819') body = '<urn:AlertOrRejectionOfMovement><urn:MovementId>' + movId + '</urn:MovementId></urn:AlertOrRejectionOfMovement>';
-  else if (msgType === 'IE837') body = '<urn:ExplanationOfDelay><urn:MovementId>' + movId + '</urn:MovementId></urn:ExplanationOfDelay>';
-  else if (msgType === 'IE871') body = '<urn:ReasonForShortage><urn:MovementId>' + movId + '</urn:MovementId></urn:ReasonForShortage>';
-  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urn:' + msgType + ' xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n  <urn:Message>\n    <urn:Header>\n      <urn1:MessageSender>GBWK002281023</urn1:MessageSender>\n      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n      <urn1:DateOfPreparation>' + t + '</urn1:DateOfPreparation>\n      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n      <urn1:MessageIdentifier>' + msgId + '</urn1:MessageIdentifier>\n    </urn:Header>\n    <urn:Body>' + body + '</urn:Body>\n  </urn:Message>\n</urn:' + msgType + '>';
+  
+  if (msgType === 'IE810') {
+    body = '<urn:CancellationOfEADESAD><urn:MovementId>' + movId + '</urn:MovementId></urn:CancellationOfEADESAD>';
+  } else if (msgType === 'IE818') {
+    body = '<urn:AcceptedOrRejectedReportOfReceiptExport><urn:MovementId>' + movId + '</urn:MovementId><urn:DestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:DestinationOffice></urn:AcceptedOrRejectedReportOfReceiptExport>';
+  } else if (msgType === 'IE813') {
+    body = '<urn:ChangeOfDestination><urn:MovementId>' + movId + '</urn:MovementId><urn:NewDestinationOffice><urn:ReferenceNumber>GB000000</urn:ReferenceNumber></urn:NewDestinationOffice></urn:ChangeOfDestination>';
+  } else if (msgType === 'IE819') {
+    body = '<urn:AlertOrRejectionOfMovement><urn:MovementId>' + movId + '</urn:MovementId></urn:AlertOrRejectionOfMovement>';
+  } else if (msgType === 'IE837') {
+    body = '<urn:ExplanationOfDelay><urn:MovementId>' + movId + '</urn:MovementId></urn:ExplanationOfDelay>';
+  } else if (msgType === 'IE871') {
+    body = '<urn:ReasonForShortage><urn:MovementId>' + movId + '</urn:MovementId></urn:ReasonForShortage>';
+  }
+  
+  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<urn:' + msgType + ' xmlns:urn="urn:wco:datamodel:WCO:DEC-DMS:2" xmlns:urn1="urn:wco:datamodel:WCO:RES-DMS:2">\n' +
+    '  <urn:Message>\n' +
+    '    <urn:Header>\n' +
+    '      <urn1:MessageSender>GBWK002281023</urn1:MessageSender>\n' +
+    '      <urn1:MessageRecipient>HMRC</urn1:MessageRecipient>\n' +
+    '      <urn1:DateOfPreparation>' + t + '</urn1:DateOfPreparation>\n' +
+    '      <urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>\n' +
+    '      <urn1:MessageIdentifier>' + msgId + '</urn1:MessageIdentifier>\n' +
+    '    </urn:Header>\n' +
+    '    <urn:Body>' + body + '</urn:Body>\n' +
+    '  </urn:Message>\n' +
+    '</urn:' + msgType + '>';
+  
   const res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { method: 'POST', headers: { ...h, 'Content-Type': 'application/xml' }, body: xml });
   document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
 }
