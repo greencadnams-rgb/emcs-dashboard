@@ -1,20 +1,16 @@
-export default async function handler(req, res) {
-  // Get token from Authorization header (sent by frontend)
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.startsWith('Bearer ') 
-    ? authHeader.substring(7) 
-    : null;
+import crypto from 'crypto';
 
-  console.log('=== EMCS API CALL ===');
-  console.log('Token present:', !!token);
-  console.log('Endpoint:', req.query.endpoint);
+export default async function handler(req, res) {
+  // 1. Check Authentication
+  const cookies = req.headers.cookie || '';
+  const tokenMatch = cookies.match(/hmrc_token=([^;]+)/);
+  const token = tokenMatch ? tokenMatch[1] : null;
 
   if (!token) {
-    console.error('No token provided');
     return res.status(401).json({ error: "Not logged in to HMRC. Click 'Login to HMRC' first." });
   }
 
-  // Get fraud prevention data
+  // 2. Collect Fraud Prevention Headers
   const clientIp = req.headers['x-client-ip'] || '127.0.0.1';
   const userAgent = req.headers['x-client-ua'] || 'Unknown';
   const deviceId = req.headers['x-device-id'] || 'unknown';
@@ -49,18 +45,29 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('Calling HMRC:', url);
+    // 3. CRITICAL FIX: Read the raw body stream for application/xml
+    let rawBody = req.body;
+    if (rawBody && typeof rawBody.on === 'function') {
+      rawBody = await new Promise((resolve, reject) => {
+        let data = '';
+        rawBody.on('data', chunk => data += chunk);
+        rawBody.on('end', () => resolve(data));
+        rawBody.on('error', reject);
+      });
+    }
+
+    // 4. Forward to HMRC
     const response = await fetch(url, {
       method: req.method,
       headers: headers,
-      body: ['POST', 'PUT', 'PATCH'].includes(req.method) ? req.body : undefined
+      body: ['POST', 'PUT', 'PATCH'].includes(req.method) ? rawBody : undefined
     });
 
     const data = await response.text();
-    console.log('HMRC response status:', response.status);
     res.status(response.status).send(data);
+    
   } catch (error) {
-    console.error('HMRC API error:', error);
+    console.error('HMRC API Error:', error);
     res.status(500).json({ error: error.message });
   }
 }
