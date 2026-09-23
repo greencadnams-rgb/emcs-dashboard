@@ -92,7 +92,7 @@
 <!-- MAIN DASHBOARD -->
 <div id="dashboard" style="display:none;">
   <div class="status-bar">
-    <span>🇬🇧 HMRC EMCS Dashboard <span id="mode-indicator" class="mode-indicator mode-test">TEST MODE</span></span>
+    <span>🇬 HMRC EMCS Dashboard <span id="mode-indicator" class="mode-indicator mode-test">TEST MODE</span></span>
     <div>
       <span id="hmrc-status" class="token-status token-missing">HMRC: Not Logged In</span>
       <a href="/api/auth">Login to HMRC</a>
@@ -138,7 +138,7 @@
           </div>
           <div class="field">
             <label>Journey Time <span class="required-asterisk">*</span>
-              <span class="field-help">?<span class="tooltip">Expected duration of the journey in hours (H) or days (D). Maximum 45 days. Examples: '14D' for 14 days, '12H' for 12 hours. <b>Format: an3 (3 alphanumeric)</b></span></span>
+              <span class="field-help">?<span class="tooltip">Expected duration of the journey in hours (H) or days (D). Maximum 45 days. Examples: 'D14' for 14 days, 'H12' for 12 hours. <b>Format: an3 (3 alphanumeric)</b></span></span>
             </label>
             <input type="text" id="s-journey-time" value="D07" pattern="^[HD]\d{1,2}$" maxlength="3" required>
             <div class="validation-msg"></div>
@@ -726,7 +726,7 @@
         <h2>Get Single Message (Returns XML)</h2>
         <div class="form-grid">
           <div class="field"><label>Movement ID</label><input type="text" id="gsmsg-mid" placeholder="Paste a Movement ID"></div>
-          <div class="field"><label>Message ID</label><input type="text" id="gsmsg-id" placeholder="e.g. XI00005"></div>
+          <div class="field"><label>Message ID</label><input type="text" id="gsmsg-id" placeholder="e.g. XI000002"></div>
         </div>
         <button id="get-single-message-btn" style="margin-top:15px;">Get Message</button>
         <pre id="gsmsg-output">Waiting...</pre>
@@ -783,6 +783,8 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log('Script loaded successfully');
 
   var today = new Date().toISOString().slice(0, 10);
+  var nowTime = new Date().toISOString().slice(11, 19);
+
   document.getElementById('s-date').value = today;
   document.getElementById('s-invoice-date').value = today;
 
@@ -1067,10 +1069,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     html += '</div>';
     container.innerHTML = html;
+    attachValidation(container);
   });
   document.getElementById('sm-type').dispatchEvent(new Event('change'));
 
-  // ==================== 1. SUBMIT MOVEMENT (IE815) - FIXED XML ORDER ====================
+  // ==================== 1. SUBMIT MOVEMENT (IE815) ====================
   document.getElementById('submit-movement-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
 
@@ -1085,6 +1088,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var h = await getHeaders();
     var submitDate = new Date().toISOString().slice(0, 10);
+    var prepareTime = new Date().toISOString().slice(11, 19);
 
     var lrnInput = document.getElementById('s-lrn').value.trim();
     var uniqueLrn = lrnInput || ('LRN' + Date.now().toString().slice(-10) + '-' + Math.floor(Math.random() * 1000));
@@ -1135,7 +1139,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '<urn1:MessageSender>NDEA.GB</urn1:MessageSender>' +
       '<urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>' +
       '<urn1:DateOfPreparation>' + submitDate + '</urn1:DateOfPreparation>' +
-      '<urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>' +
+      '<urn1:TimeOfPreparation>' + prepareTime + '</urn1:TimeOfPreparation>' +
       '<urn1:MessageIdentifier>' + uniqueLrn + '</urn1:MessageIdentifier>' +
       '<urn1:CorrelationIdentifier>PORTAL' + uniqueLrn + '</urn1:CorrelationIdentifier>' +
       '</urn:Header>' +
@@ -1247,15 +1251,19 @@ document.addEventListener('DOMContentLoaded', function() {
         var parsed = JSON.parse(responseText);
         if (parsed && parsed.movementId) {
           localStorage.setItem('last_movement_id', parsed.movementId);
+
           ['gsm-id', 'sm-mov-id', 'gmsg-id', 'gsmsg-mid'].forEach(function(fieldId) {
             var el = document.getElementById(fieldId);
             if (el) el.value = parsed.movementId;
           });
+
           console.log('Auto-filled movementId:', parsed.movementId);
+        } else {
+          console.warn('Tab 1 returned 202 but no movementId was found in response.', parsed);
         }
       }
     } catch (e) {
-      console.log('Could not auto-fill movement IDs:', e);
+      console.error('Could not parse Tab 1 response for auto-fill:', e, responseText);
     }
   });
 
@@ -1276,8 +1284,18 @@ document.addEventListener('DOMContentLoaded', function() {
   // ==================== 3. GET SINGLE MOVEMENT ====================
   document.getElementById('get-single-movement-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+
+    var movId = (document.getElementById('gsm-id').value || localStorage.getItem('last_movement_id') || '').trim();
+
+    if (!movId) {
+      alert('Movement ID is required. Submit a movement in Tab 1 first, or paste a movementId.');
+      return;
+    }
+
+    document.getElementById('gsm-id').value = movId;
+
     var h = await getHeaders();
-    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + document.getElementById('gsm-id').value, { headers: h });
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId), { headers: h });
     document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
@@ -1285,11 +1303,11 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('submit-message-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
 
-    var movId = getVal('sm-mov-id');
+    var movId = (getVal('sm-mov-id') || localStorage.getItem('last_movement_id') || '').trim();
     var arc = getVal('sm-arc');
 
     if (!movId) {
-      alert('Movement ID is required. Submit a movement in Tab 1 or paste a movementId.');
+      alert('Movement ID is required. Submit a movement in Tab 1 first, or paste a movementId.');
       return;
     }
 
@@ -1298,19 +1316,21 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
+    document.getElementById('sm-mov-id').value = movId;
+
     var h = await getHeaders();
     var msgType = getVal('sm-type');
     var msgId = getVal('sm-msgid') || ('MSG' + Date.now());
     var seq = getVal('sm-seq') || '1';
     var submitDate = new Date().toISOString().slice(0, 10);
-    var now = new Date().toISOString().slice(0, 19);
+    var prepareTime = new Date().toISOString().slice(11, 19);
     var namespace = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:' + msgType + ':V3.23';
     var bodyXml = '';
 
     if (msgType === 'IE810') {
       var reason = getVal('msg-cancel-reason') || '3';
       bodyXml = '<urn:CancellationOfEAD>' +
-        '<urn:Attributes><urn:DateAndTimeOfValidationOfCancellation>' + now + '</urn:DateAndTimeOfValidationOfCancellation></urn:Attributes>' +
+        '<urn:Attributes><urn:DateAndTimeOfValidationOfCancellation>' + prepareTime + '</urn:DateAndTimeOfValidationOfCancellation></urn:Attributes>' +
         '<urn:ExciseMovementEad><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode></urn:ExciseMovementEad>' +
         '<urn:Cancellation><urn:CancellationReasonCode>' + reason + '</urn:CancellationReasonCode></urn:Cancellation>' +
         '</urn:CancellationOfEAD>';
@@ -1318,7 +1338,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var arrivalDate = getVal('msg-arrival-date') || submitDate;
       var conclusion = getVal('msg-receipt-conclusion') || '1';
       bodyXml = '<urn:AcceptedOrRejectedReportOfReceiptExport>' +
-        '<urn:Attributes><urn:DateAndTimeOfValidationOfReportOfReceiptExport>' + now + '</urn:DateAndTimeOfValidationOfReportOfReceiptExport></urn:Attributes>' +
+        '<urn:Attributes><urn:DateAndTimeOfValidationOfReportOfReceiptExport>' + prepareTime + '</urn:DateAndTimeOfValidationOfReportOfReceiptExport></urn:Attributes>' +
         '<urn:ConsigneeTrader language="en"><urn:Traderid>' + getVal('s-consignee-ern') + '</urn:Traderid><urn:TraderName>' + getVal('s-consignee-name') + '</urn:TraderName></urn:ConsigneeTrader>' +
         '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
         '<urn:DeliveryPlaceTrader language="en"><urn:Traderid>' + getVal('s-delivery-trader-id') + '</urn:Traderid><urn:TraderName>' + getVal('s-delivery-name') + '</urn:TraderName></urn:DeliveryPlaceTrader>' +
@@ -1327,7 +1347,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '</urn:AcceptedOrRejectedReportOfReceiptExport>';
     } else if (msgType === 'IE813') {
       bodyXml = '<urn:ChangeOfDestination>' +
-        '<urn:Attributes><urn:DateAndTimeOfValidationOfChangeOfDestination>' + now + '</urn:DateAndTimeOfValidationOfChangeOfDestination></urn:Attributes>' +
+        '<urn:Attributes><urn:DateAndTimeOfValidationOfChangeOfDestination>' + prepareTime + '</urn:DateAndTimeOfValidationOfChangeOfDestination></urn:Attributes>' +
         '<urn:UpdateEadEsad><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:JourneyTime>D02</urn:JourneyTime><urn:ChangedTransportArrangement>1</urn:ChangedTransportArrangement><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:UpdateEadEsad>' +
         '<urn:DestinationChanged><urn:DestinationTypeCode>' + getVal('msg-dest-type') + '</urn:DestinationTypeCode>' +
         '<urn:NewConsigneeTrader language="en"><urn:Traderid>' + getVal('msg-new-consignee') + '</urn:Traderid><urn:TraderName>' + getVal('msg-new-consignee-name') + '</urn:TraderName><urn:StreetName>' + getVal('msg-new-consignee-street') + '</urn:StreetName>' +
@@ -1345,7 +1365,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '</urn:ChangeOfDestination>';
     } else if (msgType === 'IE819') {
       bodyXml = '<urn:AlertOrRejectionOfEADESAD>' +
-        '<urn:Attributes><urn:DateAndTimeOfValidationOfAlertRejection>' + now + '</urn:DateAndTimeOfValidationOfAlertRejection></urn:Attributes>' +
+        '<urn:Attributes><urn:DateAndTimeOfValidationOfAlertRejection>' + prepareTime + '</urn:DateAndTimeOfValidationOfAlertRejection></urn:Attributes>' +
         '<urn:ConsigneeTrader language="en"><urn:Traderid>' + getVal('s-consignee-ern') + '</urn:Traderid><urn:TraderName>' + getVal('s-consignee-name') + '</urn:TraderName></urn:ConsigneeTrader>' +
         '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
         '<urn:DestinationOffice><urn:ReferenceNumber>' + getVal('s-dispatch-office') + '</urn:ReferenceNumber></urn:DestinationOffice>' +
@@ -1355,13 +1375,27 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (msgType === 'IE837') {
       var submitterType = getVal('msg-submitter-type') || '1';
       var submitterId = submitterType === '1' ? getVal('s-consignor-ern') : getVal('s-consignee-ern');
+
+      // IMPORTANT:
+      // Do NOT include DateAndTimeOfValidationOfExplanationOnDelay.
+      // HMRC business rule 8017 says this must not be present in trader-submitted IE837.
+      // The message header still contains DateOfPreparation and TimeOfPreparation.
       bodyXml = '<urn:ExplanationOnDelayForDelivery>' +
-        '<urn:Attributes><urn:SubmitterIdentification>' + submitterId + '</urn:SubmitterIdentification><urn:SubmitterType>' + submitterType + '</urn:SubmitterType><urn:ExplanationCode>' + getVal('msg-explanation-code') + '</urn:ExplanationCode><urn:ComplementaryInformation language="en">' + getVal('msg-delay-info') + '</urn:ComplementaryInformation><urn:MessageRole>1</urn:MessageRole><urn:DateAndTimeOfValidationOfExplanationOnDelay>' + now + '</urn:DateAndTimeOfValidationOfExplanationOnDelay></urn:Attributes>' +
-        '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
+        '<urn:Attributes>' +
+        '<urn:SubmitterIdentification>' + submitterId + '</urn:SubmitterIdentification>' +
+        '<urn:SubmitterType>' + submitterType + '</urn:SubmitterType>' +
+        '<urn:ExplanationCode>' + getVal('msg-explanation-code') + '</urn:ExplanationCode>' +
+        '<urn:ComplementaryInformation language="en">' + getVal('msg-delay-info') + '</urn:ComplementaryInformation>' +
+        '<urn:MessageRole>1</urn:MessageRole>' +
+        '</urn:Attributes>' +
+        '<urn:ExciseMovement>' +
+        '<urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode>' +
+        '<urn:SequenceNumber>' + seq + '</urn:SequenceNumber>' +
+        '</urn:ExciseMovement>' +
         '</urn:ExplanationOnDelayForDelivery>';
     } else if (msgType === 'IE871') {
       bodyXml = '<urn:ExplanationOnReasonForShortage>' +
-        '<urn:Attributes><urn:SubmitterType>1</urn:SubmitterType><urn:DateAndTimeOfValidationOfExplanationOnShortage>' + now + '</urn:DateAndTimeOfValidationOfExplanationOnShortage></urn:Attributes>' +
+        '<urn:Attributes><urn:SubmitterType>1</urn:SubmitterType><urn:DateAndTimeOfValidationOfExplanationOnShortage>' + prepareTime + '</urn:DateAndTimeOfValidationOfExplanationOnShortage></urn:Attributes>' +
         '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
         '<urn:ConsignorTrader language="en"><urn:TraderExciseNumber>' + getVal('s-consignor-ern') + '</urn:TraderExciseNumber><urn:TraderName>' + getVal('s-consignor-name') + '</urn:TraderName></urn:ConsignorTrader>' +
         '<urn:Analysis><urn:DateOfAnalysis>' + getVal('msg-analysis-date') + '</urn:DateOfAnalysis><urn:GlobalExplanation language="en">' + getVal('msg-shortage-explanation') + '</urn:GlobalExplanation></urn:Analysis>' +
@@ -1373,7 +1407,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '<urn1:MessageSender>NDEA.GB</urn1:MessageSender>' +
       '<urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>' +
       '<urn1:DateOfPreparation>' + submitDate + '</urn1:DateOfPreparation>' +
-      '<urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>' +
+      '<urn1:TimeOfPreparation>' + prepareTime + '</urn1:TimeOfPreparation>' +
       '<urn1:MessageIdentifier>' + msgId + '</urn1:MessageIdentifier>' +
       '<urn1:CorrelationIdentifier>PORTAL' + msgId + '</urn1:CorrelationIdentifier>' +
       '</urn:Header>' +
@@ -1397,18 +1431,37 @@ document.addEventListener('DOMContentLoaded', function() {
   // ==================== 5. GET MESSAGES ====================
   document.getElementById('get-messages-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+
+    var movId = (document.getElementById('gmsg-id').value || localStorage.getItem('last_movement_id') || '').trim();
+
+    if (!movId) {
+      alert('Movement ID is required. Submit a movement in Tab 1 first, or paste a movementId.');
+      return;
+    }
+
+    document.getElementById('gmsg-id').value = movId;
+
     var h = await getHeaders();
-    var movId = document.getElementById('gmsg-id').value;
-    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages', { headers: h });
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages', { headers: h });
     var text = await res.text();
+
     try {
       var msgs = JSON.parse(text);
       if (Array.isArray(msgs)) {
-        msgs.forEach(function(m) { if (m.encodedMessage) { try { m.decodedXml = atob(m.encodedMessage); } catch(e) { m.decodedXml = 'Decode failed'; } } });
+        msgs.forEach(function(m) {
+          if (m.encodedMessage) {
+            try {
+              m.decodedXml = atob(m.encodedMessage);
+            } catch (e) {
+              m.decodedXml = 'Decode failed';
+            }
+          }
+        });
         document.getElementById('gmsg-output').innerText = JSON.stringify(msgs, null, 2);
         return;
       }
-    } catch(e) {}
+    } catch (e) {}
+
     document.getElementById('gmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
   });
   document.getElementById('export-gmsg-btn').addEventListener('click', function() { exportResult('gmsg-output', 'messages'); });
@@ -1416,11 +1469,30 @@ document.addEventListener('DOMContentLoaded', function() {
   // ==================== 6. GET SINGLE MESSAGE ====================
   document.getElementById('get-single-message-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+
+    var movId = (document.getElementById('gsmsg-mid').value || localStorage.getItem('last_movement_id') || '').trim();
+    var msgId = (document.getElementById('gsmsg-id').value || '').trim();
+
+    if (!movId) {
+      alert('Movement ID is required. Submit a movement in Tab 1 first, or paste a movementId.');
+      return;
+    }
+
+    if (!msgId) {
+      alert('Message ID is required. Get it from Tab 5, for example XI000002.');
+      return;
+    }
+
+    document.getElementById('gsmsg-mid').value = movId;
+
     var h = await getHeaders();
     h['Accept'] = 'application/vnd.hmrc.1.0+xml';
-    var movId = document.getElementById('gsmsg-mid').value;
-    var msgId = document.getElementById('gsmsg-id').value;
-    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + movId + '/messages/' + msgId, { headers: h });
+
+    var res = await fetch(
+      '/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages/' + encodeURIComponent(msgId),
+      { headers: h }
+    );
+
     document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
