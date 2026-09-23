@@ -683,29 +683,29 @@
       </div>
     </div>
 
-   <!-- TAB 4: SUBMIT MESSAGE -->
-<div id="tab-submit-msg" class="tab">
-  <div class="card">
-    <h2>Submit Message (IE810/813/818/819/837/871)</h2>
-    <div class="form-grid">
-      <div class="field"><label>Movement ID <span class="required-asterisk">*</span>
-        <span class="field-help">?<span class="tooltip">The movementId from your IE815 submission response (e.g., a113cc24-427d-4373-abdd-cafedc0008d5). Get this from Tab 1 response or Tab 2/3.</span></span>
-      </label><input type="text" id="sm-movement-id" placeholder="Paste movement ID from Tab 1" required></div>
-      <div class="field"><label>Administrative Reference Code (ARC) <span class="required-asterisk">*</span>
-        <span class="field-help">?<span class="tooltip">21-character ARC from IE801 message (e.g., 23XI00000000000000013). Get this from Tab 5 messages.</span></span>
-      </label><input type="text" id="sm-arc" placeholder="e.g., 23XI00000000000000013" required></div>
-      <div class="field"><label>Sequence Number <span class="required-asterisk">*</span></label><input type="number" id="sm-seq" value="1" min="1"></div>
-      <div class="field"><label>Message Type <span class="required-asterisk">*</span></label>
-        <select id="sm-type">
-          <option value="IE810">IE810 - Cancellation</option>
-          <option value="IE818">IE818 - Report of Receipt</option>
-          <option value="IE813">IE813 - Change of Destination</option>
-          <option value="IE819">IE819 - Alert or Rejection</option>
-          <option value="IE837">IE837 - Explain Delay</option>
-          <option value="IE871">IE871 - Reason for Shortage</option>
-        </select>
+    <!-- TAB 4: SUBMIT MESSAGE -->
+    <div id="tab-submit-msg" class="tab">
+      <div class="card">
+        <h2>Submit Message (IE810/813/818/819/837/871)</h2>
+        <div class="form-grid">
+          <div class="field"><label>Administrative Reference Code (ARC) <span class="required-asterisk">*</span></label><input type="text" id="sm-arc" placeholder="e.g., 23GB00000000000377161"></div>
+          <div class="field"><label>Sequence Number <span class="required-asterisk">*</span></label><input type="number" id="sm-seq" value="1" min="1"></div>
+          <div class="field"><label>Message Type <span class="required-asterisk">*</span></label>
+            <select id="sm-type">
+              <option value="IE810">IE810 - Cancellation</option>
+              <option value="IE818">IE818 - Report of Receipt</option>
+              <option value="IE813">IE813 - Change of Destination</option>
+              <option value="IE819">IE819 - Alert or Rejection</option>
+              <option value="IE837">IE837 - Explain Delay</option>
+              <option value="IE871">IE871 - Reason for Shortage</option>
+            </select>
+          </div>
+          <div class="field"><label>Message Identifier <span class="required-asterisk">*</span></label><input type="text" id="sm-msgid" value="GB100000000302249"></div>
+        </div>
+        <div id="msg-specific-fields"></div>
+        <button id="submit-message-btn" style="margin-top:20px;">Submit Message</button>
+        <pre id="sm-output">Waiting...</pre>
       </div>
-      <div class="field"><label>Message Identifier <span class="required-asterisk">*</span></label><input type="text" id="sm-msgid" value="GB100000000302249"></div>
     </div>
 
     <!-- TAB 5: GET MESSAGES -->
@@ -1318,8 +1318,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '</urn:' + msgType + '>';
 
     console.log('Sending ' + msgType + ' XML:', xml);
-    var movementId = document.getElementById('sm-movement-id').value;
-var endpoint = '/customs/excise/movements/' + movementId + '/messages';
+    var endpoint = arc ? '/customs/excise/movements/messages' : '/customs/excise/movements';
     var res = await fetch('/api/emcs?endpoint=' + endpoint, { method: 'POST', headers: Object.assign({}, h, { 'Content-Type': 'application/xml' }), body: xml });
     var responseText = await res.text();
     console.log('HMRC Response:', res.status, responseText);
