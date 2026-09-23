@@ -572,7 +572,7 @@
               </div>
               <div class="field">
                 <label>Alcoholic Strength (% ABV)
-                  <span class="field-help">?<span class="tooltip">Percentage by volume at 20°C. Required for: B000, W200, W300, I000, S200, S300, S400, S500. <b>Format: n..5.2</b></span></span>
+                  <span class="field-help">?<span class="tooltip">Percentage by volume at 20°C. Required for: B000, W200, W300, I000, S200, S300, S400, S500. Leave blank if not applicable. <b>Format: n..5.2</b></span></span>
                 </label>
                 <input type="number" class="s-abv" value="0.5" step="0.01">
                 <div class="validation-msg"></div>
@@ -596,7 +596,7 @@
               </div>
               <div class="field">
                 <label>Number of Packages
-                  <span class="field-help">?<span class="tooltip">Count of packages for this line item. Conditional - required for countable packages. <b>Format: n..15</b></span></span>
+                  <span class="field-help">?<span class="tooltip">Count of packages for this line item. Conditional - required for countable packages. Leave blank if not applicable. <b>Format: n..15</b></span></span>
                 </label>
                 <input type="number" class="s-package-count" value="2" min="0">
                 <div class="validation-msg"></div>
@@ -688,7 +688,8 @@
       <div class="card">
         <h2>Submit Message (IE810/813/818/819/837/871)</h2>
         <div class="form-grid">
-          <div class="field"><label>Administrative Reference Code (ARC) <span class="required-asterisk">*</span></label><input type="text" id="sm-arc" placeholder="e.g., 23GB00000000000377161"></div>
+          <div class="field"><label>Movement ID <span class="required-asterisk">*</span></label><input type="text" id="sm-mov-id" placeholder="Auto-filled after Tab 1, or paste movementId"></div>
+          <div class="field"><label>Administrative Reference Code (ARC) <span class="required-asterisk">*</span></label><input type="text" id="sm-arc" placeholder="e.g., 23XI00000000000000013"></div>
           <div class="field"><label>Sequence Number <span class="required-asterisk">*</span></label><input type="number" id="sm-seq" value="1" min="1"></div>
           <div class="field"><label>Message Type <span class="required-asterisk">*</span></label>
             <select id="sm-type">
@@ -696,7 +697,7 @@
               <option value="IE818">IE818 - Report of Receipt</option>
               <option value="IE813">IE813 - Change of Destination</option>
               <option value="IE819">IE819 - Alert or Rejection</option>
-              <option value="IE837">IE837 - Explain Delay</option>
+              <option value="IE837" selected>IE837 - Explain Delay</option>
               <option value="IE871">IE871 - Reason for Shortage</option>
             </select>
           </div>
@@ -821,6 +822,15 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   attachValidation(document);
+
+  // Restore last movement ID if available
+  var lastMovId = localStorage.getItem('last_movement_id');
+  if (lastMovId) {
+    ['gsm-id', 'sm-mov-id', 'gmsg-id', 'gsmsg-mid'].forEach(function(fieldId) {
+      var el = document.getElementById(fieldId);
+      if (el) el.value = lastMovId;
+    });
+  }
 
   // ==================== AUTH ====================
   var urlParams = new URLSearchParams(window.location.search);
@@ -963,6 +973,11 @@ document.addEventListener('DOMContentLoaded', function() {
     return '<urn:' + tag + '>' + value + '</urn:' + tag + '>';
   }
 
+  function getVal(id) {
+    var el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }
+
   // ==================== ADD TRANSPORT UNIT ====================
   document.getElementById('add-transport-unit-btn').addEventListener('click', function() {
     transportUnitCount++;
@@ -1006,10 +1021,10 @@ document.addEventListener('DOMContentLoaded', function() {
       '<div class="field"><label>Quantity <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">In units based on product: thousands (T200/T300), kg (T400/T500/E470/E500/E600), litres at 15°C (energy products), litres at 20°C (B000/W200/W300/I000/S200-S500). <b>Format: n..15.3</b></span></span></label><input type="number" class="s-qty" value="2000" step="0.001" required><div class="validation-msg"></div></div>' +
       '<div class="field"><label>Gross Mass (kg) <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">Gross weight including packaging in kg. <b>Format: n..16.6</b></span></span></label><input type="number" class="s-weight" value="20000" step="0.000001" required><div class="validation-msg"></div></div>' +
       '<div class="field"><label>Net Mass (kg) <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">Net weight without packaging in kg. <b>Format: n..16.6</b></span></span></label><input type="number" class="s-net-weight" value="19999" step="0.000001" required><div class="validation-msg"></div></div>' +
-      '<div class="field"><label>Alcoholic Strength (% ABV) <span class="field-help">?<span class="tooltip">Percentage by volume at 20°C. Required for B000/W200/W300/I000/S200-S500. <b>Format: n..5.2</b></span></span></label><input type="number" class="s-abv" value="0.5" step="0.01"><div class="validation-msg"></div></div>' +
+      '<div class="field"><label>Alcoholic Strength (% ABV) <span class="field-help">?<span class="tooltip">Percentage by volume at 20°C. Required for B000/W200/W300/I000/S200-S500. Leave blank if not applicable. <b>Format: n..5.2</b></span></span></label><input type="number" class="s-abv" value="0.5" step="0.01"><div class="validation-msg"></div></div>' +
       '<div class="field"><label>Fiscal Mark Used Flag <span class="field-help">?<span class="tooltip">Whether goods carry fiscal marks. <b>Format: n1</b></span></span></label><select class="s-fiscal"><option value="0" selected>0 - No</option><option value="1">1 - Yes</option></select><div class="validation-msg"></div></div>' +
       '<div class="field"><label>Kind of Packages <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">2-letter code from UK Trade Tariff (BA=Barrel, BX=Box, CT=Carton, DR=Drum). <b>Format: a2</b></span></span></label><input type="text" class="s-package-kind" value="BA" pattern="^[A-Z]{2}$" maxlength="2" required><div class="validation-msg"></div></div>' +
-      '<div class="field"><label>Number of Packages <span class="field-help">?<span class="tooltip">Count of packages. <b>Format: n..15</b></span></span></label><input type="number" class="s-package-count" value="2" min="0"><div class="validation-msg"></div></div>' +
+      '<div class="field"><label>Number of Packages <span class="field-help">?<span class="tooltip">Count of packages. Leave blank if not applicable. <b>Format: n..15</b></span></span></label><input type="number" class="s-package-count" value="2" min="0"><div class="validation-msg"></div></div>' +
       '</div>';
     container.appendChild(newItem);
     newItem.querySelector('.remove-item-btn').addEventListener('click', function() {
@@ -1086,19 +1101,31 @@ document.addEventListener('DOMContentLoaded', function() {
     var itemIndex = 0;
     document.querySelectorAll('#goods-items-container .item-field').forEach(function(item) {
       itemIndex++;
+
+      var abv = item.querySelector('.s-abv').value.trim();
+      var pkgCount = item.querySelector('.s-package-count').value.trim();
+
       bodyEadEsadXml += '<urn:BodyEadEsad>' +
         '<urn:BodyRecordUniqueReference>' + itemIndex + '</urn:BodyRecordUniqueReference>' +
         '<urn:ExciseProductCode>' + item.querySelector('.s-product-code').value + '</urn:ExciseProductCode>' +
         '<urn:CnCode>' + item.querySelector('.s-cn-code').value + '</urn:CnCode>' +
         '<urn:Quantity>' + item.querySelector('.s-qty').value + '</urn:Quantity>' +
         '<urn:GrossMass>' + item.querySelector('.s-weight').value + '</urn:GrossMass>' +
-        '<urn:NetMass>' + item.querySelector('.s-net-weight').value + '</urn:NetMass>' +
-        '<urn:AlcoholicStrengthByVolumeInPercentage>' + item.querySelector('.s-abv').value + '</urn:AlcoholicStrengthByVolumeInPercentage>' +
-        '<urn:FiscalMarkUsedFlag>' + item.querySelector('.s-fiscal').value + '</urn:FiscalMarkUsedFlag>' +
+        '<urn:NetMass>' + item.querySelector('.s-net-weight').value + '</urn:NetMass>';
+
+      if (abv !== '') {
+        bodyEadEsadXml += '<urn:AlcoholicStrengthByVolumeInPercentage>' + abv + '</urn:AlcoholicStrengthByVolumeInPercentage>';
+      }
+
+      bodyEadEsadXml += '<urn:FiscalMarkUsedFlag>' + item.querySelector('.s-fiscal').value + '</urn:FiscalMarkUsedFlag>' +
         '<urn:Package>' +
-        '<urn:KindOfPackages>' + item.querySelector('.s-package-kind').value + '</urn:KindOfPackages>' +
-        '<urn:NumberOfPackages>' + item.querySelector('.s-package-count').value + '</urn:NumberOfPackages>' +
-        '</urn:Package>' +
+        '<urn:KindOfPackages>' + item.querySelector('.s-package-kind').value + '</urn:KindOfPackages>';
+
+      if (pkgCount !== '') {
+        bodyEadEsadXml += '<urn:NumberOfPackages>' + pkgCount + '</urn:NumberOfPackages>';
+      }
+
+      bodyEadEsadXml += '</urn:Package>' +
         '</urn:BodyEadEsad>';
     });
 
@@ -1213,6 +1240,23 @@ document.addEventListener('DOMContentLoaded', function() {
     var responseText = await res.text();
     console.log('HMRC Response:', res.status, responseText);
     document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
+
+    // Auto-fill movement IDs on success
+    try {
+      if (res.status === 202) {
+        var parsed = JSON.parse(responseText);
+        if (parsed && parsed.movementId) {
+          localStorage.setItem('last_movement_id', parsed.movementId);
+          ['gsm-id', 'sm-mov-id', 'gmsg-id', 'gsmsg-mid'].forEach(function(fieldId) {
+            var el = document.getElementById(fieldId);
+            if (el) el.value = parsed.movementId;
+          });
+          console.log('Auto-filled movementId:', parsed.movementId);
+        }
+      }
+    } catch (e) {
+      console.log('Could not auto-fill movement IDs:', e);
+    }
   });
 
   document.getElementById('export-submit-btn').addEventListener('click', function() { exportResult('submit-output', 'movement'); });
@@ -1240,68 +1284,87 @@ document.addEventListener('DOMContentLoaded', function() {
   // ==================== 4. SUBMIT MESSAGE ====================
   document.getElementById('submit-message-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+
+    var movId = getVal('sm-mov-id');
+    var arc = getVal('sm-arc');
+
+    if (!movId) {
+      alert('Movement ID is required. Submit a movement in Tab 1 or paste a movementId.');
+      return;
+    }
+
+    if (!arc) {
+      alert('ARC is required. Get it from Tab 5 by opening the IE801 message.');
+      return;
+    }
+
     var h = await getHeaders();
-    var msgType = document.getElementById('sm-type').value;
-    var msgId = document.getElementById('sm-msgid').value;
-    var arc = document.getElementById('sm-arc').value;
-    var seq = document.getElementById('sm-seq').value;
+    var msgType = getVal('sm-type');
+    var msgId = getVal('sm-msgid') || ('MSG' + Date.now());
+    var seq = getVal('sm-seq') || '1';
     var submitDate = new Date().toISOString().slice(0, 10);
     var now = new Date().toISOString().slice(0, 19);
     var namespace = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:' + msgType + ':V3.23';
     var bodyXml = '';
 
     if (msgType === 'IE810') {
-      var reason = document.getElementById('msg-cancel-reason').value;
+      var reason = getVal('msg-cancel-reason') || '3';
       bodyXml = '<urn:CancellationOfEAD>' +
         '<urn:Attributes><urn:DateAndTimeOfValidationOfCancellation>' + now + '</urn:DateAndTimeOfValidationOfCancellation></urn:Attributes>' +
         '<urn:ExciseMovementEad><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode></urn:ExciseMovementEad>' +
         '<urn:Cancellation><urn:CancellationReasonCode>' + reason + '</urn:CancellationReasonCode></urn:Cancellation>' +
         '</urn:CancellationOfEAD>';
     } else if (msgType === 'IE818') {
-      var arrivalDate = document.getElementById('msg-arrival-date').value;
-      var conclusion = document.getElementById('msg-receipt-conclusion').value;
+      var arrivalDate = getVal('msg-arrival-date') || submitDate;
+      var conclusion = getVal('msg-receipt-conclusion') || '1';
       bodyXml = '<urn:AcceptedOrRejectedReportOfReceiptExport>' +
         '<urn:Attributes><urn:DateAndTimeOfValidationOfReportOfReceiptExport>' + now + '</urn:DateAndTimeOfValidationOfReportOfReceiptExport></urn:Attributes>' +
-        '<urn:ConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName></urn:ConsigneeTrader>' +
+        '<urn:ConsigneeTrader language="en"><urn:Traderid>' + getVal('s-consignee-ern') + '</urn:Traderid><urn:TraderName>' + getVal('s-consignee-name') + '</urn:TraderName></urn:ConsigneeTrader>' +
         '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
-        '<urn:DeliveryPlaceTrader language="en"><urn:Traderid>' + document.getElementById('s-delivery-trader-id').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('s-delivery-name').value + '</urn:TraderName></urn:DeliveryPlaceTrader>' +
-        '<urn:DestinationOffice><urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber></urn:DestinationOffice>' +
+        '<urn:DeliveryPlaceTrader language="en"><urn:Traderid>' + getVal('s-delivery-trader-id') + '</urn:Traderid><urn:TraderName>' + getVal('s-delivery-name') + '</urn:TraderName></urn:DeliveryPlaceTrader>' +
+        '<urn:DestinationOffice><urn:ReferenceNumber>' + getVal('s-dispatch-office') + '</urn:ReferenceNumber></urn:DestinationOffice>' +
         '<urn:ReportOfReceiptExport><urn:DateOfArrivalOfExciseProducts>' + arrivalDate + '</urn:DateOfArrivalOfExciseProducts><urn:GlobalConclusionOfReceipt>' + conclusion + '</urn:GlobalConclusionOfReceipt></urn:ReportOfReceiptExport>' +
         '</urn:AcceptedOrRejectedReportOfReceiptExport>';
     } else if (msgType === 'IE813') {
       bodyXml = '<urn:ChangeOfDestination>' +
         '<urn:Attributes><urn:DateAndTimeOfValidationOfChangeOfDestination>' + now + '</urn:DateAndTimeOfValidationOfChangeOfDestination></urn:Attributes>' +
         '<urn:UpdateEadEsad><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:JourneyTime>D02</urn:JourneyTime><urn:ChangedTransportArrangement>1</urn:ChangedTransportArrangement><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:UpdateEadEsad>' +
-        '<urn:DestinationChanged><urn:DestinationTypeCode>' + document.getElementById('msg-dest-type').value + '</urn:DestinationTypeCode>' +
-        '<urn:NewConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('msg-new-consignee').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('msg-new-consignee-name').value + '</urn:TraderName><urn:StreetName>' + document.getElementById('msg-new-consignee-street').value + '</urn:StreetName><urn:StreetNumber>' + document.getElementById('msg-new-consignee-street-num').value + '</urn:StreetNumber><urn:Postcode>' + document.getElementById('msg-new-consignee-postcode').value + '</urn:Postcode><urn:City>' + document.getElementById('msg-new-consignee-city').value + '</urn:City></urn:NewConsigneeTrader>' +
-        '<urn:DeliveryPlaceTrader language="en"><urn:Traderid>' + document.getElementById('msg-new-consignee').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('msg-new-consignee-name').value + '</urn:TraderName><urn:StreetName>' + document.getElementById('msg-new-consignee-street').value + '</urn:StreetName><urn:StreetNumber>' + document.getElementById('msg-new-consignee-street-num').value + '</urn:StreetNumber><urn:Postcode>' + document.getElementById('msg-new-consignee-postcode').value + '</urn:Postcode><urn:City>' + document.getElementById('msg-new-consignee-city').value + '</urn:City></urn:DeliveryPlaceTrader>' +
+        '<urn:DestinationChanged><urn:DestinationTypeCode>' + getVal('msg-dest-type') + '</urn:DestinationTypeCode>' +
+        '<urn:NewConsigneeTrader language="en"><urn:Traderid>' + getVal('msg-new-consignee') + '</urn:Traderid><urn:TraderName>' + getVal('msg-new-consignee-name') + '</urn:TraderName><urn:StreetName>' + getVal('msg-new-consignee-street') + '</urn:StreetName>' +
+        xmlField('StreetNumber', getVal('msg-new-consignee-street-num')) +
+        '<urn:Postcode>' + getVal('msg-new-consignee-postcode') + '</urn:Postcode><urn:City>' + getVal('msg-new-consignee-city') + '</urn:City></urn:NewConsigneeTrader>' +
+        '<urn:DeliveryPlaceTrader language="en"><urn:Traderid>' + getVal('msg-new-consignee') + '</urn:Traderid><urn:TraderName>' + getVal('msg-new-consignee-name') + '</urn:TraderName><urn:StreetName>' + getVal('msg-new-consignee-street') + '</urn:StreetName>' +
+        xmlField('StreetNumber', getVal('msg-new-consignee-street-num')) +
+        '<urn:Postcode>' + getVal('msg-new-consignee-postcode') + '</urn:Postcode><urn:City>' + getVal('msg-new-consignee-city') + '</urn:City></urn:DeliveryPlaceTrader>' +
         '<urn:MovementGuarantee><urn:GuarantorTypeCode>1</urn:GuarantorTypeCode></urn:MovementGuarantee>' +
         '</urn:DestinationChanged>' +
-        '<urn:NewTransporterTrader language="en"><urn:TraderName>' + document.getElementById('msg-new-consignee-name').value + '</urn:TraderName><urn:StreetName>' + document.getElementById('msg-new-consignee-street').value + '</urn:StreetName><urn:StreetNumber>' + document.getElementById('msg-new-consignee-street-num').value + '</urn:StreetNumber><urn:Postcode>' + document.getElementById('msg-new-consignee-postcode').value + '</urn:Postcode><urn:City>' + document.getElementById('msg-new-consignee-city').value + '</urn:City></urn:NewTransporterTrader>' +
+        '<urn:NewTransporterTrader language="en"><urn:TraderName>' + getVal('msg-new-consignee-name') + '</urn:TraderName><urn:StreetName>' + getVal('msg-new-consignee-street') + '</urn:StreetName>' +
+        xmlField('StreetNumber', getVal('msg-new-consignee-street-num')) +
+        '<urn:Postcode>' + getVal('msg-new-consignee-postcode') + '</urn:Postcode><urn:City>' + getVal('msg-new-consignee-city') + '</urn:City></urn:NewTransporterTrader>' +
         '<urn:TransportDetails><urn:TransportUnitCode>1</urn:TransportUnitCode><urn:IdentityOfTransportUnits>1</urn:IdentityOfTransportUnits></urn:TransportDetails>' +
         '</urn:ChangeOfDestination>';
     } else if (msgType === 'IE819') {
       bodyXml = '<urn:AlertOrRejectionOfEADESAD>' +
         '<urn:Attributes><urn:DateAndTimeOfValidationOfAlertRejection>' + now + '</urn:DateAndTimeOfValidationOfAlertRejection></urn:Attributes>' +
-        '<urn:ConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName></urn:ConsigneeTrader>' +
+        '<urn:ConsigneeTrader language="en"><urn:Traderid>' + getVal('s-consignee-ern') + '</urn:Traderid><urn:TraderName>' + getVal('s-consignee-name') + '</urn:TraderName></urn:ConsigneeTrader>' +
         '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
-        '<urn:DestinationOffice><urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber></urn:DestinationOffice>' +
-        '<urn:AlertOrRejection><urn:DateOfAlertOrRejection>' + document.getElementById('msg-alert-date').value + '</urn:DateOfAlertOrRejection><urn:EadEsadRejectedFlag>' + document.getElementById('msg-rejected-flag').value + '</urn:EadEsadRejectedFlag></urn:AlertOrRejection>' +
-        '<urn:AlertOrRejectionOfEadEsadReason><urn:AlertOrRejectionOfMovementReasonCode>' + document.getElementById('msg-rejection-reason').value + '</urn:AlertOrRejectionOfMovementReasonCode><urn:ComplementaryInformation language="en">' + document.getElementById('msg-rejection-info').value + '</urn:ComplementaryInformation></urn:AlertOrRejectionOfEadEsadReason>' +
+        '<urn:DestinationOffice><urn:ReferenceNumber>' + getVal('s-dispatch-office') + '</urn:ReferenceNumber></urn:DestinationOffice>' +
+        '<urn:AlertOrRejection><urn:DateOfAlertOrRejection>' + getVal('msg-alert-date') + '</urn:DateOfAlertOrRejection><urn:EadEsadRejectedFlag>' + getVal('msg-rejected-flag') + '</urn:EadEsadRejectedFlag></urn:AlertOrRejection>' +
+        '<urn:AlertOrRejectionOfEadEsadReason><urn:AlertOrRejectionOfMovementReasonCode>' + getVal('msg-rejection-reason') + '</urn:AlertOrRejectionOfMovementReasonCode><urn:ComplementaryInformation language="en">' + getVal('msg-rejection-info') + '</urn:ComplementaryInformation></urn:AlertOrRejectionOfEadEsadReason>' +
         '</urn:AlertOrRejectionOfEADESAD>';
     } else if (msgType === 'IE837') {
-      var submitterType = document.getElementById('msg-submitter-type').value;
-      var submitterId = submitterType === '1' ? document.getElementById('s-consignor-ern').value : document.getElementById('s-consignee-ern').value;
+      var submitterType = getVal('msg-submitter-type') || '1';
+      var submitterId = submitterType === '1' ? getVal('s-consignor-ern') : getVal('s-consignee-ern');
       bodyXml = '<urn:ExplanationOnDelayForDelivery>' +
-        '<urn:Attributes><urn:SubmitterIdentification>' + submitterId + '</urn:SubmitterIdentification><urn:SubmitterType>' + submitterType + '</urn:SubmitterType><urn:ExplanationCode>' + document.getElementById('msg-explanation-code').value + '</urn:ExplanationCode><urn:ComplementaryInformation language="en">' + document.getElementById('msg-delay-info').value + '</urn:ComplementaryInformation><urn:MessageRole>1</urn:MessageRole><urn:DateAndTimeOfValidationOfExplanationOnDelay>' + now + '</urn:DateAndTimeOfValidationOfExplanationOnDelay></urn:Attributes>' +
+        '<urn:Attributes><urn:SubmitterIdentification>' + submitterId + '</urn:SubmitterIdentification><urn:SubmitterType>' + submitterType + '</urn:SubmitterType><urn:ExplanationCode>' + getVal('msg-explanation-code') + '</urn:ExplanationCode><urn:ComplementaryInformation language="en">' + getVal('msg-delay-info') + '</urn:ComplementaryInformation><urn:MessageRole>1</urn:MessageRole><urn:DateAndTimeOfValidationOfExplanationOnDelay>' + now + '</urn:DateAndTimeOfValidationOfExplanationOnDelay></urn:Attributes>' +
         '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
         '</urn:ExplanationOnDelayForDelivery>';
     } else if (msgType === 'IE871') {
       bodyXml = '<urn:ExplanationOnReasonForShortage>' +
         '<urn:Attributes><urn:SubmitterType>1</urn:SubmitterType><urn:DateAndTimeOfValidationOfExplanationOnShortage>' + now + '</urn:DateAndTimeOfValidationOfExplanationOnShortage></urn:Attributes>' +
         '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
-        '<urn:ConsignorTrader language="en"><urn:TraderExciseNumber>' + document.getElementById('s-consignor-ern').value + '</urn:TraderExciseNumber><urn:TraderName>' + document.getElementById('s-consignor-name').value + '</urn:TraderName></urn:ConsignorTrader>' +
-        '<urn:Analysis><urn:DateOfAnalysis>' + document.getElementById('msg-analysis-date').value + '</urn:DateOfAnalysis><urn:GlobalExplanation language="en">' + document.getElementById('msg-shortage-explanation').value + '</urn:GlobalExplanation></urn:Analysis>' +
+        '<urn:ConsignorTrader language="en"><urn:TraderExciseNumber>' + getVal('s-consignor-ern') + '</urn:TraderExciseNumber><urn:TraderName>' + getVal('s-consignor-name') + '</urn:TraderName></urn:ConsignorTrader>' +
+        '<urn:Analysis><urn:DateOfAnalysis>' + getVal('msg-analysis-date') + '</urn:DateOfAnalysis><urn:GlobalExplanation language="en">' + getVal('msg-shortage-explanation') + '</urn:GlobalExplanation></urn:Analysis>' +
         '</urn:ExplanationOnReasonForShortage>';
     }
 
@@ -1318,8 +1381,14 @@ document.addEventListener('DOMContentLoaded', function() {
       '</urn:' + msgType + '>';
 
     console.log('Sending ' + msgType + ' XML:', xml);
-    var endpoint = arc ? '/customs/excise/movements/messages' : '/customs/excise/movements';
-    var res = await fetch('/api/emcs?endpoint=' + endpoint, { method: 'POST', headers: Object.assign({}, h, { 'Content-Type': 'application/xml' }), body: xml });
+
+    var endpoint = '/customs/excise/movements/' + encodeURIComponent(movId) + '/messages';
+    var res = await fetch('/api/emcs?endpoint=' + endpoint, {
+      method: 'POST',
+      headers: Object.assign({}, h, { 'Content-Type': 'application/xml' }),
+      body: xml
+    });
+
     var responseText = await res.text();
     console.log('HMRC Response:', res.status, responseText);
     document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
