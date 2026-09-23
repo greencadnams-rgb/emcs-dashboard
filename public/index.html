@@ -62,7 +62,6 @@
     .mode-prod { background: #d32f2f; color: white; }
     .required-asterisk { color: #d4351c; font-weight: bold; }
     .section-optional { background: #f9f9f9; border-left: 3px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-    .section-info { background: #e8f4fd; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -119,14 +118,7 @@
       <div class="card">
         <h2>Submit Draft Movement (IE815) - EMCS Phase 4 V3.23</h2>
 
-        <div class="section-info">
-          <strong>ℹ️ Works for both:</strong>
-          <ul style="margin: 10px 0 0 20px;">
-            <li><strong>Authorised Warehouse Keepers</strong> - dispatching from Tax Warehouse (complete Box 3)</li>
-            <li><strong>Registered Consignors</strong> - dispatching from registered premises (leave Box 3 blank)</li>
-          </ul>
-        </div>
-
+        <!-- BOX 1: eAD Header -->
         <h3>Box 1: eAD Header <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field">
@@ -144,7 +136,6 @@
             </select>
             <div class="validation-msg"></div>
           </div>
-
           <div class="field">
             <label>Journey Time <span class="required-asterisk">*</span>
               <span class="field-help">?<span class="tooltip">Expected duration of the journey in hours (H) or days (D). Maximum 45 days. Examples: '14D' for 14 days, '12H' for 12 hours. <b>Format: an3 (3 alphanumeric)</b></span></span>
@@ -152,7 +143,6 @@
             <input type="text" id="s-journey-time" value="D07" pattern="^[HD]\d{1,2}$" maxlength="3" required>
             <div class="validation-msg"></div>
           </div>
-
           <div class="field">
             <label>Transport Arrangement <span class="required-asterisk">*</span>
               <span class="field-help">?<span class="tooltip">Who is responsible for arranging the first transport. <b>Format: n1 (1 digit)</b></span></span>
@@ -167,6 +157,7 @@
           </div>
         </div>
 
+        <!-- BOX 2: Consignor -->
         <h3>Box 2: Consignor <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field">
@@ -213,55 +204,57 @@
           </div>
         </div>
 
+        <!-- BOX 3: Place of Dispatch (Conditional) -->
         <div class="section-optional">
           <h3 style="margin-top:0;">Box 3: Place of Dispatch <span class="format-badge">Conditional - Only for Tax Warehouse dispatches</span></h3>
-          <p style="font-size:13px; color:#666; margin-bottom:15px;"><strong>Leave blank if dispatching as a Registered Consignor</strong> (not from a Tax Warehouse). Only complete if goods are being dispatched from a Tax Warehouse.</p>
+          <p style="font-size:13px; color:#666; margin-bottom:15px;">Leave blank if dispatching as a Registered Consignor (not from a Tax Warehouse). Only complete if goods are being dispatched from a Tax Warehouse.</p>
           <div class="form-grid">
             <div class="field">
               <label>Tax Warehouse Reference
                 <span class="field-help">?<span class="tooltip">13 digit Excise ID of the Tax Warehouse of dispatch. Only required when goods dispatched from a Tax Warehouse. <b>Format: an13</b></span></span>
               </label>
-              <input type="text" id="s-dispatch-warehouse" value="" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13" placeholder="Leave blank for Registered Consignor">
+              <input type="text" id="s-dispatch-warehouse" value="GB00DO459DMNX" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13">
               <div class="validation-msg"></div>
             </div>
             <div class="field">
               <label>Trader Name
                 <span class="field-help">?<span class="tooltip">Name of the Tax Warehouse. Optional. <b>Format: an..182</b></span></span>
               </label>
-              <input type="text" id="s-dispatch-name" value="" maxlength="182" placeholder="Optional">
+              <input type="text" id="s-dispatch-name" value="Test Dispatch Warehouse" maxlength="182">
               <div class="validation-msg"></div>
             </div>
             <div class="field">
               <label>Street Name
                 <span class="field-help">?<span class="tooltip">Street name of Tax Warehouse. Optional. <b>Format: an..65</b></span></span>
               </label>
-              <input type="text" id="s-dispatch-street" value="" maxlength="65" placeholder="Optional">
+              <input type="text" id="s-dispatch-street" value="Warehouse Lane" maxlength="65">
               <div class="validation-msg"></div>
             </div>
             <div class="field">
               <label>Street Number
                 <span class="field-help">?<span class="tooltip">Street number of Tax Warehouse. Optional. <b>Format: an..11</b></span></span>
               </label>
-              <input type="text" id="s-dispatch-street-num" value="" maxlength="11" placeholder="Optional">
+              <input type="text" id="s-dispatch-street-num" value="1" maxlength="11">
               <div class="validation-msg"></div>
             </div>
             <div class="field">
               <label>Postcode
                 <span class="field-help">?<span class="tooltip">Postcode of Tax Warehouse. Optional. <b>Format: an..10</b></span></span>
               </label>
-              <input type="text" id="s-dispatch-postcode" value="" maxlength="10" placeholder="Optional">
+              <input type="text" id="s-dispatch-postcode" value="E2 9BB" maxlength="10">
               <div class="validation-msg"></div>
             </div>
             <div class="field">
               <label>City
                 <span class="field-help">?<span class="tooltip">City of Tax Warehouse. Optional. <b>Format: an..50</b></span></span>
               </label>
-              <input type="text" id="s-dispatch-city" value="" maxlength="50" placeholder="Optional">
+              <input type="text" id="s-dispatch-city" value="London" maxlength="50">
               <div class="validation-msg"></div>
             </div>
           </div>
         </div>
 
+        <!-- BOX 5: Consignee -->
         <h3>Box 5: Consignee <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field">
@@ -308,6 +301,7 @@
           </div>
         </div>
 
+        <!-- BOX 7: Place of Delivery -->
         <h3>Box 7: Place of Delivery <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field">
@@ -354,106 +348,7 @@
           </div>
         </div>
 
-        <h3>Box 10: Competent Authority of Dispatch <span class="format-badge">Required</span></h3>
-        <div class="form-grid">
-          <div class="field">
-            <label>Office Reference Number <span class="required-asterisk">*</span>
-              <span class="field-help">?<span class="tooltip">Code of UK office responsible for excise control at dispatch. GB004098 for Great Britain, XI004098 for Northern Ireland. <b>Format: an8</b></span></span>
-            </label>
-            <input type="text" id="s-dispatch-office" value="GB004098" maxlength="8" required>
-            <div class="validation-msg"></div>
-          </div>
-        </div>
-
-        <h3>Box 15: First Transporter <span class="format-badge">Required</span></h3>
-        <div class="form-grid">
-          <div class="field">
-            <label>VAT Number <span class="required-asterisk">*</span>
-              <span class="field-help">?<span class="tooltip">VAT number of the first transporter. Use 'NONGBVAT' if not VAT registered in UK. <b>Format: an..35 (max 35 chars)</b></span></span>
-            </label>
-            <input type="text" id="s-transporter-vat" value="123798354" maxlength="35" required>
-            <div class="validation-msg"></div>
-          </div>
-          <div class="field">
-            <label>Trader Name <span class="required-asterisk">*</span>
-              <span class="field-help">?<span class="tooltip">Full company name of first transporter. <b>Format: an..182 (max 182 chars)</b></span></span>
-            </label>
-            <input type="text" id="s-transporter-name" value="Fast Freight Ltd" maxlength="182" required>
-            <div class="validation-msg"></div>
-          </div>
-          <div class="field">
-            <label>Street Name <span class="required-asterisk">*</span>
-              <span class="field-help">?<span class="tooltip">Street name of transporter's office. <b>Format: an..65 (max 65 chars)</b></span></span>
-            </label>
-            <input type="text" id="s-transporter-street" value="Logistics Way" maxlength="65" required>
-            <div class="validation-msg"></div>
-          </div>
-          <div class="field">
-            <label>Street Number
-              <span class="field-help">?<span class="tooltip">Street number of transporter's office. Optional. <b>Format: an..11 (max 11 chars)</b></span></span>
-            </label>
-            <input type="text" id="s-transporter-street-num" value="5" maxlength="11">
-            <div class="validation-msg"></div>
-          </div>
-          <div class="field">
-            <label>Postcode <span class="required-asterisk">*</span>
-              <span class="field-help">?<span class="tooltip">Postcode of transporter's office. <b>Format: an..10 (max 10 chars)</b></span></span>
-            </label>
-            <input type="text" id="s-transporter-postcode" value="FR5 4RN" maxlength="10" required>
-            <div class="validation-msg"></div>
-          </div>
-          <div class="field">
-            <label>City <span class="required-asterisk">*</span>
-              <span class="field-help">?<span class="tooltip">City of transporter's office. <b>Format: an..50 (max 50 chars)</b></span></span>
-            </label>
-            <input type="text" id="s-transporter-city" value="Dover" maxlength="50" required>
-            <div class="validation-msg"></div>
-          </div>
-        </div>
-
-        <div class="section-optional">
-          <h3 style="margin-top:0;">Box 18: Document Certificate <span class="format-badge">Optional</span></h3>
-          <p style="font-size:13px; color:#666; margin-bottom:15px;">Leave as "None" if no certificates apply</p>
-          <div class="form-grid">
-            <div class="field">
-              <label>Document Type
-                <span class="field-help">?<span class="tooltip">Type of accompanying certificate document. <b>Format: an..4 (max 4 chars)</b></span></span>
-              </label>
-              <select id="s-doc-type">
-                <option value="" selected>-- None --</option>
-                <option value="1">1 - Invoice</option>
-                <option value="2">2 - Delivery note</option>
-                <option value="9">9 - Other</option>
-              </select>
-              <div class="validation-msg"></div>
-            </div>
-            <div class="field">
-              <label>Document Reference
-                <span class="field-help">?<span class="tooltip">Reference number for the certificate document. <b>Format: an..35 (max 35 chars)</b></span></span>
-              </label>
-              <input type="text" id="s-doc-ref" value="" maxlength="35" placeholder="Optional">
-              <div class="validation-msg"></div>
-            </div>
-          </div>
-        </div>
-
-        <h3>Box 11: Movement Guarantee <span class="format-badge">Conditional</span></h3>
-        <div class="form-grid">
-          <div class="field">
-            <label>Guarantor Type Code <span class="required-asterisk">*</span>
-              <span class="field-help">?<span class="tooltip">Who provides the movement guarantee. Select "Not required" for qualifying UK-to-UK or NI-to-EU movements. <b>Format: n..4</b></span></span>
-            </label>
-            <select id="s-guarantor-type" required>
-              <option value="1" selected>1 - Consignor</option>
-              <option value="2">2 - Transporter of goods</option>
-              <option value="3">3 - Owner of goods</option>
-              <option value="4">4 - Consignee</option>
-              <option value="0">0 - Not required (qualifying movements)</option>
-            </select>
-            <div class="validation-msg"></div>
-          </div>
-        </div>
-
+        <!-- BOX 9: e-AD -->
         <h3>Box 9: e-AD <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field">
@@ -503,6 +398,37 @@
           </div>
         </div>
 
+        <!-- BOX 10: Competent Authority of Dispatch -->
+        <h3>Box 10: Competent Authority of Dispatch <span class="format-badge">Required</span></h3>
+        <div class="form-grid">
+          <div class="field">
+            <label>Office Reference Number <span class="required-asterisk">*</span>
+              <span class="field-help">?<span class="tooltip">Code of UK office responsible for excise control at dispatch. GB004098 for Great Britain, XI004098 for Northern Ireland. <b>Format: an8</b></span></span>
+            </label>
+            <input type="text" id="s-dispatch-office" value="GB004098" maxlength="8" required>
+            <div class="validation-msg"></div>
+          </div>
+        </div>
+
+        <!-- BOX 11: Movement Guarantee -->
+        <h3>Box 11: Movement Guarantee <span class="format-badge">Conditional</span></h3>
+        <div class="form-grid">
+          <div class="field">
+            <label>Guarantor Type Code <span class="required-asterisk">*</span>
+              <span class="field-help">?<span class="tooltip">Who provides the movement guarantee. Select "Not required" for qualifying UK-to-UK or NI-to-EU movements. <b>Format: n..4</b></span></span>
+            </label>
+            <select id="s-guarantor-type" required>
+              <option value="1" selected>1 - Consignor</option>
+              <option value="2">2 - Transporter of goods</option>
+              <option value="3">3 - Owner of goods</option>
+              <option value="4">4 - Consignee</option>
+              <option value="0">0 - Not required (qualifying movements)</option>
+            </select>
+            <div class="validation-msg"></div>
+          </div>
+        </div>
+
+        <!-- BOX 13: Transport -->
         <h3>Box 13: Transport <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field">
@@ -523,6 +449,54 @@
           </div>
         </div>
 
+        <!-- BOX 15: First Transporter -->
+        <h3>Box 15: First Transporter <span class="format-badge">Required</span></h3>
+        <div class="form-grid">
+          <div class="field">
+            <label>VAT Number <span class="required-asterisk">*</span>
+              <span class="field-help">?<span class="tooltip">VAT number of the first transporter. Use 'NONGBVAT' if not VAT registered in UK. <b>Format: an..35 (max 35 chars)</b></span></span>
+            </label>
+            <input type="text" id="s-transporter-vat" value="123798354" maxlength="35" required>
+            <div class="validation-msg"></div>
+          </div>
+          <div class="field">
+            <label>Trader Name <span class="required-asterisk">*</span>
+              <span class="field-help">?<span class="tooltip">Full company name of first transporter. <b>Format: an..182 (max 182 chars)</b></span></span>
+            </label>
+            <input type="text" id="s-transporter-name" value="Fast Freight Ltd" maxlength="182" required>
+            <div class="validation-msg"></div>
+          </div>
+          <div class="field">
+            <label>Street Name <span class="required-asterisk">*</span>
+              <span class="field-help">?<span class="tooltip">Street name of transporter's office. <b>Format: an..65 (max 65 chars)</b></span></span>
+            </label>
+            <input type="text" id="s-transporter-street" value="Logistics Way" maxlength="65" required>
+            <div class="validation-msg"></div>
+          </div>
+          <div class="field">
+            <label>Street Number
+              <span class="field-help">?<span class="tooltip">Street number of transporter's office. Optional. <b>Format: an..11 (max 11 chars)</b></span></span>
+            </label>
+            <input type="text" id="s-transporter-street-num" value="5" maxlength="11">
+            <div class="validation-msg"></div>
+          </div>
+          <div class="field">
+            <label>Postcode <span class="required-asterisk">*</span>
+              <span class="field-help">?<span class="tooltip">Postcode of transporter's office. <b>Format: an..10 (max 10 chars)</b></span></span>
+            </label>
+            <input type="text" id="s-transporter-postcode" value="FR5 4RN" maxlength="10" required>
+            <div class="validation-msg"></div>
+          </div>
+          <div class="field">
+            <label>City <span class="required-asterisk">*</span>
+              <span class="field-help">?<span class="tooltip">City of transporter's office. <b>Format: an..50 (max 50 chars)</b></span></span>
+            </label>
+            <input type="text" id="s-transporter-city" value="Dover" maxlength="50" required>
+            <div class="validation-msg"></div>
+          </div>
+        </div>
+
+        <!-- BOX 16: Transport Details (Multiple Units) -->
         <h3>Box 16: Transport Details <span class="format-badge">Required - Multiple Units Allowed</span></h3>
         <p style="font-size:13px; color:#666; margin-bottom:15px;">Add details for each transport unit involved in the first transport (e.g., vehicle + trailer)</p>
         <div id="transport-units-container">
@@ -554,68 +528,60 @@
         </div>
         <button type="button" id="add-transport-unit-btn" class="btn-green btn-small">+ Add Another Transport Unit</button>
 
-        <h3>Box 17: e-AD Body (Goods Items) <span class="format-badge">Required</span></h3>
-        <div class="form-grid">
-          <div class="field">
-            <label>Number of Items <span class="required-asterisk">*</span>
-              <span class="field-help">?<span class="tooltip">Number of product line items. A separate data group required for each product. <b>Format: n..3</b></span></span>
-            </label>
-            <input type="number" id="s-item-count" value="1" min="1" max="999" onchange="generateItemFields()">
-            <div class="validation-msg"></div>
-          </div>
-        </div>
-
+        <!-- BOX 17: e-AD Body (Goods Items) - Multiple Items -->
+        <h3>Box 17: e-AD Body (Goods Items) <span class="format-badge">Required - Multiple Items Allowed</span></h3>
+        <p style="font-size:13px; color:#666; margin-bottom:15px;">Add a separate item for each product being transported</p>
         <div id="goods-items-container">
-          <div class="item-field">
+          <div class="item-field" data-item="1">
             <h4>Item 1</h4>
             <div class="form-grid">
               <div class="field">
                 <label>Excise Product Code <span class="required-asterisk">*</span>
                   <span class="field-help">?<span class="tooltip">4-character code: T200 (Cigarettes), T300 (Cigars), T400 (Fine-cut tobacco), T500 (Other smoking tobacco), B000 (Beer), W200 (Still wine), W300 (Sparkling wine), I000 (Intermediate), S200 (Spirits), S300 (Ethyl alcohol), S400 (Partially denatured), S500 (Other ethyl alcohol), E200-E920 (Energy products). <b>Format: an4</b></span></span>
                 </label>
-                <input type="text" id="s-product-1" value="B000" pattern="^[A-Z][0-9]{3}$" maxlength="4" required>
+                <input type="text" class="s-product-code" value="B000" pattern="^[A-Z][0-9]{3}$" maxlength="4" required>
                 <div class="validation-msg"></div>
               </div>
               <div class="field">
                 <label>CN Code (Commodity Code) <span class="required-asterisk">*</span>
                   <span class="field-help">?<span class="tooltip">8-digit CN Code applicable at date of dispatch. For S500 products use 10000000. <b>Format: n8 (8 digits)</b></span></span>
                 </label>
-                <input type="text" id="s-cn-1" value="22030001" pattern="^\d{8}$" maxlength="8" required>
+                <input type="text" class="s-cn-code" value="22030001" pattern="^\d{8}$" maxlength="8" required>
                 <div class="validation-msg"></div>
               </div>
               <div class="field">
                 <label>Quantity <span class="required-asterisk">*</span>
                   <span class="field-help">?<span class="tooltip">Quantity in units: thousands of items (T200/T300), kg (T400/T500/E470/E500/E600), litres at 15°C (E200/E300/E410-E460/E480-E490/E700-E920), litres at 20°C (B000/W200/W300/I000/S200-S500). <b>Format: n..15.3</b></span></span>
                 </label>
-                <input type="number" id="s-qty-1" value="2000" step="0.001" required>
+                <input type="number" class="s-qty" value="2000" step="0.001" required>
                 <div class="validation-msg"></div>
               </div>
               <div class="field">
                 <label>Gross Mass (kg) <span class="required-asterisk">*</span>
                   <span class="field-help">?<span class="tooltip">Gross weight including packaging in kilograms. Bulk goods = same as net mass. <b>Format: n..16.6</b></span></span>
                 </label>
-                <input type="number" id="s-weight-1" value="20000" step="0.000001" required>
+                <input type="number" class="s-weight" value="20000" step="0.000001" required>
                 <div class="validation-msg"></div>
               </div>
               <div class="field">
                 <label>Net Mass (kg) <span class="required-asterisk">*</span>
                   <span class="field-help">?<span class="tooltip">Net weight without packaging in kilograms. <b>Format: n..16.6</b></span></span>
                 </label>
-                <input type="number" id="s-net-weight-1" value="19999" step="0.000001" required>
+                <input type="number" class="s-net-weight" value="19999" step="0.000001" required>
                 <div class="validation-msg"></div>
               </div>
               <div class="field">
                 <label>Alcoholic Strength (% ABV)
                   <span class="field-help">?<span class="tooltip">Percentage by volume at 20°C. Required for: B000, W200, W300, I000, S200, S300, S400, S500. <b>Format: n..5.2</b></span></span>
                 </label>
-                <input type="number" id="s-abv-1" value="0.5" step="0.01">
+                <input type="number" class="s-abv" value="0.5" step="0.01">
                 <div class="validation-msg"></div>
               </div>
               <div class="field">
                 <label>Fiscal Mark Used Flag
                   <span class="field-help">?<span class="tooltip">Whether goods carry fiscal marks. 0 = No, 1 = Yes. <b>Format: n1</b></span></span>
                 </label>
-                <select id="s-fiscal-1">
+                <select class="s-fiscal">
                   <option value="0" selected>0 - No fiscal marks</option>
                   <option value="1">1 - Goods carry fiscal marks</option>
                 </select>
@@ -625,16 +591,44 @@
                 <label>Kind of Packages <span class="required-asterisk">*</span>
                   <span class="field-help">?<span class="tooltip">2-letter package code from UK Trade Tariff list (e.g., BA = Barrel, BX = Box, CT = Carton, DR = Drum). <b>Format: a2 (2 letters)</b></span></span>
                 </label>
-                <input type="text" id="s-package-kind-1" value="BA" pattern="^[A-Z]{2}$" maxlength="2" required>
+                <input type="text" class="s-package-kind" value="BA" pattern="^[A-Z]{2}$" maxlength="2" required>
                 <div class="validation-msg"></div>
               </div>
               <div class="field">
                 <label>Number of Packages
                   <span class="field-help">?<span class="tooltip">Count of packages for this line item. Conditional - required for countable packages. <b>Format: n..15</b></span></span>
                 </label>
-                <input type="number" id="s-package-count-1" value="2" min="0">
+                <input type="number" class="s-package-count" value="2" min="0">
                 <div class="validation-msg"></div>
               </div>
+            </div>
+          </div>
+        </div>
+        <button type="button" id="add-goods-item-btn" class="btn-green btn-small">+ Add Another Goods Item</button>
+
+        <!-- BOX 18: Document Certificate (Optional) -->
+        <div class="section-optional" style="margin-top: 20px;">
+          <h3 style="margin-top:0;">Box 18: Document Certificate <span class="format-badge">Optional</span></h3>
+          <p style="font-size:13px; color:#666; margin-bottom:15px;">Leave as "None" if no certificates apply</p>
+          <div class="form-grid">
+            <div class="field">
+              <label>Document Type
+                <span class="field-help">?<span class="tooltip">Type of accompanying certificate document. <b>Format: an..4 (max 4 chars)</b></span></span>
+              </label>
+              <select id="s-doc-type">
+                <option value="" selected>-- None --</option>
+                <option value="1">1 - Invoice</option>
+                <option value="2">2 - Delivery note</option>
+                <option value="9">9 - Other</option>
+              </select>
+              <div class="validation-msg"></div>
+            </div>
+            <div class="field">
+              <label>Document Reference
+                <span class="field-help">?<span class="tooltip">Reference number for the certificate document. <b>Format: an..35 (max 35 chars)</b></span></span>
+              </label>
+              <input type="text" id="s-doc-ref" value="" maxlength="35" placeholder="Optional">
+              <div class="validation-msg"></div>
             </div>
           </div>
         </div>
@@ -664,7 +658,7 @@
       </div>
     </div>
 
-    <!-- TAB 2-9 (unchanged) -->
+    <!-- TAB 2: GET MOVEMENTS -->
     <div id="tab-get-movements" class="tab">
       <div class="card">
         <h2>Get All Movements</h2>
@@ -679,6 +673,7 @@
       </div>
     </div>
 
+    <!-- TAB 3: GET SINGLE MOVEMENT -->
     <div id="tab-get-movement" class="tab">
       <div class="card">
         <h2>Get Single Movement</h2>
@@ -688,6 +683,7 @@
       </div>
     </div>
 
+    <!-- TAB 4: SUBMIT MESSAGE -->
     <div id="tab-submit-msg" class="tab">
       <div class="card">
         <h2>Submit Message (IE810/813/818/819/837/871)</h2>
@@ -712,6 +708,7 @@
       </div>
     </div>
 
+    <!-- TAB 5: GET MESSAGES -->
     <div id="tab-get-messages" class="tab">
       <div class="card">
         <h2>Get All Messages for a Movement</h2>
@@ -722,6 +719,7 @@
       </div>
     </div>
 
+    <!-- TAB 6: GET SINGLE MESSAGE -->
     <div id="tab-get-message" class="tab">
       <div class="card">
         <h2>Get Single Message (Returns XML)</h2>
@@ -734,6 +732,7 @@
       </div>
     </div>
 
+    <!-- TAB 7: PRE-VALIDATE -->
     <div id="tab-validate" class="tab">
       <div class="card">
         <h2>Pre-Validate Trader</h2>
@@ -756,6 +755,7 @@
       </div>
     </div>
 
+    <!-- TAB 8: SUBSCRIBE -->
     <div id="tab-subscribe" class="tab">
       <div class="card">
         <h2>Subscribe ERN for Push Notifications</h2>
@@ -765,6 +765,7 @@
       </div>
     </div>
 
+    <!-- TAB 9: UNSUBSCRIBE -->
     <div id="tab-unsubscribe" class="tab">
       <div class="card">
         <h2>Unsubscribe ERN from Push Notifications</h2>
@@ -780,28 +781,25 @@
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Script loaded successfully');
 
-  // Set default dates to today
   var today = new Date().toISOString().slice(0, 10);
   document.getElementById('s-date').value = today;
   document.getElementById('s-invoice-date').value = today;
 
   var TMS_NS = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.23';
   var transportUnitCount = 1;
+  var goodsItemCount = 1;
 
   // ==================== VALIDATION ====================
   function validateField(input) {
     var msgEl = input.parentElement.querySelector('.validation-msg');
     if (!msgEl) return true;
-
     input.classList.remove('valid', 'invalid');
     msgEl.textContent = '';
-
     if (!input.value && input.required) {
       input.classList.add('invalid');
       msgEl.textContent = 'This field is required';
       return false;
     }
-
     if (input.value && input.pattern) {
       var regex = new RegExp(input.pattern);
       if (!regex.test(input.value)) {
@@ -810,25 +808,21 @@ document.addEventListener('DOMContentLoaded', function() {
         return false;
       }
     }
-
-    if (input.value) {
-      input.classList.add('valid');
-    }
+    if (input.value) input.classList.add('valid');
     return true;
   }
 
-  // Add validation listeners to all inputs
-  document.querySelectorAll('input, select').forEach(function(input) {
-    input.addEventListener('blur', function() { validateField(this); });
-    input.addEventListener('input', function() {
-      if (this.classList.contains('invalid')) validateField(this);
+  function attachValidation(container) {
+    container.querySelectorAll('input, select').forEach(function(input) {
+      input.addEventListener('blur', function() { validateField(this); });
+      input.addEventListener('input', function() { if (this.classList.contains('invalid')) validateField(this); });
+      input.addEventListener('change', function() { if (this.classList.contains('invalid')) validateField(this); });
     });
-    input.addEventListener('change', function() {
-      if (this.classList.contains('invalid')) validateField(this);
-    });
-  });
+  }
 
-  // ==================== AUTH (unchanged) ====================
+  attachValidation(document);
+
+  // ==================== AUTH ====================
   var urlParams = new URLSearchParams(window.location.search);
   var hmrcTokenFromUrl = urlParams.get('hmrc_token');
   if (hmrcTokenFromUrl) {
@@ -920,7 +914,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (err) { console.error(err); }
   });
 
-  // ==================== TABS (unchanged) ====================
+  // ==================== TABS ====================
   document.querySelectorAll('.nav-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
@@ -930,7 +924,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // ==================== HELPERS (unchanged) ====================
+  // ==================== HELPERS ====================
   async function getHeaders() {
     var ip = '127.0.0.1';
     try { var r = await fetch('https://api.ipify.org?format=json'); ip = (await r.json()).ip; } catch(e) {}
@@ -964,6 +958,11 @@ document.addEventListener('DOMContentLoaded', function() {
     a.click();
   }
 
+  function xmlField(tag, value) {
+    if (!value || value.trim() === '') return '';
+    return '<urn:' + tag + '>' + value + '</urn:' + tag + '>';
+  }
+
   // ==================== ADD TRANSPORT UNIT ====================
   document.getElementById('add-transport-unit-btn').addEventListener('click', function() {
     transportUnitCount++;
@@ -986,49 +985,41 @@ document.addEventListener('DOMContentLoaded', function() {
       '<div class="validation-msg"></div></div>' +
       '</div>';
     container.appendChild(newUnit);
-
-    // Add remove listener
     newUnit.querySelector('.remove-unit-btn').addEventListener('click', function() {
       newUnit.remove();
       transportUnitCount--;
     });
-
-    // Add validation listeners to new fields
-    newUnit.querySelectorAll('input, select').forEach(function(input) {
-      input.addEventListener('blur', function() { validateField(this); });
-      input.addEventListener('input', function() { if (this.classList.contains('invalid')) validateField(this); });
-      input.addEventListener('change', function() { if (this.classList.contains('invalid')) validateField(this); });
-    });
+    attachValidation(newUnit);
   });
 
-  window.generateItemFields = function() {
-    var count = parseInt(document.getElementById('s-item-count').value) || 1;
+  // ==================== ADD GOODS ITEM ====================
+  document.getElementById('add-goods-item-btn').addEventListener('click', function() {
+    goodsItemCount++;
     var container = document.getElementById('goods-items-container');
-    var html = '';
-    for (var i = 1; i <= count; i++) {
-      html += '<div class="item-field"><h4>Item ' + i + '</h4><div class="form-grid">' +
-        '<div class="field"><label>Excise Product Code <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">4-char code: T200 (Cigarettes), T300 (Cigars), T400 (Fine-cut), T500 (Other tobacco), B000 (Beer), W200 (Still wine), W300 (Sparkling wine), I000 (Intermediate), S200 (Spirits), S300-S500 (Ethyl alcohol), E200-E920 (Energy). <b>Format: an4</b></span></span></label><input type="text" id="s-product-' + i + '" value="B000" pattern="^[A-Z][0-9]{3}$" maxlength="4" required><div class="validation-msg"></div></div>' +
-        '<div class="field"><label>CN Code <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">8-digit commodity code applicable at date of dispatch. <b>Format: n8</b></span></span></label><input type="text" id="s-cn-' + i + '" value="22030001" pattern="^\\d{8}$" maxlength="8" required><div class="validation-msg"></div></div>' +
-        '<div class="field"><label>Quantity <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">In units based on product: thousands (T200/T300), kg (T400/T500/E470/E500/E600), litres at 15°C (energy products), litres at 20°C (B000/W200/W300/I000/S200-S500). <b>Format: n..15.3</b></span></span></label><input type="number" id="s-qty-' + i + '" value="2000" step="0.001" required><div class="validation-msg"></div></div>' +
-        '<div class="field"><label>Gross Mass (kg) <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">Gross weight including packaging in kg. <b>Format: n..16.6</b></span></span></label><input type="number" id="s-weight-' + i + '" value="20000" step="0.000001" required><div class="validation-msg"></div></div>' +
-        '<div class="field"><label>Net Mass (kg) <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">Net weight without packaging in kg. <b>Format: n..16.6</b></span></span></label><input type="number" id="s-net-weight-' + i + '" value="19999" step="0.000001" required><div class="validation-msg"></div></div>' +
-        '<div class="field"><label>Alcoholic Strength (% ABV) <span class="field-help">?<span class="tooltip">Percentage by volume at 20°C. Required for B000/W200/W300/I000/S200-S500. <b>Format: n..5.2</b></span></span></label><input type="number" id="s-abv-' + i + '" value="0.5" step="0.01"><div class="validation-msg"></div></div>' +
-        '<div class="field"><label>Fiscal Mark Used Flag <span class="field-help">?<span class="tooltip">Whether goods carry fiscal marks. <b>Format: n1</b></span></span></label><select id="s-fiscal-' + i + '"><option value="0" selected>0 - No</option><option value="1">1 - Yes</option></select><div class="validation-msg"></div></div>' +
-        '<div class="field"><label>Kind of Packages <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">2-letter code from UK Trade Tariff (BA=Barrel, BX=Box, CT=Carton, DR=Drum). <b>Format: a2</b></span></span></label><input type="text" id="s-package-kind-' + i + '" value="BA" pattern="^[A-Z]{2}$" maxlength="2" required><div class="validation-msg"></div></div>' +
-        '<div class="field"><label>Number of Packages <span class="field-help">?<span class="tooltip">Count of packages. <b>Format: n..15</b></span></span></label><input type="number" id="s-package-count-' + i + '" value="2" min="0"><div class="validation-msg"></div></div>' +
-        '</div></div>';
-    }
-    container.innerHTML = html;
-
-    // Re-attach validation listeners to new fields
-    container.querySelectorAll('input, select').forEach(function(input) {
-      input.addEventListener('blur', function() { validateField(this); });
-      input.addEventListener('input', function() { if (this.classList.contains('invalid')) validateField(this); });
-      input.addEventListener('change', function() { if (this.classList.contains('invalid')) validateField(this); });
+    var newItem = document.createElement('div');
+    newItem.className = 'item-field';
+    newItem.setAttribute('data-item', goodsItemCount);
+    newItem.innerHTML = '<h4>Item ' + goodsItemCount + ' <button type="button" class="btn-red btn-small remove-item-btn" style="float:right;">Remove</button></h4>' +
+      '<div class="form-grid">' +
+      '<div class="field"><label>Excise Product Code <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">4-char code: T200 (Cigarettes), T300 (Cigars), T400 (Fine-cut), T500 (Other tobacco), B000 (Beer), W200 (Still wine), W300 (Sparkling wine), I000 (Intermediate), S200 (Spirits), S300-S500 (Ethyl alcohol), E200-E920 (Energy). <b>Format: an4</b></span></span></label><input type="text" class="s-product-code" value="B000" pattern="^[A-Z][0-9]{3}$" maxlength="4" required><div class="validation-msg"></div></div>' +
+      '<div class="field"><label>CN Code <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">8-digit commodity code applicable at date of dispatch. <b>Format: n8</b></span></span></label><input type="text" class="s-cn-code" value="22030001" pattern="^\\d{8}$" maxlength="8" required><div class="validation-msg"></div></div>' +
+      '<div class="field"><label>Quantity <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">In units based on product: thousands (T200/T300), kg (T400/T500/E470/E500/E600), litres at 15°C (energy products), litres at 20°C (B000/W200/W300/I000/S200-S500). <b>Format: n..15.3</b></span></span></label><input type="number" class="s-qty" value="2000" step="0.001" required><div class="validation-msg"></div></div>' +
+      '<div class="field"><label>Gross Mass (kg) <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">Gross weight including packaging in kg. <b>Format: n..16.6</b></span></span></label><input type="number" class="s-weight" value="20000" step="0.000001" required><div class="validation-msg"></div></div>' +
+      '<div class="field"><label>Net Mass (kg) <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">Net weight without packaging in kg. <b>Format: n..16.6</b></span></span></label><input type="number" class="s-net-weight" value="19999" step="0.000001" required><div class="validation-msg"></div></div>' +
+      '<div class="field"><label>Alcoholic Strength (% ABV) <span class="field-help">?<span class="tooltip">Percentage by volume at 20°C. Required for B000/W200/W300/I000/S200-S500. <b>Format: n..5.2</b></span></span></label><input type="number" class="s-abv" value="0.5" step="0.01"><div class="validation-msg"></div></div>' +
+      '<div class="field"><label>Fiscal Mark Used Flag <span class="field-help">?<span class="tooltip">Whether goods carry fiscal marks. <b>Format: n1</b></span></span></label><select class="s-fiscal"><option value="0" selected>0 - No</option><option value="1">1 - Yes</option></select><div class="validation-msg"></div></div>' +
+      '<div class="field"><label>Kind of Packages <span class="required-asterisk">*</span> <span class="field-help">?<span class="tooltip">2-letter code from UK Trade Tariff (BA=Barrel, BX=Box, CT=Carton, DR=Drum). <b>Format: a2</b></span></span></label><input type="text" class="s-package-kind" value="BA" pattern="^[A-Z]{2}$" maxlength="2" required><div class="validation-msg"></div></div>' +
+      '<div class="field"><label>Number of Packages <span class="field-help">?<span class="tooltip">Count of packages. <b>Format: n..15</b></span></span></label><input type="number" class="s-package-count" value="2" min="0"><div class="validation-msg"></div></div>' +
+      '</div>';
+    container.appendChild(newItem);
+    newItem.querySelector('.remove-item-btn').addEventListener('click', function() {
+      newItem.remove();
+      goodsItemCount--;
     });
-  };
+    attachValidation(newItem);
+  });
 
-  // ==================== MESSAGE SPECIFIC FIELDS (unchanged) ====================
+  // ==================== MESSAGE SPECIFIC FIELDS ====================
   document.getElementById('sm-type').addEventListener('change', function() {
     var msgType = this.value;
     var container = document.getElementById('msg-specific-fields');
@@ -1064,17 +1055,10 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   document.getElementById('sm-type').dispatchEvent(new Event('change'));
 
-  // Helper to build XML field (skips if empty for optional fields)
-  function xmlField(tag, value) {
-    if (!value || value.trim() === '') return '';
-    return '<urn:' + tag + '>' + value + '</urn:' + tag + '>';
-  }
-
-  // ==================== 1. SUBMIT MOVEMENT (IE815) - UPDATED FOR MULTIPLE TRANSPORT UNITS ====================
+  // ==================== 1. SUBMIT MOVEMENT (IE815) - FIXED XML ORDER ====================
   document.getElementById('submit-movement-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
 
-    // Validate all required fields
     var isValid = true;
     document.querySelectorAll('#tab-submit input[required], #tab-submit select[required]').forEach(function(input) {
       if (!validateField(input)) isValid = false;
@@ -1087,7 +1071,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var h = await getHeaders();
     var submitDate = new Date().toISOString().slice(0, 10);
 
-    // Use LRN from form if provided, otherwise generate
     var lrnInput = document.getElementById('s-lrn').value.trim();
     var uniqueLrn = lrnInput || ('LRN' + Date.now().toString().slice(-10) + '-' + Math.floor(Math.random() * 1000));
     document.getElementById('s-lrn').value = uniqueLrn;
@@ -1098,25 +1081,28 @@ document.addEventListener('DOMContentLoaded', function() {
     if (dispatchTime.length === 5) dispatchTime = dispatchTime + ':00';
     var invoiceDate = document.getElementById('s-invoice-date').value || submitDate;
 
-    var itemCount = parseInt(document.getElementById('s-item-count').value) || 1;
+    // Build goods items XML (Box 17)
     var bodyEadEsadXml = '';
-    for (var i = 1; i <= itemCount; i++) {
+    var itemIndex = 0;
+    document.querySelectorAll('#goods-items-container .item-field').forEach(function(item) {
+      itemIndex++;
       bodyEadEsadXml += '<urn:BodyEadEsad>' +
-        '<urn:BodyRecordUniqueReference>' + i + '</urn:BodyRecordUniqueReference>' +
-        '<urn:ExciseProductCode>' + document.getElementById('s-product-' + i).value + '</urn:ExciseProductCode>' +
-        '<urn:CnCode>' + document.getElementById('s-cn-' + i).value + '</urn:CnCode>' +
-        '<urn:Quantity>' + document.getElementById('s-qty-' + i).value + '</urn:Quantity>' +
-        '<urn:GrossMass>' + document.getElementById('s-weight-' + i).value + '</urn:GrossMass>' +
-        '<urn:NetMass>' + document.getElementById('s-net-weight-' + i).value + '</urn:NetMass>' +
-        '<urn:AlcoholicStrengthByVolumeInPercentage>' + document.getElementById('s-abv-' + i).value + '</urn:AlcoholicStrengthByVolumeInPercentage>' +
-        '<urn:FiscalMarkUsedFlag>' + document.getElementById('s-fiscal-' + i).value + '</urn:FiscalMarkUsedFlag>' +
+        '<urn:BodyRecordUniqueReference>' + itemIndex + '</urn:BodyRecordUniqueReference>' +
+        '<urn:ExciseProductCode>' + item.querySelector('.s-product-code').value + '</urn:ExciseProductCode>' +
+        '<urn:CnCode>' + item.querySelector('.s-cn-code').value + '</urn:CnCode>' +
+        '<urn:Quantity>' + item.querySelector('.s-qty').value + '</urn:Quantity>' +
+        '<urn:GrossMass>' + item.querySelector('.s-weight').value + '</urn:GrossMass>' +
+        '<urn:NetMass>' + item.querySelector('.s-net-weight').value + '</urn:NetMass>' +
+        '<urn:AlcoholicStrengthByVolumeInPercentage>' + item.querySelector('.s-abv').value + '</urn:AlcoholicStrengthByVolumeInPercentage>' +
+        '<urn:FiscalMarkUsedFlag>' + item.querySelector('.s-fiscal').value + '</urn:FiscalMarkUsedFlag>' +
         '<urn:Package>' +
-        '<urn:KindOfPackages>' + document.getElementById('s-package-kind-' + i).value + '</urn:KindOfPackages>' +
-        '<urn:NumberOfPackages>' + document.getElementById('s-package-count-' + i).value + '</urn:NumberOfPackages>' +
+        '<urn:KindOfPackages>' + item.querySelector('.s-package-kind').value + '</urn:KindOfPackages>' +
+        '<urn:NumberOfPackages>' + item.querySelector('.s-package-count').value + '</urn:NumberOfPackages>' +
         '</urn:Package>' +
         '</urn:BodyEadEsad>';
-    }
+    });
 
+    // Build XML in CORRECT ORDER per IE815 schema
     var xml = '<urn:IE815 xmlns:urn="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:IE815:V3.23" xmlns:urn1="' + TMS_NS + '">' +
       '<urn:Header>' +
       '<urn1:MessageSender>NDEA.GB</urn1:MessageSender>' +
@@ -1146,7 +1132,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '<urn:City>' + document.getElementById('s-consignor-city').value + '</urn:City>' +
       '</urn:ConsignorTrader>';
 
-    // Conditional: Place of Dispatch (Box 3)
+    // Box 3: Place of Dispatch (Conditional)
     var dispatchWarehouse = document.getElementById('s-dispatch-warehouse').value.trim();
     if (dispatchWarehouse) {
       xml += '<urn:PlaceOfDispatchTrader language="en">' +
@@ -1177,7 +1163,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '<urn:City>' + document.getElementById('s-transporter-city').value + '</urn:City>' +
       '</urn:FirstTransporterTrader>';
 
-    // Conditional: Document Certificate (Box 18)
+    // Box 18: Document Certificate (Optional)
     var docType = document.getElementById('s-doc-type').value;
     var docRef = document.getElementById('s-doc-ref').value.trim();
     if (docType && docRef) {
@@ -1194,9 +1180,18 @@ document.addEventListener('DOMContentLoaded', function() {
       '</urn:HeaderEadEsad>' +
       '<urn:TransportMode><urn:TransportModeCode>' + document.getElementById('s-transport-mode').value + '</urn:TransportModeCode></urn:TransportMode>' +
       '<urn:MovementGuarantee><urn:GuarantorTypeCode>' + document.getElementById('s-guarantor-type').value + '</urn:GuarantorTypeCode></urn:MovementGuarantee>' +
-      bodyEadEsadXml;
+      bodyEadEsadXml +
+      // CORRECT ORDER: EadEsadDraft BEFORE TransportDetails
+      '<urn:EadEsadDraft>' +
+      '<urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>' +
+      '<urn:InvoiceNumber>' + document.getElementById('s-invoice-number').value + '</urn:InvoiceNumber>' +
+      '<urn:InvoiceDate>' + invoiceDate + '</urn:InvoiceDate>' +
+      '<urn:OriginTypeCode>' + document.getElementById('s-origin-type').value + '</urn:OriginTypeCode>' +
+      '<urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>' +
+      '<urn:TimeOfDispatch>' + dispatchTime + '</urn:TimeOfDispatch>' +
+      '</urn:EadEsadDraft>';
 
-    // MULTIPLE TRANSPORT UNITS - Box 16
+    // Box 16: Transport Details (AFTER EadEsadDraft)
     var transportUnits = document.querySelectorAll('.transport-unit-field');
     transportUnits.forEach(function(unit) {
       var unitCode = unit.querySelector('.s-transport-unit-code').value;
@@ -1209,15 +1204,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
-    xml += '<urn:EadEsadDraft>' +
-      '<urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>' +
-      '<urn:InvoiceNumber>' + document.getElementById('s-invoice-number').value + '</urn:InvoiceNumber>' +
-      '<urn:InvoiceDate>' + invoiceDate + '</urn:InvoiceDate>' +
-      '<urn:OriginTypeCode>' + document.getElementById('s-origin-type').value + '</urn:OriginTypeCode>' +
-      '<urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>' +
-      '<urn:TimeOfDispatch>' + dispatchTime + '</urn:TimeOfDispatch>' +
-      '</urn:EadEsadDraft>' +
-      '</urn:SubmittedDraftOfEADESAD>' +
+    xml += '</urn:SubmittedDraftOfEADESAD>' +
       '</urn:Body>' +
       '</urn:IE815>';
 
@@ -1230,7 +1217,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById('export-submit-btn').addEventListener('click', function() { exportResult('submit-output', 'movement'); });
 
-  // ==================== 2-9. Other endpoints (unchanged) ====================
+  // ==================== 2. GET MOVEMENTS ====================
   document.getElementById('get-movements-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1242,6 +1229,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   document.getElementById('export-gm-btn').addEventListener('click', function() { exportResult('gm-output', 'movements'); });
 
+  // ==================== 3. GET SINGLE MOVEMENT ====================
   document.getElementById('get-single-movement-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1249,6 +1237,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
+  // ==================== 4. SUBMIT MESSAGE ====================
   document.getElementById('submit-message-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1336,6 +1325,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
   });
 
+  // ==================== 5. GET MESSAGES ====================
   document.getElementById('get-messages-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1354,6 +1344,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   document.getElementById('export-gmsg-btn').addEventListener('click', function() { exportResult('gmsg-output', 'messages'); });
 
+  // ==================== 6. GET SINGLE MESSAGE ====================
   document.getElementById('get-single-message-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1364,6 +1355,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
+  // ==================== 7. PRE-VALIDATE ====================
   document.getElementById('pre-validate-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1379,6 +1371,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
+  // ==================== 8. SUBSCRIBE ====================
   document.getElementById('subscribe-ern-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1390,6 +1383,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('sub-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
+  // ==================== 9. UNSUBSCRIBE ====================
   document.getElementById('unsubscribe-ern-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
