@@ -19,8 +19,8 @@
     .btn-green:hover { background: #005a30; }
     .btn-red { background: #d4351c; }
     .btn-red:hover { background: #aa2a16; }
+    .btn-small { padding: 6px 12px; font-size: 12px; }
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
-    .form-grid-full { grid-column: 1 / -1; }
     input, select { padding: 8px 12px; border: 2px solid #b1b4b6; border-radius: 4px; font-size: 14px; width: 100%; }
     input:focus, select:focus { border-color: #005ea5; outline: none; }
     input.invalid, select.invalid { border-color: #d4351c; background: #fff5f5; }
@@ -56,11 +56,13 @@
     .token-ok { background: #00703c; }
     .token-missing { background: #d4351c; }
     .item-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 15px; background: #fafafa; }
+    .transport-unit-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 15px; background: #f0f9ff; }
     .mode-indicator { padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; }
     .mode-test { background: #ff9800; color: white; }
     .mode-prod { background: #d32f2f; color: white; }
     .required-asterisk { color: #d4351c; font-weight: bold; }
     .section-optional { background: #f9f9f9; border-left: 3px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+    .section-info { background: #e8f4fd; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -116,6 +118,14 @@
     <div id="tab-submit" class="tab active">
       <div class="card">
         <h2>Submit Draft Movement (IE815) - EMCS Phase 4 V3.23</h2>
+
+        <div class="section-info">
+          <strong>ℹ️ Works for both:</strong>
+          <ul style="margin: 10px 0 0 20px;">
+            <li><strong>Authorised Warehouse Keepers</strong> - dispatching from Tax Warehouse (complete Box 3)</li>
+            <li><strong>Registered Consignors</strong> - dispatching from registered premises (leave Box 3 blank)</li>
+          </ul>
+        </div>
 
         <h3>Box 1: eAD Header <span class="format-badge">Required</span></h3>
         <div class="form-grid">
@@ -204,49 +214,49 @@
         </div>
 
         <div class="section-optional">
-          <h3 style="margin-top:0;">Box 3: Place of Dispatch <span class="format-badge">Conditional - Only if from Tax Warehouse</span></h3>
-          <p style="font-size:13px; color:#666; margin-bottom:15px;">Leave blank if not dispatching from a Tax Warehouse</p>
+          <h3 style="margin-top:0;">Box 3: Place of Dispatch <span class="format-badge">Conditional - Only for Tax Warehouse dispatches</span></h3>
+          <p style="font-size:13px; color:#666; margin-bottom:15px;"><strong>Leave blank if dispatching as a Registered Consignor</strong> (not from a Tax Warehouse). Only complete if goods are being dispatched from a Tax Warehouse.</p>
           <div class="form-grid">
             <div class="field">
               <label>Tax Warehouse Reference
                 <span class="field-help">?<span class="tooltip">13 digit Excise ID of the Tax Warehouse of dispatch. Only required when goods dispatched from a Tax Warehouse. <b>Format: an13</b></span></span>
               </label>
-              <input type="text" id="s-dispatch-warehouse" value="GB00DO459DMNX" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13">
+              <input type="text" id="s-dispatch-warehouse" value="" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13" placeholder="Leave blank for Registered Consignor">
               <div class="validation-msg"></div>
             </div>
             <div class="field">
               <label>Trader Name
                 <span class="field-help">?<span class="tooltip">Name of the Tax Warehouse. Optional. <b>Format: an..182</b></span></span>
               </label>
-              <input type="text" id="s-dispatch-name" value="Dispatch Warehouse" maxlength="182">
+              <input type="text" id="s-dispatch-name" value="" maxlength="182" placeholder="Optional">
               <div class="validation-msg"></div>
             </div>
             <div class="field">
               <label>Street Name
                 <span class="field-help">?<span class="tooltip">Street name of Tax Warehouse. Optional. <b>Format: an..65</b></span></span>
               </label>
-              <input type="text" id="s-dispatch-street" value="Warehouse Lane" maxlength="65">
+              <input type="text" id="s-dispatch-street" value="" maxlength="65" placeholder="Optional">
               <div class="validation-msg"></div>
             </div>
             <div class="field">
               <label>Street Number
                 <span class="field-help">?<span class="tooltip">Street number of Tax Warehouse. Optional. <b>Format: an..11</b></span></span>
               </label>
-              <input type="text" id="s-dispatch-street-num" value="1" maxlength="11">
+              <input type="text" id="s-dispatch-street-num" value="" maxlength="11" placeholder="Optional">
               <div class="validation-msg"></div>
             </div>
             <div class="field">
               <label>Postcode
                 <span class="field-help">?<span class="tooltip">Postcode of Tax Warehouse. Optional. <b>Format: an..10</b></span></span>
               </label>
-              <input type="text" id="s-dispatch-postcode" value="E2 9BB" maxlength="10">
+              <input type="text" id="s-dispatch-postcode" value="" maxlength="10" placeholder="Optional">
               <div class="validation-msg"></div>
             </div>
             <div class="field">
               <label>City
                 <span class="field-help">?<span class="tooltip">City of Tax Warehouse. Optional. <b>Format: an..50</b></span></span>
               </label>
-              <input type="text" id="s-dispatch-city" value="London" maxlength="50">
+              <input type="text" id="s-dispatch-city" value="" maxlength="50" placeholder="Optional">
               <div class="validation-msg"></div>
             </div>
           </div>
@@ -427,17 +437,18 @@
           </div>
         </div>
 
-        <h3>Box 11: Movement Guarantee <span class="format-badge">Required</span></h3>
+        <h3>Box 11: Movement Guarantee <span class="format-badge">Conditional</span></h3>
         <div class="form-grid">
           <div class="field">
             <label>Guarantor Type Code <span class="required-asterisk">*</span>
-              <span class="field-help">?<span class="tooltip">Who provides the movement guarantee. <b>Format: n..4</b></span></span>
+              <span class="field-help">?<span class="tooltip">Who provides the movement guarantee. Select "Not required" for qualifying UK-to-UK or NI-to-EU movements. <b>Format: n..4</b></span></span>
             </label>
             <select id="s-guarantor-type" required>
               <option value="1" selected>1 - Consignor</option>
               <option value="2">2 - Transporter of goods</option>
               <option value="3">3 - Owner of goods</option>
               <option value="4">4 - Consignee</option>
+              <option value="0">0 - Not required (qualifying movements)</option>
             </select>
             <div class="validation-msg"></div>
           </div>
@@ -512,29 +523,36 @@
           </div>
         </div>
 
-        <h3>Box 16: Transport Details <span class="format-badge">Required</span></h3>
-        <div class="form-grid">
-          <div class="field">
-            <label>Transport Unit Code <span class="required-asterisk">*</span>
-              <span class="field-help">?<span class="tooltip">Type of transport unit used for first transport. <b>Format: n..2</b></span></span>
-            </label>
-            <select id="s-transport-unit-code" required>
-              <option value="1" selected>1 - Container</option>
-              <option value="2">2 - Vehicle</option>
-              <option value="3">3 - Trailer</option>
-              <option value="4">4 - Tractor</option>
-              <option value="5">5 - Fixed Transport Installations</option>
-            </select>
-            <div class="validation-msg"></div>
-          </div>
-          <div class="field">
-            <label>Identity of Transport Units <span class="required-asterisk">*</span>
-              <span class="field-help">?<span class="tooltip">Registration Number/Unique Identifier of the first transport units (vehicle reg, container number, trailer number). <b>Format: an..35 (max 35 chars)</b></span></span>
-            </label>
-            <input type="text" id="s-identity-transport" value="AB12CDE" maxlength="35" required>
-            <div class="validation-msg"></div>
+        <h3>Box 16: Transport Details <span class="format-badge">Required - Multiple Units Allowed</span></h3>
+        <p style="font-size:13px; color:#666; margin-bottom:15px;">Add details for each transport unit involved in the first transport (e.g., vehicle + trailer)</p>
+        <div id="transport-units-container">
+          <div class="transport-unit-field" data-unit="1">
+            <h4>Transport Unit 1</h4>
+            <div class="form-grid">
+              <div class="field">
+                <label>Transport Unit Code <span class="required-asterisk">*</span>
+                  <span class="field-help">?<span class="tooltip">Type of transport unit used for first transport. <b>Format: n..2</b></span></span>
+                </label>
+                <select class="s-transport-unit-code" required>
+                  <option value="1" selected>1 - Container</option>
+                  <option value="2">2 - Vehicle</option>
+                  <option value="3">3 - Trailer</option>
+                  <option value="4">4 - Tractor</option>
+                  <option value="5">5 - Fixed Transport Installations</option>
+                </select>
+                <div class="validation-msg"></div>
+              </div>
+              <div class="field">
+                <label>Identity of Transport Units <span class="required-asterisk">*</span>
+                  <span class="field-help">?<span class="tooltip">Registration Number/Unique Identifier of the first transport units (vehicle reg, container number, trailer number). <b>Format: an..35 (max 35 chars)</b></span></span>
+                </label>
+                <input type="text" class="s-identity-transport" value="AB12CDE" maxlength="35" required>
+                <div class="validation-msg"></div>
+              </div>
+            </div>
           </div>
         </div>
+        <button type="button" id="add-transport-unit-btn" class="btn-green btn-small">+ Add Another Transport Unit</button>
 
         <h3>Box 17: e-AD Body (Goods Items) <span class="format-badge">Required</span></h3>
         <div class="form-grid">
@@ -646,7 +664,7 @@
       </div>
     </div>
 
-    <!-- TAB 2: GET MOVEMENTS -->
+    <!-- TAB 2-9 (unchanged) -->
     <div id="tab-get-movements" class="tab">
       <div class="card">
         <h2>Get All Movements</h2>
@@ -661,7 +679,6 @@
       </div>
     </div>
 
-    <!-- TAB 3: GET SINGLE MOVEMENT -->
     <div id="tab-get-movement" class="tab">
       <div class="card">
         <h2>Get Single Movement</h2>
@@ -671,7 +688,6 @@
       </div>
     </div>
 
-    <!-- TAB 4: SUBMIT MESSAGE -->
     <div id="tab-submit-msg" class="tab">
       <div class="card">
         <h2>Submit Message (IE810/813/818/819/837/871)</h2>
@@ -696,7 +712,6 @@
       </div>
     </div>
 
-    <!-- TAB 5: GET MESSAGES -->
     <div id="tab-get-messages" class="tab">
       <div class="card">
         <h2>Get All Messages for a Movement</h2>
@@ -707,7 +722,6 @@
       </div>
     </div>
 
-    <!-- TAB 6: GET SINGLE MESSAGE -->
     <div id="tab-get-message" class="tab">
       <div class="card">
         <h2>Get Single Message (Returns XML)</h2>
@@ -720,7 +734,6 @@
       </div>
     </div>
 
-    <!-- TAB 7: PRE-VALIDATE -->
     <div id="tab-validate" class="tab">
       <div class="card">
         <h2>Pre-Validate Trader</h2>
@@ -743,7 +756,6 @@
       </div>
     </div>
 
-    <!-- TAB 8: SUBSCRIBE -->
     <div id="tab-subscribe" class="tab">
       <div class="card">
         <h2>Subscribe ERN for Push Notifications</h2>
@@ -753,7 +765,6 @@
       </div>
     </div>
 
-    <!-- TAB 9: UNSUBSCRIBE -->
     <div id="tab-unsubscribe" class="tab">
       <div class="card">
         <h2>Unsubscribe ERN from Push Notifications</h2>
@@ -775,6 +786,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('s-invoice-date').value = today;
 
   var TMS_NS = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.23';
+  var transportUnitCount = 1;
 
   // ==================== VALIDATION ====================
   function validateField(input) {
@@ -816,7 +828,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // ==================== AUTH ====================
+  // ==================== AUTH (unchanged) ====================
   var urlParams = new URLSearchParams(window.location.search);
   var hmrcTokenFromUrl = urlParams.get('hmrc_token');
   if (hmrcTokenFromUrl) {
@@ -908,7 +920,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (err) { console.error(err); }
   });
 
-  // ==================== TABS ====================
+  // ==================== TABS (unchanged) ====================
   document.querySelectorAll('.nav-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
@@ -918,7 +930,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // ==================== HELPERS ====================
+  // ==================== HELPERS (unchanged) ====================
   async function getHeaders() {
     var ip = '127.0.0.1';
     try { var r = await fetch('https://api.ipify.org?format=json'); ip = (await r.json()).ip; } catch(e) {}
@@ -952,6 +964,43 @@ document.addEventListener('DOMContentLoaded', function() {
     a.click();
   }
 
+  // ==================== ADD TRANSPORT UNIT ====================
+  document.getElementById('add-transport-unit-btn').addEventListener('click', function() {
+    transportUnitCount++;
+    var container = document.getElementById('transport-units-container');
+    var newUnit = document.createElement('div');
+    newUnit.className = 'transport-unit-field';
+    newUnit.setAttribute('data-unit', transportUnitCount);
+    newUnit.innerHTML = '<h4>Transport Unit ' + transportUnitCount + ' <button type="button" class="btn-red btn-small remove-unit-btn" style="float:right;">Remove</button></h4>' +
+      '<div class="form-grid">' +
+      '<div class="field"><label>Transport Unit Code <span class="required-asterisk">*</span></label>' +
+      '<select class="s-transport-unit-code" required>' +
+      '<option value="1" selected>1 - Container</option>' +
+      '<option value="2">2 - Vehicle</option>' +
+      '<option value="3">3 - Trailer</option>' +
+      '<option value="4">4 - Tractor</option>' +
+      '<option value="5">5 - Fixed Transport Installations</option>' +
+      '</select><div class="validation-msg"></div></div>' +
+      '<div class="field"><label>Identity of Transport Units <span class="required-asterisk">*</span></label>' +
+      '<input type="text" class="s-identity-transport" maxlength="35" required>' +
+      '<div class="validation-msg"></div></div>' +
+      '</div>';
+    container.appendChild(newUnit);
+
+    // Add remove listener
+    newUnit.querySelector('.remove-unit-btn').addEventListener('click', function() {
+      newUnit.remove();
+      transportUnitCount--;
+    });
+
+    // Add validation listeners to new fields
+    newUnit.querySelectorAll('input, select').forEach(function(input) {
+      input.addEventListener('blur', function() { validateField(this); });
+      input.addEventListener('input', function() { if (this.classList.contains('invalid')) validateField(this); });
+      input.addEventListener('change', function() { if (this.classList.contains('invalid')) validateField(this); });
+    });
+  });
+
   window.generateItemFields = function() {
     var count = parseInt(document.getElementById('s-item-count').value) || 1;
     var container = document.getElementById('goods-items-container');
@@ -979,7 +1028,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   };
 
-  // ==================== MESSAGE SPECIFIC FIELDS ====================
+  // ==================== MESSAGE SPECIFIC FIELDS (unchanged) ====================
   document.getElementById('sm-type').addEventListener('change', function() {
     var msgType = this.value;
     var container = document.getElementById('msg-specific-fields');
@@ -1021,7 +1070,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return '<urn:' + tag + '>' + value + '</urn:' + tag + '>';
   }
 
-  // ==================== 1. SUBMIT MOVEMENT (IE815) ====================
+  // ==================== 1. SUBMIT MOVEMENT (IE815) - UPDATED FOR MULTIPLE TRANSPORT UNITS ====================
   document.getElementById('submit-movement-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
 
@@ -1145,8 +1194,22 @@ document.addEventListener('DOMContentLoaded', function() {
       '</urn:HeaderEadEsad>' +
       '<urn:TransportMode><urn:TransportModeCode>' + document.getElementById('s-transport-mode').value + '</urn:TransportModeCode></urn:TransportMode>' +
       '<urn:MovementGuarantee><urn:GuarantorTypeCode>' + document.getElementById('s-guarantor-type').value + '</urn:GuarantorTypeCode></urn:MovementGuarantee>' +
-      bodyEadEsadXml +
-      '<urn:EadEsadDraft>' +
+      bodyEadEsadXml;
+
+    // MULTIPLE TRANSPORT UNITS - Box 16
+    var transportUnits = document.querySelectorAll('.transport-unit-field');
+    transportUnits.forEach(function(unit) {
+      var unitCode = unit.querySelector('.s-transport-unit-code').value;
+      var unitIdentity = unit.querySelector('.s-identity-transport').value;
+      if (unitCode && unitIdentity) {
+        xml += '<urn:TransportDetails>' +
+          '<urn:TransportUnitCode>' + unitCode + '</urn:TransportUnitCode>' +
+          '<urn:IdentityOfTransportUnits>' + unitIdentity + '</urn:IdentityOfTransportUnits>' +
+          '</urn:TransportDetails>';
+      }
+    });
+
+    xml += '<urn:EadEsadDraft>' +
       '<urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>' +
       '<urn:InvoiceNumber>' + document.getElementById('s-invoice-number').value + '</urn:InvoiceNumber>' +
       '<urn:InvoiceDate>' + invoiceDate + '</urn:InvoiceDate>' +
@@ -1154,10 +1217,6 @@ document.addEventListener('DOMContentLoaded', function() {
       '<urn:DateOfDispatch>' + d + '</urn:DateOfDispatch>' +
       '<urn:TimeOfDispatch>' + dispatchTime + '</urn:TimeOfDispatch>' +
       '</urn:EadEsadDraft>' +
-      '<urn:TransportDetails>' +
-      '<urn:TransportUnitCode>' + document.getElementById('s-transport-unit-code').value + '</urn:TransportUnitCode>' +
-      '<urn:IdentityOfTransportUnits>' + document.getElementById('s-identity-transport').value + '</urn:IdentityOfTransportUnits>' +
-      '</urn:TransportDetails>' +
       '</urn:SubmittedDraftOfEADESAD>' +
       '</urn:Body>' +
       '</urn:IE815>';
@@ -1171,7 +1230,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById('export-submit-btn').addEventListener('click', function() { exportResult('submit-output', 'movement'); });
 
-  // ==================== 2. GET MOVEMENTS ====================
+  // ==================== 2-9. Other endpoints (unchanged) ====================
   document.getElementById('get-movements-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1183,7 +1242,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   document.getElementById('export-gm-btn').addEventListener('click', function() { exportResult('gm-output', 'movements'); });
 
-  // ==================== 3. GET SINGLE MOVEMENT ====================
   document.getElementById('get-single-movement-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1191,7 +1249,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
-  // ==================== 4. SUBMIT MESSAGE ====================
   document.getElementById('submit-message-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1279,7 +1336,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
   });
 
-  // ==================== 5. GET MESSAGES ====================
   document.getElementById('get-messages-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1298,7 +1354,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   document.getElementById('export-gmsg-btn').addEventListener('click', function() { exportResult('gmsg-output', 'messages'); });
 
-  // ==================== 6. GET SINGLE MESSAGE ====================
   document.getElementById('get-single-message-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1309,7 +1364,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
-  // ==================== 7. PRE-VALIDATE ====================
   document.getElementById('pre-validate-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1325,7 +1379,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
-  // ==================== 8. SUBSCRIBE ====================
   document.getElementById('subscribe-ern-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
@@ -1337,7 +1390,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('sub-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
-  // ==================== 9. UNSUBSCRIBE ====================
   document.getElementById('unsubscribe-ern-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
     var h = await getHeaders();
