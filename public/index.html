@@ -35,16 +35,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .tab.active { display: block; }
 .field { position: relative; }
 .field label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 14px; }
-.field-help { display: inline-block; width: 18px; height: 18px; background: #005ea5; color: white; border-radius: 50%; text-align: center; line-height: 18px; font-size: 12px; font-weight: bold; cursor: help; margin-left: 5px; position: relative; }
-.field-help:hover .tooltip { visibility: visible; opacity: 1; }
-.tooltip { visibility: hidden; opacity: 0; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 12px; border-radius: 5px; font-size: 12px; font-weight: normal; width: 300px; z-index: 1000; transition: opacity 0.3s; line-height: 1.4; }
-.tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
 .format-badge { display: inline-block; background: #e8f4fd; color: #005ea5; padding: 2px 6px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace; }
-.cheat-sheet { background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin-top: 15px; font-size: 13px; }
-.cheat-sheet h3 { margin-bottom: 8px; margin-top: 0; }
-.cheat-sheet table { width: 100%; border-collapse: collapse; }
-.cheat-sheet th, .cheat-sheet td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
-.cheat-sheet th { background: #ffeeba; }
 #login-screen { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
 .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 450px; width: 100%; text-align: center; }
 .status-bar { background: #005ea5; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
@@ -76,14 +67,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 
 .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .item-actions { display: flex; gap: 5px; }
-
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
-.modal-overlay.active { display: flex; }
-.modal { background: white; border-radius: 8px; padding: 25px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; }
-.modal h2 { margin-bottom: 15px; }
-.preview-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-.preview-table th { background: #005ea5; color: white; padding: 6px; text-align: left; }
-.preview-table td { padding: 6px; border-bottom: 1px solid #eee; }
 </style>
 </head>
 <body>
@@ -263,10 +246,8 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
         </div>
 
         <h3>Box 17: e-AD Body (Goods Items) <span class="format-badge">Required</span></h3>
-        <div style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+        <div style="margin-bottom: 10px;">
           <button type="button" id="add-goods-item-btn" class="btn-green btn-small">+ Add Item</button>
-          <button type="button" id="import-csv-btn" class="btn-small">📥 Import from CSV</button>
-          <button type="button" id="download-csv-template-btn" class="btn-small">📄 Download CSV Template</button>
         </div>
         <div id="goods-items-container"></div>
 
@@ -373,20 +354,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
   </div>
 </div>
 
-<!-- CSV IMPORT MODAL -->
-<div id="csv-modal" class="modal-overlay">
-  <div class="modal">
-    <h2>📥 Import Goods Items from CSV</h2>
-    <p style="margin-bottom:15px; color:#666;">Required columns: ExciseProductCode, CNCode, Quantity, GrossMass, NetMass, PackageKind, PackageCount</p>
-    <input type="file" id="csv-file-input" accept=".csv">
-    <div id="csv-preview" style="margin-top:15px;"></div>
-    <div style="margin-top:15px; display:flex; gap:10px;">
-      <button id="csv-confirm-btn" class="btn-green" style="display:none;">✓ Confirm Import</button>
-      <button id="csv-cancel-btn" class="btn-red">Cancel</button>
-    </div>
-  </div>
-</div>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   var today = new Date().toISOString().slice(0, 10);
@@ -395,7 +362,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var TMS_NS = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.23';
   window.monitorData = [];
-  window.parsedCsvRows = [];
 
   // CN Code auto-fill mapping
   var CN_CODES = {
@@ -405,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
     'E420': '27101211'
   };
 
-  // Full UN/CEFACT Kind of Packages list for excise
+  // Full UN/CEFACT Kind of Packages list for excise (includes CK - Cask)
   var PACKAGE_CODES = [
     { code: 'BA', name: 'Barrel' },
     { code: 'BB', name: 'Bobbin' },
@@ -423,6 +389,7 @@ document.addEventListener('DOMContentLoaded', function() {
     { code: 'CC', name: 'Carrying case' },
     { code: 'CF', name: 'Coffer' },
     { code: 'CI', name: 'Canister' },
+    { code: 'CK', name: 'Cask' },
     { code: 'CL', name: 'Coil' },
     { code: 'CM', name: 'Card' },
     { code: 'CN', name: 'Container' },
@@ -440,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
     { code: 'FI', name: 'Firkin' },
     { code: 'FL', name: 'Flask' },
     { code: 'GI', name: 'Girder' },
-    { code: 'KG', name: 'Keg' },
+    { code: 'KG', name: 'Keg (large)' },
     { code: 'KE', name: 'Keg' },
     { code: 'NE', name: 'Unpacked or unpackaged' },
     { code: 'NS', name: 'Nest' },
@@ -530,7 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return '<urn:' + tag + '>' + value + '</urn:' + tag + '>';
   }
 
-  // ==================== GOODS ITEMS (Enhanced, Fixed) ====================
+  // ==================== GOODS ITEMS ====================
   function updateItemFieldVisibility(item) {
     var pc = item.querySelector('.s-product-code').value.toUpperCase();
     var abvField = item.querySelector('.s-abv').parentElement;
@@ -567,13 +534,6 @@ document.addEventListener('DOMContentLoaded', function() {
       it.classList.toggle('collapsed');
       this.textContent = it.classList.contains('collapsed') ? '▶' : '▼';
     });
-    item.querySelector('.dup-btn').addEventListener('click', function() {
-      var it = this.closest('.item-field');
-      var clone = it.cloneNode(true);
-      document.getElementById('goods-items-container').appendChild(clone);
-      renumberItems();
-      bindItemEvents(clone);
-    });
     item.querySelector('.remove-btn').addEventListener('click', function() {
       this.closest('.item-field').remove();
       renumberItems();
@@ -601,7 +561,6 @@ document.addEventListener('DOMContentLoaded', function() {
         '<h4>Item ' + idx + '</h4>' +
         '<div class="item-actions">' +
           '<button type="button" class="btn-small collapse-btn">▼</button>' +
-          '<button type="button" class="btn-small btn-green dup-btn">⎘ Duplicate</button>' +
           '<button type="button" class="btn-small btn-red remove-btn">✕ Remove</button>' +
         '</div>' +
       '</div>' +
@@ -650,92 +609,6 @@ document.addEventListener('DOMContentLoaded', function() {
     container.appendChild(div);
     bindItemEvents(div);
     document.getElementById('s-item-count').value = newIdx;
-  });
-
-  // ==================== CSV IMPORT ====================
-  document.getElementById('import-csv-btn').addEventListener('click', function() {
-    document.getElementById('csv-modal').classList.add('active');
-    document.getElementById('csv-preview').innerHTML = '';
-    document.getElementById('csv-confirm-btn').style.display = 'none';
-    document.getElementById('csv-file-input').value = '';
-  });
-
-  document.getElementById('csv-cancel-btn').addEventListener('click', function() {
-    document.getElementById('csv-modal').classList.remove('active');
-  });
-
-  document.getElementById('download-csv-template-btn').addEventListener('click', function() {
-    var csv = 'ExciseProductCode,CNCode,Quantity,GrossMass,NetMass,ABV,CommercialDescription,BrandName,PackageKind,PackageCount,ShippingMark,CommercialSeal\nB000,22030001,2000,20000,19999,5.0,Standard Lager,TestBrand,BA,2,,\nW200,22042142,500,800,750,12.5,Red Wine,TestVineyard,BX,10,,\nS200,22089091,100,150,120,40.0,Gin,TestGin,BO,6,,SEAL123';
-    var blob = new Blob([csv], { type: 'text/csv' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'emcs-goods-items-template.csv';
-    a.click();
-  });
-
-  document.getElementById('csv-file-input').addEventListener('change', function(e) {
-    var file = e.target.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function(ev) {
-      var text = ev.target.result;
-      var lines = text.split(/\r?\n/).filter(function(l) { return l.trim(); });
-      if (lines.length < 2) {
-        document.getElementById('csv-preview').innerHTML = '<p class="error">CSV must have at least a header row and one data row.</p>';
-        return;
-      }
-      var headers = lines[0].split(',').map(function(h) { return h.trim(); });
-      var required = ['ExciseProductCode', 'CNCode', 'Quantity', 'GrossMass', 'NetMass', 'PackageKind', 'PackageCount'];
-      var missing = required.filter(function(r) { return !headers.includes(r); });
-      if (missing.length > 0) {
-        document.getElementById('csv-preview').innerHTML = '<p class="error">Missing required columns: ' + missing.join(', ') + '</p>';
-        return;
-      }
-      var rows = [];
-      for (var i = 1; i < lines.length; i++) {
-        var cols = lines[i].split(',').map(function(c) { return c.trim(); });
-        var row = {};
-        headers.forEach(function(h, idx) { row[h] = cols[idx] || ''; });
-        rows.push(row);
-      }
-      window.parsedCsvRows = rows;
-      var preview = '<h4>Preview (' + rows.length + ' items)</h4><table class="preview-table"><thead><tr>';
-      headers.forEach(function(h) { preview += '<th>' + h + '</th>'; });
-      preview += '</tr></thead><tbody>';
-      rows.forEach(function(r) {
-        preview += '<tr>';
-        headers.forEach(function(h) { preview += '<td>' + (r[h] || '') + '</td>'; });
-        preview += '</tr>';
-      });
-      preview += '</tbody></table>';
-      document.getElementById('csv-preview').innerHTML = preview;
-      document.getElementById('csv-confirm-btn').style.display = 'inline-block';
-    };
-    reader.readAsText(file);
-  });
-
-  document.getElementById('csv-confirm-btn').addEventListener('click', function() {
-    var rows = window.parsedCsvRows;
-    if (!rows || rows.length === 0) return;
-    var items = rows.map(function(r) {
-      return {
-        productCode: r.ExciseProductCode,
-        cnCode: r.CNCode,
-        qty: r.Quantity,
-        gross: r.GrossMass,
-        net: r.NetMass,
-        abv: r.ABV || 0,
-        commDesc: r.CommercialDescription || '',
-        brand: r.BrandName || '',
-        pkgKind: r.PackageKind,
-        pkgCount: r.PackageCount,
-        shipMark: r.ShippingMark || '',
-        seal: r.CommercialSeal || ''
-      };
-    });
-    renderGoodsItems(items.length, items);
-    document.getElementById('csv-modal').classList.remove('active');
-    alert('Imported ' + items.length + ' items from CSV.');
   });
 
   // ==================== CSV EXPORT ====================
