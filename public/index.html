@@ -62,6 +62,10 @@
     .mode-prod { background: #d32f2f; color: white; }
     .required-asterisk { color: #d4351c; font-weight: bold; }
     .section-optional { background: #f9f9f9; border-left: 3px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+    /* Table styles for Tab 7 */
+    #pv-results-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+    #pv-results-table th, #pv-results-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    #pv-results-table th { background: #eee; }
   </style>
 </head>
 <body>
@@ -92,7 +96,7 @@
 <!-- MAIN DASHBOARD -->
 <div id="dashboard" style="display:none;">
   <div class="status-bar">
-    <span>🇬 HMRC EMCS Dashboard <span id="mode-indicator" class="mode-indicator mode-test">TEST MODE</span></span>
+    <span>🇬🇧 HMRC EMCS Dashboard <span id="mode-indicator" class="mode-indicator mode-test">TEST MODE</span></span>
     <div>
       <span id="hmrc-status" class="token-status token-missing">HMRC: Not Logged In</span>
       <a href="/api/auth">Login to HMRC</a>
@@ -726,8 +730,28 @@
         <h2>Get Single Message (Returns XML)</h2>
         <div class="form-grid">
           <div class="field"><label>Movement ID</label><input type="text" id="gsmsg-mid" placeholder="Paste a Movement ID"></div>
-          <div class="field"><label>Message ID</label><input type="text" id="gsmsg-id" placeholder="e.g. XI000002"></div>
+          
+          <div class="field">
+            <label>Message Type / ID</label>
+            <select id="gsmsg-type-select">
+              <option value="">-- Select Common Type --</option>
+              <option value="IE801">IE801 - Acceptance (ARC Issued)</option>
+              <option value="IE810">IE810 - Cancellation Acknowledgement</option>
+              <option value="IE813">IE813 - Change of Destination Ack.</option>
+              <option value="IE818">IE818 - Report of Receipt</option>
+              <option value="IE819">IE819 - Alert/Rejection Ack.</option>
+              <option value="IE837">IE837 - Delay Explanation Ack.</option>
+              <option value="IE871">IE871 - Shortage Explanation Ack.</option>
+              <option value="custom">Custom Message ID...</option>
+            </select>
+          </div>
+
+          <div class="field" id="gsmsg-custom-field" style="display:none;">
+            <label>Specific Message ID</label>
+            <input type="text" id="gsmsg-id-custom" placeholder="e.g. XI000002">
+          </div>
         </div>
+        
         <button id="get-single-message-btn" style="margin-top:15px;">Get Message</button>
         <pre id="gsmsg-output">Waiting...</pre>
       </div>
@@ -737,22 +761,53 @@
     <div id="tab-validate" class="tab">
       <div class="card">
         <h2>Pre-Validate Trader</h2>
+        <p style="color:#666; font-size:13px; margin-bottom:15px;">Checks if a trader is authorized for specific products before submitting a movement.</p>
+        
         <div class="form-grid">
-          <div class="field"><label>Target ERN</label><input type="text" id="pv-ern" value="GBWK000000206"></div>
-          <div class="field"><label>Entity Group</label>
+          <div class="field">
+            <label>Target ERN</label>
+            <input type="text" id="pv-ern" value="GBWK000000206">
+          </div>
+          <div class="field">
+            <label>Entity Group</label>
             <select id="pv-group">
               <option value="UK Record">UK Record</option>
               <option value="EU Trader">EU Trader</option>
               <option value="EU Warehouse">EU Warehouse</option>
-              <option value="UK Temporary Authorisation">UK Temporary Authorisation</option>
-              <option value="EU Temporary Authorisation">EU Temporary Authorisation</option>
+              <option value="UK Temporary Authorisation">UK Temp Auth</option>
+              <option value="EU Temporary Authorisation">EU Temp Auth</option>
             </select>
           </div>
-          <div class="field"><label>Product Code 1</label><input type="text" id="pv-p1" value="W200"></div>
-          <div class="field"><label>Product Code 2 (optional)</label><input type="text" id="pv-p2" placeholder="Optional"></div>
+          <div class="field">
+            <label>Product Code 1</label>
+            <input type="text" id="pv-p1" value="W200">
+          </div>
+          <div class="field">
+            <label>Product Code 2 (optional)</label>
+            <input type="text" id="pv-p2" placeholder="Optional">
+          </div>
         </div>
-        <button id="pre-validate-btn" style="margin-top:15px;">Validate Trader</button>
-        <pre id="pv-output">Waiting...</pre>
+        
+        <div style="margin-top:15px;">
+          <button id="pre-validate-btn">Validate Current Selection</button>
+          <button id="pre-validate-all-btn" class="btn-green">🚀 Run Full Matrix Test (All Groups x Top Products)</button>
+        </div>
+
+        <h3 style="margin-top:20px;">Results Table</h3>
+        <table id="pv-results-table" style="width:100%; border-collapse:collapse; display:none;">
+          <thead>
+            <tr style="background:#eee;">
+              <th style="border:1px solid #ddd; padding:8px;">Entity Group</th>
+              <th style="border:1px solid #ddd; padding:8px;">Product Code</th>
+              <th style="border:1px solid #ddd; padding:8px;">Status</th>
+              <th style="border:1px solid #ddd; padding:8px;">Result / Error</th>
+            </tr>
+          </thead>
+          <tbody id="pv-results-body">
+          </tbody>
+        </table>
+
+        <pre id="pv-output" style="margin-top:15px;">Waiting...</pre>
       </div>
     </div>
 
@@ -825,14 +880,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   attachValidation(document);
 
-  // Restore last movement ID if available
-  var lastMovId = localStorage.getItem('last_movement_id');
-  if (lastMovId) {
-    ['gsm-id', 'sm-mov-id', 'gmsg-id', 'gsmsg-mid'].forEach(function(fieldId) {
-      var el = document.getElementById(fieldId);
-      if (el) el.value = lastMovId;
-    });
-  }
+  // Restore last state if available
+  restoreLastState();
 
   // ==================== AUTH ====================
   var urlParams = new URLSearchParams(window.location.search);
@@ -894,6 +943,10 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
     localStorage.removeItem('dashboard_auth');
     localStorage.removeItem('hmrc_token');
+    localStorage.removeItem('last_movement_id');
+    localStorage.removeItem('last_arc');
+    localStorage.removeItem('last_lrn');
+    localStorage.removeItem('last_ern');
     location.reload();
   });
 
@@ -978,6 +1031,54 @@ document.addEventListener('DOMContentLoaded', function() {
   function getVal(id) {
     var el = document.getElementById(id);
     return el ? el.value.trim() : '';
+  }
+
+  // Save state helper
+  function saveState(movementId, arc, lrn, ern) {
+    if (movementId) localStorage.setItem('last_movement_id', movementId);
+    if (arc) localStorage.setItem('last_arc', arc);
+    if (lrn) localStorage.setItem('last_lrn', lrn);
+    if (ern) localStorage.setItem('last_ern', ern);
+    
+    // Distribute to fields
+    distributeState();
+  }
+
+  // Distribute state helper
+  function distributeState() {
+    var movId = localStorage.getItem('last_movement_id');
+    var arc = localStorage.getItem('last_arc');
+    var lrn = localStorage.getItem('last_lrn');
+    var ern = localStorage.getItem('last_ern');
+
+    if (movId) {
+      ['gsm-id', 'sm-mov-id', 'gmsg-id', 'gsmsg-mid'].forEach(function(fid) {
+        var el = document.getElementById(fid);
+        if (el) el.value = movId;
+      });
+    }
+    
+    if (arc) {
+      var elArc = document.getElementById('sm-arc');
+      if (elArc) elArc.value = arc;
+      
+      var elGmAcr = document.getElementById('gm-arc');
+      if (elGmAcr) elGmAcr.value = arc;
+    }
+
+    if (lrn) {
+      var elLrn = document.getElementById('gm-lrn');
+      if (elLrn) elLrn.value = lrn;
+    }
+
+    if (ern) {
+      var elErn = document.getElementById('gm-ern');
+      if (elErn) elErn.value = ern;
+    }
+  }
+
+  function restoreLastState() {
+    distributeState();
   }
 
   // ==================== ADD TRANSPORT UNIT ====================
@@ -1245,21 +1346,17 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('HMRC Response:', res.status, responseText);
     document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
 
-    // Auto-fill movement IDs on success
+    // Auto-fill ALL relevant fields on success
     try {
       if (res.status === 202) {
         var parsed = JSON.parse(responseText);
         if (parsed && parsed.movementId) {
-          localStorage.setItem('last_movement_id', parsed.movementId);
-
-          ['gsm-id', 'sm-mov-id', 'gmsg-id', 'gsmsg-mid'].forEach(function(fieldId) {
-            var el = document.getElementById(fieldId);
-            if (el) el.value = parsed.movementId;
-          });
-
-          console.log('Auto-filled movementId:', parsed.movementId);
-        } else {
-          console.warn('Tab 1 returned 202 but no movementId was found in response.', parsed);
+          var arc = parsed.administrativeReferenceCode || '';
+          var lrn = parsed.localReferenceNumber || uniqueLrn;
+          var ern = parsed.consignorId || document.getElementById('s-consignor-ern').value;
+          
+          saveState(parsed.movementId, arc, lrn, ern);
+          console.log('Saved State:', { movementId: parsed.movementId, arc: arc, lrn: lrn, ern: ern });
         }
       }
     } catch (e) {
@@ -1312,7 +1409,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (!arc) {
-      alert('ARC is required. Get it from Tab 5 by opening the IE801 message.');
+      alert('ARC is required. Get it from Tab 5 by opening the IE801 message, or ensure Tab 1 returned it.');
       return;
     }
 
@@ -1467,23 +1564,54 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('export-gmsg-btn').addEventListener('click', function() { exportResult('gmsg-output', 'messages'); });
 
   // ==================== 6. GET SINGLE MESSAGE ====================
+  
+  // Toggle custom input visibility
+  document.getElementById('gsmsg-type-select').addEventListener('change', function() {
+    var customField = document.getElementById('gsmsg-custom-field');
+    if (this.value === 'custom') {
+      customField.style.display = 'block';
+    } else {
+      customField.style.display = 'none';
+    }
+  });
+
   document.getElementById('get-single-message-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
 
     var movId = (document.getElementById('gsmsg-mid').value || localStorage.getItem('last_movement_id') || '').trim();
-    var msgId = (document.getElementById('gsmsg-id').value || '').trim();
+    
+    // Determine Message ID from selection or custom input
+    var typeSelect = document.getElementById('gsmsg-type-select').value;
+    var msgId = '';
+    
+    if (typeSelect === 'custom' || typeSelect === '') {
+       msgId = document.getElementById('gsmsg-id-custom').value.trim();
+    } else {
+       // For standard types, we often need the specific ID generated by HMRC. 
+       // However, some sandboxes allow querying by type if only one exists. 
+       // Safer approach: Ask user to paste the ID from Tab 5 if they selected a type but didn't know the ID.
+       // For this demo, let's assume they might have pasted an ID into the custom field even if they picked a type, 
+       // OR we try to find it dynamically. 
+       
+       // Simplified logic: If they pick a type, we expect them to also have the ID handy, 
+       // BUT since we can't guess the dynamic ID (XI00000X), let's force them to use Custom or paste ID.
+       // Actually, let's just use the custom field value regardless, but label it better.
+       msgId = document.getElementById('gsmsg-id-custom').value.trim();
+       
+       if(!msgId && typeSelect !== 'custom') {
+         alert("Please enter the specific Message ID (e.g. XI000002) found in Tab 5.");
+         return;
+       }
+    }
 
     if (!movId) {
-      alert('Movement ID is required. Submit a movement in Tab 1 first, or paste a movementId.');
+      alert('Movement ID is required.');
       return;
     }
-
     if (!msgId) {
-      alert('Message ID is required. Get it from Tab 5, for example XI000002.');
+      alert('Message ID is required. Copy it from Tab 5 output.');
       return;
     }
-
-    document.getElementById('gsmsg-mid').value = movId;
 
     var h = await getHeaders();
     h['Accept'] = 'application/vnd.hmrc.1.0+xml';
@@ -1497,19 +1625,101 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // ==================== 7. PRE-VALIDATE ====================
-  document.getElementById('pre-validate-btn').addEventListener('click', async function() {
-    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+  
+  async function runSingleValidation(group, productCode, ern) {
     var h = await getHeaders();
     h['x-correlation-id'] = crypto.randomUUID();
-    var products = [];
-    if (document.getElementById('pv-p1').value) products.push({ product: { exciseProductCode: document.getElementById('pv-p1').value } });
-    if (document.getElementById('pv-p2').value) products.push({ product: { exciseProductCode: document.getElementById('pv-p2').value } });
+    
+    var requestBody = {
+      exciseTraderValidationRequest: {
+        exciseRegistrationNumber: ern,
+        entityGroup: group,
+        validateProductAuthorisationRequest: [{ product: { exciseProductCode: productCode } }]
+      }
+    };
+
+    try {
+      var res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', {
+        method: 'POST',
+        headers: Object.assign({}, h, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify(requestBody)
+      });
+      
+      var text = await res.text();
+      var statusText = res.ok ? 'PASS' : 'FAIL (' + res.status + ')';
+      var detail = res.ok ? 'Authorized' : text.substring(0, 100); // Truncate error
+      
+      return { group, productCode, status: statusText, detail: detail };
+    } catch (e) {
+      return { group, productCode, status: 'ERROR', detail: e.message };
+    }
+  }
+
+  document.getElementById('pre-validate-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+    
+    var ern = document.getElementById('pv-ern').value;
+    var group = document.getElementById('pv-group').value;
+    var p1 = document.getElementById('pv-p1').value;
+    var p2 = document.getElementById('pv-p2').value;
+    
+    var products = [p1];
+    if(p2) products.push(p2);
+    
+    var h = await getHeaders();
+    h['x-correlation-id'] = crypto.randomUUID();
+    
+    var requestBody = {
+      exciseTraderValidationRequest: {
+        exciseRegistrationNumber: ern,
+        entityGroup: group,
+        validateProductAuthorisationRequest: products.map(code => ({ product: { exciseProductCode: code } }))
+      }
+    };
+
     var res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', {
       method: 'POST',
       headers: Object.assign({}, h, { 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ exciseRegistrationNumber: document.getElementById('pv-ern').value, entityGroup: document.getElementById('pv-group').value, validateProductAuthorisationRequest: products })
+      body: JSON.stringify(requestBody)
     });
+    
     document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+  });
+
+  document.getElementById('pre-validate-all-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+    
+    var ern = document.getElementById('pv-ern').value;
+    var groups = ['UK Record', 'EU Trader', 'EU Warehouse'];
+    var products = ['B000', 'W200', 'S200', 'E410']; // Beer, Wine, Spirits, Petrol
+    
+    var tbody = document.getElementById('pv-results-body');
+    tbody.innerHTML = '<tr><td colspan="4" style="padding:10px; text-align:center;">Running tests...</td></tr>';
+    document.getElementById('pv-results-table').style.display = 'table';
+    document.getElementById('pv-output').innerText = '';
+
+    var results = [];
+    
+    // Sequential execution to avoid rate limiting
+    for (let g of groups) {
+      for (let p of products) {
+        var result = await runSingleValidation(g, p, ern);
+        results.push(result);
+        
+        // Append row immediately
+        var tr = document.createElement('tr');
+        var color = result.status.includes('PASS') ? '#d4edda' : '#f8d7da';
+        tr.innerHTML = `
+          <td style="border:1px solid #ddd; padding:8px;">${result.group}</td>
+          <td style="border:1px solid #ddd; padding:8px;">${result.productCode}</td>
+          <td style="border:1px solid #ddd; padding:8px; background:${color};">${result.status}</td>
+          <td style="border:1px solid #ddd; padding:8px; font-size:11px;">${result.detail}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+    
+    document.getElementById('pv-output').innerText = 'Matrix Test Complete. See table above.';
   });
 
   // ==================== 8. SUBSCRIBE ====================
