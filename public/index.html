@@ -62,11 +62,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .required-asterisk { color: #d4351c; font-weight: bold; }
 .section-optional { background: #f9f9f9; border-left: 3px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 .section-filter { background: #f0f4f8; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-.section-templates { background: #f0fff4; border-left: 3px solid #00703c; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-.section-duty { background: #fff8e1; border-left: 3px solid #ff9800; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-.section-recent { background: #e3f2fd; border-left: 3px solid #2196f3; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 
-/* Monitor Table */
 .monitor-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
 .monitor-table th { background: #005ea5; color: white; padding: 10px; text-align: left; position: sticky; top: 0; }
 .monitor-table td { padding: 10px; border-bottom: 1px solid #ddd; }
@@ -78,36 +74,16 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .warning-row { background-color: #fff5f5 !important; }
 .warning-text { color: #d4351c; font-weight: bold; }
 
-/* Recent Movements */
-.recent-movements { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
-.recent-card { background: white; border: 1px solid #ddd; border-radius: 5px; padding: 10px; min-width: 200px; cursor: pointer; transition: transform 0.2s; }
-.recent-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-color: #005ea5; }
-.recent-card .rc-lrn { font-weight: bold; color: #005ea5; font-size: 12px; }
-.recent-card .rc-date { font-size: 11px; color: #666; }
-.recent-card .rc-party { font-size: 12px; margin-top: 5px; }
+.item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.item-actions { display: flex; gap: 5px; }
 
-/* Templates */
-.template-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.template-chip { background: white; border: 1px solid #00703c; color: #00703c; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-.template-chip:hover { background: #00703c; color: white; }
-.template-chip .del-tpl { color: #d4351c; font-weight: bold; cursor: pointer; margin-left: 4px; }
-.template-chip .del-tpl:hover { color: white; }
-
-/* Duty Estimator */
-.duty-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-.duty-table th { background: #ff9800; color: white; padding: 8px; text-align: left; }
-.duty-table td { padding: 8px; border-bottom: 1px solid #eee; }
-.duty-total { font-size: 1.2em; font-weight: bold; color: #00703c; margin-top: 10px; padding: 10px; background: #e8f5e9; border-radius: 5px; text-align: right; }
-
-/* Modal */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
 .modal-overlay.active { display: flex; }
 .modal { background: white; border-radius: 8px; padding: 25px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; }
 .modal h2 { margin-bottom: 15px; }
-
-/* Item header with actions */
-.item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.item-actions { display: flex; gap: 5px; }
+.preview-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+.preview-table th { background: #005ea5; color: white; padding: 6px; text-align: left; }
+.preview-table td { padding: 6px; border-bottom: 1px solid #eee; }
 </style>
 </head>
 <body>
@@ -188,25 +164,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
       <div class="card">
         <h2>Submit Draft Movement (IE815) - EMCS Phase 4 V3.23</h2>
 
-        <!-- RECENT MOVEMENTS WIDGET -->
-        <div class="section-recent">
-          <h3 style="margin-top:0; border:none; font-size:1em;">🕐 Recent Movements (click to reuse)</h3>
-          <div id="recent-movements" class="recent-movements">
-            <p style="color:#666; font-size:13px;">No recent movements yet. Submit one to see it here.</p>
-          </div>
-        </div>
-
-        <!-- TEMPLATES SECTION -->
-        <div class="section-templates">
-          <h3 style="margin-top:0; border:none; font-size:1em;">💾 Templates</h3>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-            <input type="text" id="template-name" placeholder="Template name (e.g., 'Weekly Beer to Manchester')" style="max-width: 300px;">
-            <button id="save-template-btn" class="btn-green btn-small">💾 Save Current as Template</button>
-          </div>
-          <div id="template-list" class="template-list"></div>
-        </div>
-
-        <!-- BOX 1: eAD Header -->
         <h3>Box 1: eAD Header <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field"><label>Destination Type Code <span class="required-asterisk">*</span></label>
@@ -222,7 +179,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           </div>
         </div>
 
-        <!-- BOX 2: Consignor -->
         <h3>Box 2: Consignor <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field"><label>Trader Excise Number (ERN) <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-ern" value="GBWK002281023" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13" required></div>
@@ -233,7 +189,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <div class="field"><label>City <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-city" value="London" maxlength="50" required></div>
         </div>
 
-        <!-- BOX 3: Place of Dispatch -->
         <div class="section-optional">
           <h3 style="margin-top:0;">Box 3: Place of Dispatch <span class="format-badge">Conditional</span></h3>
           <div class="form-grid">
@@ -246,7 +201,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           </div>
         </div>
 
-        <!-- BOX 5: Consignee -->
         <h3>Box 5: Consignee <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field"><label>Trader ID (ERN) <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-ern" value="GBWKQOZ8OVLYR" maxlength="16" required></div>
@@ -257,7 +211,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <div class="field"><label>City <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-city" value="Manchester" maxlength="50" required></div>
         </div>
 
-        <!-- BOX 7: Place of Delivery -->
         <h3>Box 7: Place of Delivery <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field"><label>Trader ID <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-trader-id" value="GB00AIP67RAO3" maxlength="16" required></div>
@@ -268,7 +221,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <div class="field"><label>City <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-city" value="Manchester" maxlength="50" required></div>
         </div>
 
-        <!-- BOX 9: e-AD -->
         <h3>Box 9: e-AD <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field"><label>Local Reference Number (LRN)</label><input type="text" id="s-lrn" value="" maxlength="22" placeholder="Auto-generated"></div>
@@ -281,7 +233,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <div class="field"><label>Time of Dispatch <span class="required-asterisk">*</span></label><input type="time" id="s-time" value="12:00" required></div>
         </div>
 
-        <!-- BOX 10/11/13/15 -->
         <h3>Boxes 10/11/13/15: Authorities & Transport <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field"><label>Dispatch Office Ref <span class="required-asterisk">*</span></label><input type="text" id="s-dispatch-office" value="GB004098" maxlength="8" required></div>
@@ -296,7 +247,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <div class="field"><label>Transporter City <span class="required-asterisk">*</span></label><input type="text" id="s-transporter-city" value="Dover" maxlength="50" required></div>
         </div>
 
-        <!-- BOX 16: Transport Details -->
         <h3>Box 16: Transport Details <span class="format-badge">Required</span></h3>
         <div id="transport-units-container">
           <div class="transport-unit-field" data-unit="1">
@@ -312,7 +262,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           </div>
         </div>
 
-        <!-- BOX 17: e-AD Body (Enhanced) -->
         <h3>Box 17: e-AD Body (Goods Items) <span class="format-badge">Required</span></h3>
         <div style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
           <button type="button" id="add-goods-item-btn" class="btn-green btn-small">+ Add Item</button>
@@ -320,14 +269,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <button type="button" id="download-csv-template-btn" class="btn-small">📄 Download CSV Template</button>
         </div>
         <div id="goods-items-container"></div>
-
-        <!-- DUTY ESTIMATOR -->
-        <div class="section-duty">
-          <h3 style="margin-top:0; border:none; font-size:1em;">💷 Estimated Excise Duty</h3>
-          <div id="duty-display">
-            <p style="color:#666; font-size:13px;">Add goods items to see duty estimate.</p>
-          </div>
-        </div>
 
         <button id="submit-movement-btn" style="margin-top:20px;">Submit Movement</button>
         <button id="export-last-csv-btn" class="btn-green" style="display:none;">📤 Export Last Submission to CSV</button>
@@ -436,7 +377,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 <div id="csv-modal" class="modal-overlay">
   <div class="modal">
     <h2>📥 Import Goods Items from CSV</h2>
-    <p style="margin-bottom:15px; color:#666;">Upload a CSV file with goods items. Required columns: ExciseProductCode, CNCode, Quantity, GrossMass, NetMass, PackageKind, PackageCount</p>
+    <p style="margin-bottom:15px; color:#666;">Required columns: ExciseProductCode, CNCode, Quantity, GrossMass, NetMass, PackageKind, PackageCount</p>
     <input type="file" id="csv-file-input" accept=".csv">
     <div id="csv-preview" style="margin-top:15px;"></div>
     <div style="margin-top:15px; display:flex; gap:10px;">
@@ -456,21 +397,6 @@ document.addEventListener('DOMContentLoaded', function() {
   window.monitorData = [];
   window.parsedCsvRows = [];
 
-  // UK Excise Duty Rates (approximate 2026)
-  var DUTY_RATES = {
-    'B000': { name: 'Beer', unit: 'hl/%ABV', rate: 21.01 },
-    'W200': { name: 'Still Wine (≤5.5%)', unit: 'hl', rate: 46.09 },
-    'W200H': { name: 'Still Wine (>5.5-15%)', unit: 'hl', rate: 288.65 },
-    'W300': { name: 'Sparkling Wine', unit: 'hl', rate: 288.65 },
-    'I000': { name: 'Intermediate Products', unit: 'hl', rate: 288.65 },
-    'S200': { name: 'Spirits', unit: 'L alcohol', rate: 31.64 },
-    'S300': { name: 'Ethyl Alcohol', unit: 'L alcohol', rate: 31.64 },
-    'T200': { name: 'Cigarettes', unit: '1000 sticks', rate: 239.49 },
-    'T300': { name: 'Cigars', unit: 'kg', rate: 239.49 },
-    'E410': { name: 'Leaded Petrol', unit: 'L', rate: 0.5795 },
-    'E420': { name: 'Unleaded Petrol', unit: 'L', rate: 0.5295 }
-  };
-
   // CN Code auto-fill mapping
   var CN_CODES = {
     'B000': '22030001', 'W200': '22042142', 'W300': '22041011',
@@ -478,6 +404,84 @@ document.addEventListener('DOMContentLoaded', function() {
     'T200': '24022010', 'T300': '24021000', 'E410': '27101231',
     'E420': '27101211'
   };
+
+  // Full UN/CEFACT Kind of Packages list for excise
+  var PACKAGE_CODES = [
+    { code: 'BA', name: 'Barrel' },
+    { code: 'BB', name: 'Bobbin' },
+    { code: 'BD', name: 'Board' },
+    { code: 'BE', name: 'Bundle' },
+    { code: 'BG', name: 'Bag' },
+    { code: 'BI', name: 'Bin' },
+    { code: 'BJ', name: 'Bucket' },
+    { code: 'BK', name: 'Basket' },
+    { code: 'BL', name: 'Bale' },
+    { code: 'BO', name: 'Bottle' },
+    { code: 'BX', name: 'Box' },
+    { code: 'CA', name: 'Can' },
+    { code: 'CB', name: 'Crate' },
+    { code: 'CC', name: 'Carrying case' },
+    { code: 'CF', name: 'Coffer' },
+    { code: 'CI', name: 'Canister' },
+    { code: 'CL', name: 'Coil' },
+    { code: 'CM', name: 'Card' },
+    { code: 'CN', name: 'Container' },
+    { code: 'CO', name: 'Carboy' },
+    { code: 'CS', name: 'Case' },
+    { code: 'CT', name: 'Carton' },
+    { code: 'CU', name: 'Cup' },
+    { code: 'CV', name: 'Cover' },
+    { code: 'CX', name: 'Chest' },
+    { code: 'CY', name: 'Cylinder' },
+    { code: 'DR', name: 'Drum' },
+    { code: 'DS', name: 'Display' },
+    { code: 'EN', name: 'Envelope' },
+    { code: 'FB', name: 'Flexible bag' },
+    { code: 'FI', name: 'Firkin' },
+    { code: 'FL', name: 'Flask' },
+    { code: 'GI', name: 'Girder' },
+    { code: 'KG', name: 'Keg' },
+    { code: 'KE', name: 'Keg' },
+    { code: 'NE', name: 'Unpacked or unpackaged' },
+    { code: 'NS', name: 'Nest' },
+    { code: 'OT', name: 'Other' },
+    { code: 'OU', name: 'Container, outer' },
+    { code: 'PK', name: 'Package' },
+    { code: 'PL', name: 'Pail' },
+    { code: 'PU', name: 'Tray pack' },
+    { code: 'PX', name: 'Pallet' },
+    { code: 'PZ', name: 'Pallet box' },
+    { code: 'RL', name: 'Reel' },
+    { code: 'RO', name: 'Roll' },
+    { code: 'SC', name: 'Sachet' },
+    { code: 'SK', name: 'Skein' },
+    { code: 'SL', name: 'Slab' },
+    { code: 'SM', name: 'Sheet' },
+    { code: 'ST', name: 'Sheet' },
+    { code: 'SU', name: 'Suitcase' },
+    { code: 'TB', name: 'Tub' },
+    { code: 'TC', name: 'Tube container' },
+    { code: 'TD', name: 'Tube' },
+    { code: 'TG', name: 'Tank container' },
+    { code: 'TK', name: 'Tank' },
+    { code: 'TN', name: 'Tin' },
+    { code: 'TR', name: 'Trunk' },
+    { code: 'TS', name: 'Tins' },
+    { code: 'TU', name: 'Tube' },
+    { code: 'UN', name: 'Unit' },
+    { code: 'VG', name: 'Bulk, gas' },
+    { code: 'VI', name: 'Vial' },
+    { code: 'VR', name: 'Bulk, liquid' },
+    { code: 'VO', name: 'Bulk, solid' },
+    { code: 'XE', name: 'Bin pallet' }
+  ];
+
+  function buildPackageOptions(selected) {
+    return PACKAGE_CODES.map(function(p) {
+      var sel = (p.code === selected) ? ' selected' : '';
+      return '<option value="' + p.code + '"' + sel + '>' + p.code + ' - ' + p.name + '</option>';
+    }).join('');
+  }
 
   // ==================== AUTH ====================
   function checkAuth() {
@@ -526,337 +530,23 @@ document.addEventListener('DOMContentLoaded', function() {
     return '<urn:' + tag + '>' + value + '</urn:' + tag + '>';
   }
 
-  // ==================== TEMPLATES ====================
-  function getTemplates() {
-    try { return JSON.parse(localStorage.getItem('emcs_templates') || '[]'); } catch(e) { return []; }
-  }
-
-  function saveTemplates(templates) {
-    localStorage.setItem('emcs_templates', JSON.stringify(templates));
-  }
-
-  function initDefaultTemplates() {
-    if (localStorage.getItem('emcs_templates_initialized')) return;
-    var defaults = [
-      {
-        name: 'UK Beer to Tax Warehouse',
-        created: today,
-        data: {
-          destType: '1', journeyTime: 'D07', transportArrangement: '1',
-          consignorErn: 'GBWK002281023', consignorName: 'Test Consignor Ltd',
-          consigneeErn: 'GBWKQOZ8OVLYR', consigneeName: 'Test Consignee Ltd',
-          dispatchWarehouse: 'GB00DO459DMNX', dispatchOffice: 'GB004098',
-          transporterVat: '123798354', transporterName: 'Fast Freight Ltd',
-          items: [{ productCode: 'B000', cnCode: '22030001', qty: 2000, gross: 20000, net: 19999, abv: 5.0, commDesc: 'Standard Lager', brand: 'TestBrand', pkgKind: 'BA', pkgCount: 2 }]
-        }
-      }
-    ];
-    saveTemplates(defaults);
-    localStorage.setItem('emcs_templates_initialized', '1');
-  }
-  initDefaultTemplates();
-
-  function renderTemplates() {
-    var templates = getTemplates();
-    var container = document.getElementById('template-list');
-    if (templates.length === 0) {
-      container.innerHTML = '<p style="color:#666; font-size:13px;">No templates saved yet.</p>';
-      return;
-    }
-    container.innerHTML = templates.map(function(t, i) {
-      return '<div class="template-chip" data-idx="' + i + '">' +
-        '<span class="load-tpl">' + t.name + '</span>' +
-        '<span class="del-tpl" data-idx="' + i + '" title="Delete">✕</span>' +
-        '</div>';
-    }).join('');
-
-    container.querySelectorAll('.load-tpl').forEach(function(el) {
-      el.addEventListener('click', function() {
-        var idx = this.parentElement.getAttribute('data-idx');
-        loadTemplate(parseInt(idx));
-      });
-    });
-    container.querySelectorAll('.del-tpl').forEach(function(el) {
-      el.addEventListener('click', function(e) {
-        e.stopPropagation();
-        var idx = parseInt(this.getAttribute('data-idx'));
-        if (confirm('Delete template "' + templates[idx].name + '"?')) {
-          templates.splice(idx, 1);
-          saveTemplates(templates);
-          renderTemplates();
-        }
-      });
-    });
-  }
-  renderTemplates();
-
-  function captureFormData() {
-    var items = [];
-    document.querySelectorAll('#goods-items-container .item-field').forEach(function(item) {
-      items.push({
-        productCode: item.querySelector('.s-product-code').value,
-        cnCode: item.querySelector('.s-cn-code').value,
-        qty: item.querySelector('.s-qty').value,
-        gross: item.querySelector('.s-weight').value,
-        net: item.querySelector('.s-net-weight').value,
-        abv: item.querySelector('.s-abv').value,
-        commDesc: item.querySelector('.s-comm-desc').value,
-        brand: item.querySelector('.s-brand').value,
-        pkgKind: item.querySelector('.s-package-kind').value,
-        pkgCount: item.querySelector('.s-package-count').value,
-        bulk: item.querySelector('.s-bulk').checked,
-        smallProducer: item.querySelector('.s-small-producer').checked,
-        shipMark: item.querySelector('.s-ship-mark').value,
-        seal: item.querySelector('.s-seal').value
-      });
-    });
-    return {
-      destType: document.getElementById('s-dest-type').value,
-      journeyTime: document.getElementById('s-journey-time').value,
-      transportArrangement: document.getElementById('s-transport-arrangement').value,
-      consignorErn: document.getElementById('s-consignor-ern').value,
-      consignorName: document.getElementById('s-consignor-name').value,
-      consignorStreet: document.getElementById('s-consignor-street').value,
-      consignorPostcode: document.getElementById('s-consignor-postcode').value,
-      consignorCity: document.getElementById('s-consignor-city').value,
-      consigneeErn: document.getElementById('s-consignee-ern').value,
-      consigneeName: document.getElementById('s-consignee-name').value,
-      consigneeStreet: document.getElementById('s-consignee-street').value,
-      consigneePostcode: document.getElementById('s-consignee-postcode').value,
-      consigneeCity: document.getElementById('s-consignee-city').value,
-      dispatchWarehouse: document.getElementById('s-dispatch-warehouse').value,
-      dispatchOffice: document.getElementById('s-dispatch-office').value,
-      transporterVat: document.getElementById('s-transporter-vat').value,
-      transporterName: document.getElementById('s-transporter-name').value,
-      transporterCity: document.getElementById('s-transporter-city').value,
-      items: items
-    };
-  }
-
-  function applyFormData(data) {
-    if (data.destType) document.getElementById('s-dest-type').value = data.destType;
-    if (data.journeyTime) document.getElementById('s-journey-time').value = data.journeyTime;
-    if (data.transportArrangement) document.getElementById('s-transport-arrangement').value = data.transportArrangement;
-    if (data.consignorErn) document.getElementById('s-consignor-ern').value = data.consignorErn;
-    if (data.consignorName) document.getElementById('s-consignor-name').value = data.consignorName;
-    if (data.consignorStreet) document.getElementById('s-consignor-street').value = data.consignorStreet;
-    if (data.consignorPostcode) document.getElementById('s-consignor-postcode').value = data.consignorPostcode;
-    if (data.consignorCity) document.getElementById('s-consignor-city').value = data.consignorCity;
-    if (data.consigneeErn) document.getElementById('s-consignee-ern').value = data.consigneeErn;
-    if (data.consigneeName) document.getElementById('s-consignee-name').value = data.consigneeName;
-    if (data.consigneeStreet) document.getElementById('s-consignee-street').value = data.consigneeStreet;
-    if (data.consigneePostcode) document.getElementById('s-consignee-postcode').value = data.consigneePostcode;
-    if (data.consigneeCity) document.getElementById('s-consignee-city').value = data.consigneeCity;
-    if (data.dispatchWarehouse !== undefined) document.getElementById('s-dispatch-warehouse').value = data.dispatchWarehouse;
-    if (data.dispatchOffice) document.getElementById('s-dispatch-office').value = data.dispatchOffice;
-    if (data.transporterVat) document.getElementById('s-transporter-vat').value = data.transporterVat;
-    if (data.transporterName) document.getElementById('s-transporter-name').value = data.transporterName;
-    if (data.transporterCity) document.getElementById('s-transporter-city').value = data.transporterCity;
-
-    if (data.items && data.items.length > 0) {
-      document.getElementById('s-item-count').value = data.items.length;
-      renderGoodsItems(data.items.length);
-      data.items.forEach(function(it, idx) {
-        var item = document.querySelectorAll('#goods-items-container .item-field')[idx];
-        if (!item) return;
-        if (it.productCode) item.querySelector('.s-product-code').value = it.productCode;
-        if (it.cnCode) item.querySelector('.s-cn-code').value = it.cnCode;
-        if (it.qty) item.querySelector('.s-qty').value = it.qty;
-        if (it.gross) item.querySelector('.s-weight').value = it.gross;
-        if (it.net) item.querySelector('.s-net-weight').value = it.net;
-        if (it.abv !== undefined) item.querySelector('.s-abv').value = it.abv;
-        if (it.commDesc) item.querySelector('.s-comm-desc').value = it.commDesc;
-        if (it.brand !== undefined) item.querySelector('.s-brand').value = it.brand;
-        if (it.pkgKind) item.querySelector('.s-package-kind').value = it.pkgKind;
-        if (it.pkgCount !== undefined) item.querySelector('.s-package-count').value = it.pkgCount;
-        if (it.bulk) { item.querySelector('.s-bulk').checked = true; item.querySelector('.s-net-weight').disabled = true; }
-        if (it.smallProducer) item.querySelector('.s-small-producer').checked = true;
-        if (it.shipMark) item.querySelector('.s-ship-mark').value = it.shipMark;
-        if (it.seal) item.querySelector('.s-seal').value = it.seal;
-        updateItemFieldVisibility(item);
-      });
-    }
-    updateDutyEstimate();
-  }
-
-  function loadTemplate(idx) {
-    var templates = getTemplates();
-    if (templates[idx]) {
-      applyFormData(templates[idx].data);
-      alert('Template "' + templates[idx].name + '" loaded.');
-    }
-  }
-
-  document.getElementById('save-template-btn').addEventListener('click', function() {
-    var name = document.getElementById('template-name').value.trim();
-    if (!name) { alert('Please enter a template name.'); return; }
-    var templates = getTemplates();
-    templates.push({ name: name, created: today, data: captureFormData() });
-    saveTemplates(templates);
-    renderTemplates();
-    document.getElementById('template-name').value = '';
-    alert('Template "' + name + '" saved.');
-  });
-
-  // ==================== RECENT MOVEMENTS ====================
-  function getRecentMovements() {
-    try { return JSON.parse(localStorage.getItem('emcs_recent') || '[]'); } catch(e) { return []; }
-  }
-
-  function addRecentMovement(data) {
-    var recent = getRecentMovements();
-    recent.unshift(data);
-    if (recent.length > 5) recent = recent.slice(0, 5);
-    localStorage.setItem('emcs_recent', JSON.stringify(recent));
-    renderRecentMovements();
-  }
-
-  function renderRecentMovements() {
-    var recent = getRecentMovements();
-    var container = document.getElementById('recent-movements');
-    if (recent.length === 0) {
-      container.innerHTML = '<p style="color:#666; font-size:13px;">No recent movements yet.</p>';
-      return;
-    }
-    container.innerHTML = recent.map(function(r, i) {
-      return '<div class="recent-card" data-idx="' + i + '">' +
-        '<div class="rc-lrn">' + (r.lrn || 'N/A') + '</div>' +
-        '<div class="rc-date">' + (r.date || '') + '</div>' +
-        '<div class="rc-party">→ ' + (r.consignee || '') + '</div>' +
-        '<div class="rc-party">' + (r.product || '') + '</div>' +
-        '</div>';
-    }).join('');
-    container.querySelectorAll('.recent-card').forEach(function(card) {
-      card.addEventListener('click', function() {
-        var idx = parseInt(this.getAttribute('data-idx'));
-        var r = recent[idx];
-        if (r && r.formData) {
-          applyFormData(r.formData);
-          alert('Movement reused. Update LRN and dates before submitting.');
-        }
-      });
-    });
-  }
-  renderRecentMovements();
-
-  // ==================== GOODS ITEMS (Enhanced) ====================
+  // ==================== GOODS ITEMS (Enhanced, Fixed) ====================
   function updateItemFieldVisibility(item) {
     var pc = item.querySelector('.s-product-code').value.toUpperCase();
     var abvField = item.querySelector('.s-abv').parentElement;
-    // Show ABV for alcohol products
     var alcoholCodes = ['B000', 'W200', 'W300', 'I000', 'S200', 'S300', 'S400', 'S500'];
     abvField.style.display = alcoholCodes.includes(pc) ? 'block' : 'none';
   }
 
   function autoFillCNCode(item) {
     var pc = item.querySelector('.s-product-code').value.toUpperCase();
-    if (CN_CODES[pc]) {
-      item.querySelector('.s-cn-code').value = CN_CODES[pc];
-    }
+    if (CN_CODES[pc]) item.querySelector('.s-cn-code').value = CN_CODES[pc];
   }
 
-  function renderGoodsItems(count, existingItems) {
-    var container = document.getElementById('goods-items-container');
-    container.innerHTML = '';
-    for (var i = 1; i <= count; i++) {
-      var it = (existingItems && existingItems[i-1]) || {};
-      var div = document.createElement('div');
-      div.className = 'item-field';
-      div.setAttribute('data-item', i);
-      div.innerHTML = 
-        '<div class="item-header">' +
-          '<h4>Item ' + i + '</h4>' +
-          '<div class="item-actions">' +
-            '<button type="button" class="btn-small collapse-btn">▼</button>' +
-            '<button type="button" class="btn-small btn-green dup-btn">⎘ Duplicate</button>' +
-            '<button type="button" class="btn-small btn-red remove-btn">✕ Remove</button>' +
-          '</div>' +
-        '</div>' +
-        '<div class="form-grid">' +
-          '<div class="field"><label>Excise Product Code <span class="required-asterisk">*</span></label><input type="text" class="s-product-code" value="' + (it.productCode || 'B000') + '" pattern="^[A-Z][0-9]{3}$" maxlength="4" required></div>' +
-          '<div class="field"><label>CN Code <span class="required-asterisk">*</span></label><input type="text" class="s-cn-code" value="' + (it.cnCode || '22030001') + '" pattern="^\\d{8}$" maxlength="8" required></div>' +
-          '<div class="field"><label>Quantity <span class="required-asterisk">*</span></label><input type="number" class="s-qty" value="' + (it.qty || 2000) + '" step="0.001" required></div>' +
-          '<div class="field"><label>Bulk Movement</label><input type="checkbox" class="s-bulk" style="width:auto; margin-top:10px;"></div>' +
-          '<div class="field"><label>Gross Mass (kg) <span class="required-asterisk">*</span></label><input type="number" class="s-weight" value="' + (it.gross || 20000) + '" step="0.000001" required></div>' +
-          '<div class="field"><label>Net Mass (kg) <span class="required-asterisk">*</span></label><input type="number" class="s-net-weight" value="' + (it.net || 19999) + '" step="0.000001" required></div>' +
-          '<div class="field"><label>Commercial Description <span class="required-asterisk">*</span></label><input type="text" class="s-comm-desc" value="' + (it.commDesc || '') + '" required></div>' +
-          '<div class="field"><label>Brand Name</label><input type="text" class="s-brand" value="' + (it.brand || '') + '"></div>' +
-          '<div class="field"><label>ABV %</label><input type="number" class="s-abv" value="' + (it.abv !== undefined ? it.abv : 5.0) + '" step="0.01"></div>' +
-          '<div class="field"><label>Kind of Packages <span class="required-asterisk">*</span></label>' +
-            '<select class="s-package-kind" required>' +
-              '<option value="BA"' + (it.pkgKind === 'BA' ? ' selected' : '') + '>BA - Barrel</option>' +
-              '<option value="BX"' + (it.pkgKind === 'BX' ? ' selected' : '') + '>BX - Box</option>' +
-              '<option value="CT"' + (it.pkgKind === 'CT' ? ' selected' : '') + '>CT - Carton</option>' +
-              '<option value="DR"' + (it.pkgKind === 'DR' ? ' selected' : '') + '>DR - Drum</option>' +
-              '<option value="PK"' + (it.pkgKind === 'PK' ? ' selected' : '') + '>PK - Package</option>' +
-              '<option value="RL"' + (it.pkgKind === 'RL' ? ' selected' : '') + '>RL - Reel</option>' +
-              '<option value="UN"' + (it.pkgKind === 'UN' ? ' selected' : '') + '>UN - Unit</option>' +
-            '</select>' +
-          '</div>' +
-          '<div class="field"><label>Number of Packages <span class="required-asterisk">*</span></label><input type="number" class="s-package-count" value="' + (it.pkgCount !== undefined ? it.pkgCount : 2) + '" min="0" required></div>' +
-          '<div class="field"><label>Shipping Mark</label><input type="text" class="s-ship-mark" value="' + (it.shipMark || '') + '" placeholder="Optional"></div>' +
-          '<div class="field"><label>Commercial Seal ID</label><input type="text" class="s-seal" value="' + (it.seal || '') + '" placeholder="Optional"></div>' +
-          '<div class="field" style="grid-column: 1 / -1;"><label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="s-small-producer" style="width:auto;"> Independent Small Producer Declaration</label></div>' +
-        '</div>';
-      container.appendChild(div);
-
-      // Event listeners for this item
-      div.querySelector('.s-product-code').addEventListener('change', function() {
-        autoFillCNCode(this.closest('.item-field'));
-        updateItemFieldVisibility(this.closest('.item-field'));
-        updateDutyEstimate();
-      });
-      div.querySelector('.s-bulk').addEventListener('change', function() {
-        var p = this.closest('.item-field');
-        var netField = p.querySelector('.s-net-weight');
-        if (this.checked) {
-          netField.value = p.querySelector('.s-weight').value;
-          netField.disabled = true;
-        } else {
-          netField.disabled = false;
-        }
-        updateDutyEstimate();
-      });
-      div.querySelector('.s-weight').addEventListener('input', function() {
-        var p = this.closest('.item-field');
-        if (p.querySelector('.s-bulk').checked) p.querySelector('.s-net-weight').value = this.value;
-        updateDutyEstimate();
-      });
-      ['s-qty', 's-net-weight', 's-abv', 's-small-producer'].forEach(function(cls) {
-        var el = div.querySelector('.' + cls);
-        if (el) el.addEventListener('input', updateDutyEstimate);
-        if (el) el.addEventListener('change', updateDutyEstimate);
-      });
-      div.querySelector('.collapse-btn').addEventListener('click', function() {
-        var item = this.closest('.item-field');
-        item.classList.toggle('collapsed');
-        this.textContent = item.classList.contains('collapsed') ? '▶' : '▼';
-      });
-      div.querySelector('.dup-btn').addEventListener('click', function() {
-        var item = this.closest('.item-field');
-        var clone = item.cloneNode(true);
-        container.appendChild(clone);
-        document.getElementById('s-item-count').value = container.children.length;
-        rebindItemEvents(clone);
-        updateDutyEstimate();
-      });
-      div.querySelector('.remove-btn').addEventListener('click', function() {
-        this.closest('.item-field').remove();
-        var items = document.querySelectorAll('#goods-items-container .item-field');
-        document.getElementById('s-item-count').value = items.length;
-        items.forEach(function(it, idx) { it.querySelector('h4').textContent = 'Item ' + (idx + 1); });
-        updateDutyEstimate();
-      });
-      updateItemFieldVisibility(div);
-    }
-    updateDutyEstimate();
-  }
-
-  function rebindItemEvents(item) {
+  function bindItemEvents(item) {
     item.querySelector('.s-product-code').addEventListener('change', function() {
       autoFillCNCode(this.closest('.item-field'));
       updateItemFieldVisibility(this.closest('.item-field'));
-      updateDutyEstimate();
     });
     item.querySelector('.s-bulk').addEventListener('change', function() {
       var p = this.closest('.item-field');
@@ -867,17 +557,10 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         netField.disabled = false;
       }
-      updateDutyEstimate();
     });
     item.querySelector('.s-weight').addEventListener('input', function() {
       var p = this.closest('.item-field');
       if (p.querySelector('.s-bulk').checked) p.querySelector('.s-net-weight').value = this.value;
-      updateDutyEstimate();
-    });
-    ['s-qty', 's-net-weight', 's-abv', 's-small-producer'].forEach(function(cls) {
-      var el = item.querySelector('.' + cls);
-      if (el) el.addEventListener('input', updateDutyEstimate);
-      if (el) el.addEventListener('change', updateDutyEstimate);
     });
     item.querySelector('.collapse-btn').addEventListener('click', function() {
       var it = this.closest('.item-field');
@@ -888,18 +571,70 @@ document.addEventListener('DOMContentLoaded', function() {
       var it = this.closest('.item-field');
       var clone = it.cloneNode(true);
       document.getElementById('goods-items-container').appendChild(clone);
-      document.getElementById('s-item-count').value = document.querySelectorAll('#goods-items-container .item-field').length;
-      rebindItemEvents(clone);
-      updateDutyEstimate();
+      renumberItems();
+      bindItemEvents(clone);
     });
     item.querySelector('.remove-btn').addEventListener('click', function() {
       this.closest('.item-field').remove();
-      var items = document.querySelectorAll('#goods-items-container .item-field');
-      document.getElementById('s-item-count').value = items.length;
-      items.forEach(function(it, idx) { it.querySelector('h4').textContent = 'Item ' + (idx + 1); });
-      updateDutyEstimate();
+      renumberItems();
     });
     updateItemFieldVisibility(item);
+  }
+
+  function renumberItems() {
+    var items = document.querySelectorAll('#goods-items-container .item-field');
+    document.getElementById('s-item-count').value = items.length;
+    items.forEach(function(it, idx) {
+      it.setAttribute('data-item', idx + 1);
+      var h4 = it.querySelector('h4');
+      if (h4) h4.textContent = 'Item ' + (idx + 1);
+    });
+  }
+
+  function createItemElement(idx, data) {
+    var it = data || {};
+    var div = document.createElement('div');
+    div.className = 'item-field';
+    div.setAttribute('data-item', idx);
+    div.innerHTML = 
+      '<div class="item-header">' +
+        '<h4>Item ' + idx + '</h4>' +
+        '<div class="item-actions">' +
+          '<button type="button" class="btn-small collapse-btn">▼</button>' +
+          '<button type="button" class="btn-small btn-green dup-btn">⎘ Duplicate</button>' +
+          '<button type="button" class="btn-small btn-red remove-btn">✕ Remove</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="form-grid">' +
+        '<div class="field"><label>Excise Product Code <span class="required-asterisk">*</span></label><input type="text" class="s-product-code" value="' + (it.productCode || 'B000') + '" pattern="^[A-Z][0-9]{3}$" maxlength="4" required></div>' +
+        '<div class="field"><label>CN Code <span class="required-asterisk">*</span></label><input type="text" class="s-cn-code" value="' + (it.cnCode || '22030001') + '" pattern="^\\d{8}$" maxlength="8" required></div>' +
+        '<div class="field"><label>Quantity <span class="required-asterisk">*</span></label><input type="number" class="s-qty" value="' + (it.qty || 2000) + '" step="0.001" required></div>' +
+        '<div class="field"><label>Bulk Movement</label><input type="checkbox" class="s-bulk" style="width:auto; margin-top:10px;"></div>' +
+        '<div class="field"><label>Gross Mass (kg) <span class="required-asterisk">*</span></label><input type="number" class="s-weight" value="' + (it.gross || 20000) + '" step="0.000001" required></div>' +
+        '<div class="field"><label>Net Mass (kg) <span class="required-asterisk">*</span></label><input type="number" class="s-net-weight" value="' + (it.net || 19999) + '" step="0.000001" required></div>' +
+        '<div class="field"><label>Commercial Description <span class="required-asterisk">*</span></label><input type="text" class="s-comm-desc" value="' + (it.commDesc || '') + '" required></div>' +
+        '<div class="field"><label>Brand Name</label><input type="text" class="s-brand" value="' + (it.brand || '') + '"></div>' +
+        '<div class="field"><label>ABV %</label><input type="number" class="s-abv" value="' + (it.abv !== undefined ? it.abv : 5.0) + '" step="0.01"></div>' +
+        '<div class="field"><label>Kind of Packages <span class="required-asterisk">*</span></label>' +
+          '<select class="s-package-kind" required>' + buildPackageOptions(it.pkgKind || 'BA') + '</select>' +
+        '</div>' +
+        '<div class="field"><label>Number of Packages <span class="required-asterisk">*</span></label><input type="number" class="s-package-count" value="' + (it.pkgCount !== undefined ? it.pkgCount : 2) + '" min="0" required></div>' +
+        '<div class="field"><label>Shipping Mark</label><input type="text" class="s-ship-mark" value="' + (it.shipMark || '') + '" placeholder="Optional"></div>' +
+        '<div class="field"><label>Commercial Seal ID</label><input type="text" class="s-seal" value="' + (it.seal || '') + '" placeholder="Optional"></div>' +
+        '<div class="field" style="grid-column: 1 / -1;"><label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="s-small-producer" style="width:auto;"> Independent Small Producer Declaration</label></div>' +
+      '</div>';
+    return div;
+  }
+
+  function renderGoodsItems(count, existingItems) {
+    var container = document.getElementById('goods-items-container');
+    container.innerHTML = '';
+    for (var i = 1; i <= count; i++) {
+      var it = (existingItems && existingItems[i-1]) || {};
+      var div = createItemElement(i, it);
+      container.appendChild(div);
+      bindItemEvents(div);
+    }
   }
 
   window.generateItemFields = function() {
@@ -909,84 +644,13 @@ document.addEventListener('DOMContentLoaded', function() {
   renderGoodsItems(1);
 
   document.getElementById('add-goods-item-btn').addEventListener('click', function() {
-    var count = parseInt(document.getElementById('s-item-count').value) + 1;
-    document.getElementById('s-item-count').value = count;
-    renderGoodsItems(count);
+    var container = document.getElementById('goods-items-container');
+    var newIdx = container.children.length + 1;
+    var div = createItemElement(newIdx, {});
+    container.appendChild(div);
+    bindItemEvents(div);
+    document.getElementById('s-item-count').value = newIdx;
   });
-
-  // ==================== DUTY ESTIMATOR ====================
-  function calculateDuty(item) {
-    var pc = item.querySelector('.s-product-code').value.toUpperCase();
-    var qty = parseFloat(item.querySelector('.s-qty').value) || 0;
-    var netMass = parseFloat(item.querySelector('.s-net-weight').value) || 0;
-    var abv = parseFloat(item.querySelector('.s-abv').value) || 0;
-    var smallProducer = item.querySelector('.s-small-producer').checked;
-
-    var rate = DUTY_RATES[pc];
-    if (!rate) return { product: pc, qty: qty, duty: 0, rateInfo: 'Unknown product' };
-
-    var duty = 0;
-    var rateInfo = '';
-
-    if (pc === 'B000') {
-      // Beer: hl × ABV × rate
-      var hl = qty / 100; // assuming qty in litres
-      duty = hl * abv * rate.rate;
-      rateInfo = hl.toFixed(2) + ' hl × ' + abv + '% × £' + rate.rate;
-    } else if (pc === 'W200') {
-      var hl = qty / 100;
-      duty = abv <= 5.5 ? hl * 46.09 : hl * 288.65;
-      rateInfo = hl.toFixed(2) + ' hl × £' + (abv <= 5.5 ? '46.09' : '288.65');
-    } else if (pc === 'W300' || pc === 'I000') {
-      var hl = qty / 100;
-      duty = hl * rate.rate;
-      rateInfo = hl.toFixed(2) + ' hl × £' + rate.rate;
-    } else if (pc === 'S200' || pc === 'S300') {
-      // Spirits: litres of pure alcohol
-      var lpa = (qty * abv) / 100;
-      duty = lpa * rate.rate;
-      rateInfo = lpa.toFixed(2) + ' L alcohol × £' + rate.rate;
-    } else if (pc === 'T200') {
-      // Cigarettes: qty in thousands of sticks
-      duty = qty * rate.rate;
-      rateInfo = qty + ' × £' + rate.rate;
-    } else if (pc === 'T300') {
-      // Cigars: qty in kg
-      duty = netMass * rate.rate;
-      rateInfo = netMass.toFixed(2) + ' kg × £' + rate.rate;
-    } else if (pc.startsWith('E')) {
-      // Energy: qty in litres
-      duty = qty * rate.rate;
-      rateInfo = qty.toFixed(2) + ' L × £' + rate.rate;
-    }
-
-    if (smallProducer && (pc === 'B000')) {
-      duty = duty * 0.5;
-      rateInfo += ' (50% SPR)';
-    }
-
-    return { product: pc, productName: rate.name, qty: qty, duty: duty, rateInfo: rateInfo };
-  }
-
-  function updateDutyEstimate() {
-    var items = document.querySelectorAll('#goods-items-container .item-field');
-    if (items.length === 0) {
-      document.getElementById('duty-display').innerHTML = '<p style="color:#666; font-size:13px;">Add goods items to see duty estimate.</p>';
-      return;
-    }
-
-    var totalDuty = 0;
-    var rows = '';
-    items.forEach(function(item, idx) {
-      var result = calculateDuty(item);
-      totalDuty += result.duty;
-      rows += '<tr><td>' + (idx + 1) + '</td><td>' + result.product + ' - ' + (result.productName || '') + '</td><td>' + result.rateInfo + '</td><td style="text-align:right; font-weight:bold;">£' + result.duty.toFixed(2) + '</td></tr>';
-    });
-
-    document.getElementById('duty-display').innerHTML = 
-      '<table class="duty-table"><thead><tr><th>#</th><th>Product</th><th>Calculation</th><th style="text-align:right;">Duty</th></tr></thead><tbody>' + rows + '</tbody></table>' +
-      '<div class="duty-total">Total Estimated Excise Duty: £' + totalDuty.toFixed(2) + '</div>';
-  }
 
   // ==================== CSV IMPORT ====================
   document.getElementById('import-csv-btn').addEventListener('click', function() {
@@ -1001,7 +665,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   document.getElementById('download-csv-template-btn').addEventListener('click', function() {
-    var csv = 'ExciseProductCode,CNCode,Quantity,GrossMass,NetMass,ABV,CommercialDescription,BrandName,PackageKind,PackageCount\nB000,22030001,2000,20000,19999,5.0,Standard Lager,TestBrand,BA,2\nW200,22042142,500,800,750,12.5,Red Wine,TestVineyard,BX,10';
+    var csv = 'ExciseProductCode,CNCode,Quantity,GrossMass,NetMass,ABV,CommercialDescription,BrandName,PackageKind,PackageCount,ShippingMark,CommercialSeal\nB000,22030001,2000,20000,19999,5.0,Standard Lager,TestBrand,BA,2,,\nW200,22042142,500,800,750,12.5,Red Wine,TestVineyard,BX,10,,\nS200,22089091,100,150,120,40.0,Gin,TestGin,BO,6,,SEAL123';
     var blob = new Blob([csv], { type: 'text/csv' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1035,7 +699,7 @@ document.addEventListener('DOMContentLoaded', function() {
         rows.push(row);
       }
       window.parsedCsvRows = rows;
-      var preview = '<h4>Preview (' + rows.length + ' items)</h4><table class="duty-table"><thead><tr>';
+      var preview = '<h4>Preview (' + rows.length + ' items)</h4><table class="preview-table"><thead><tr>';
       headers.forEach(function(h) { preview += '<th>' + h + '</th>'; });
       preview += '</tr></thead><tbody>';
       rows.forEach(function(r) {
@@ -1053,7 +717,6 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('csv-confirm-btn').addEventListener('click', function() {
     var rows = window.parsedCsvRows;
     if (!rows || rows.length === 0) return;
-    document.getElementById('s-item-count').value = rows.length;
     var items = rows.map(function(r) {
       return {
         productCode: r.ExciseProductCode,
@@ -1072,7 +735,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     renderGoodsItems(items.length, items);
     document.getElementById('csv-modal').classList.remove('active');
-    updateDutyEstimate();
     alert('Imported ' + items.length + ' items from CSV.');
   });
 
@@ -1269,7 +931,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '<urn:FirstTransporterTrader language="en"><urn:VatNumber>' + document.getElementById('s-transporter-vat').value + '</urn:VatNumber>' +
       '<urn:TraderName>' + document.getElementById('s-transporter-name').value + '</urn:TraderName>' +
       '<urn:StreetName>Logistics Way</urn:StreetName><urn:StreetNumber>5</urn:StreetNumber>' +
-      '<urn:Postcode>' + 'FR5 4RN' + '</urn:Postcode>' +
+      '<urn:Postcode>FR5 4RN</urn:Postcode>' +
       '<urn:City>' + document.getElementById('s-transporter-city').value + '</urn:City></urn:FirstTransporterTrader>' +
       '<urn:HeaderEadEsad><urn:DestinationTypeCode>' + document.getElementById('s-dest-type').value + '</urn:DestinationTypeCode>' +
       '<urn:JourneyTime>' + document.getElementById('s-journey-time').value + '</urn:JourneyTime>' +
@@ -1305,16 +967,6 @@ document.addEventListener('DOMContentLoaded', function() {
           localStorage.setItem('last_arc', parsed.administrativeReferenceCode || '');
           localStorage.setItem('last_lrn', parsed.localReferenceNumber || uniqueLrn);
 
-          // Save to recent
-          addRecentMovement({
-            lrn: parsed.localReferenceNumber || uniqueLrn,
-            date: submitDate,
-            consignee: document.getElementById('s-consignee-name').value,
-            product: itemSummary.map(function(i) { return i.productCode; }).join(', '),
-            formData: captureFormData()
-          });
-
-          // Save for CSV export
           localStorage.setItem('emcs_last_submission', JSON.stringify({
             movementId: parsed.movementId,
             arc: parsed.administrativeReferenceCode || '',
@@ -1421,7 +1073,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '<urn:Analysis><urn:DateOfAnalysis>' + document.getElementById('msg-analysis-date').value + '</urn:DateOfAnalysis><urn:GlobalExplanation language="en">' + document.getElementById('msg-shortage-explanation').value + '</urn:GlobalExplanation></urn:Analysis>' +
         '</urn:ExplanationOnReasonForShortage>';
     } else {
-      alert('Message type ' + msgType + ' not yet fully implemented in Sprint 2. Please use existing logic.');
+      alert('Message type ' + msgType + ' - please check fields are populated.');
       return;
     }
 
