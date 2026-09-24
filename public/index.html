@@ -17,8 +17,6 @@ button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #005ea5; 
 button:hover { background: #003d6b; }
 .btn-green { background: #00703c; } .btn-green:hover { background: #005a30; }
 .btn-red { background: #d4351c; } .btn-red:hover { background: #aa2a16; }
-.btn-orange { background: #ff9800; } .btn-orange:hover { background: #e68900; }
-.btn-purple { background: #6f42c1; } .btn-purple:hover { background: #5a32a3; }
 .btn-small { padding: 4px 10px; font-size: 12px; margin: 2px; }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
 input, select { padding: 8px 12px; border: 2px solid #b1b4b6; border-radius: 4px; font-size: 14px; width: 100%; }
@@ -90,14 +88,12 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .loading-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #ccc; border-top-color: #005ea5; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 5px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Magic LRN cheat sheet */
 .cheat-sheet { background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin-top: 15px; font-size: 13px; }
 .cheat-sheet h3 { margin-bottom: 8px; margin-top: 0; border: none; color: #856404; }
 .cheat-sheet table { width: 100%; border-collapse: collapse; }
 .cheat-sheet th, .cheat-sheet td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
 .cheat-sheet th { background: #ffeeba; }
 
-/* Parsed data cards */
 .parsed-container { margin-top: 15px; }
 .parsed-card { background: white; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 .parsed-card h4 { color: #005ea5; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
@@ -122,8 +118,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .raw-toggle pre { margin-top: 8px; }
 
 .section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.view-toggle button { padding: 4px 10px; font-size: 12px; margin: 0 2px; }
-.view-toggle button.active { background: #00703c; }
 </style>
 </head>
 <body>
@@ -189,7 +183,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
             <button id="mon-apply-filters" class="btn-green">Apply filters</button>
             <button id="mon-clear-filters" class="btn-red">Clear filters</button>
             <button id="mon-refresh" style="margin-left: auto;">🔄 Refresh Data</button>
-            <button id="mon-simulate-inbound" class="btn-purple">📥 Simulate Inbound Movement</button>
           </div>
         </div>
         <div id="mon-loading" style="text-align: center; padding: 20px; display: none;"><span class="loading-spinner"></span>Loading movements...</div>
@@ -520,28 +513,19 @@ document.addEventListener('DOMContentLoaded', function() {
   window.monitorData = [];
   window.ie818Items = [];
 
-  // Friendly names for message types
   var MESSAGE_TYPE_NAMES = {
-    'IE801': 'Acceptance (ARC Issued)',
-    'IE802': 'Acceptance Rejected',
-    'IE803': 'Change of Destination',
-    'IE807': 'Movement Interrupted',
-    'IE810': 'Cancellation',
-    'IE813': 'Change of Destination Accepted',
-    'IE818': 'Report of Receipt',
-    'IE819': 'Alert or Rejection',
-    'IE837': 'Explanation of Delay',
-    'IE838': 'Delay Explanation Accepted',
-    'IE871': 'Reason for Shortage',
-    'IE881': 'Manual Closure',
-    'IE905': 'Control Report'
+    'IE801': 'Acceptance (ARC Issued)', 'IE802': 'Acceptance Rejected',
+    'IE803': 'Change of Destination', 'IE807': 'Movement Interrupted',
+    'IE810': 'Cancellation', 'IE813': 'Change of Destination Accepted',
+    'IE818': 'Report of Receipt', 'IE819': 'Alert or Rejection',
+    'IE837': 'Explanation of Delay', 'IE838': 'Delay Explanation Accepted',
+    'IE871': 'Reason for Shortage', 'IE881': 'Manual Closure', 'IE905': 'Control Report'
   };
 
   var CN_CODES = {
     'B000': '22030001', 'W200': '22042142', 'W300': '22041011',
     'I000': '22042999', 'S200': '22089091', 'S300': '22071000',
-    'T200': '24022010', 'T300': '24021000', 'E410': '27101231',
-    'E420': '27101211'
+    'T200': '24022010', 'T300': '24021000', 'E410': '27101231', 'E420': '27101211'
   };
 
   var PACKAGE_CODES = [
@@ -585,7 +569,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function extractXmlValue(xml, tagName) {
     if (!xml) return null;
-    // Try with namespace prefix first, then without
     var patterns = [
       new RegExp('<[^:>]+:' + tagName + '[^>]*>([^<]*)</[^:>]+:' + tagName + '>'),
       new RegExp('<' + tagName + '[^>]*>([^<]*)</' + tagName + '>')
@@ -606,9 +589,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
     for (var i = 0; i < patterns.length; i++) {
       var match;
-      while ((match = patterns[i].exec(xml)) !== null) {
-        results.push(match[1]);
-      }
+      while ((match = patterns[i].exec(xml)) !== null) results.push(match[1]);
       if (results.length > 0) return results;
     }
     return results;
@@ -620,7 +601,6 @@ document.addEventListener('DOMContentLoaded', function() {
     return '<div class="parsed-field"><div class="label">' + escapeHtml(label) + '</div><div class="value"' + cls + '>' + escapeHtml(value) + '</div></div>';
   }
 
-  // Parse a single movement JSON and render as cards
   function renderMovementParsed(data) {
     if (!data) return '<p style="color:#666;">No data to display.</p>';
     var html = '<div class="parsed-card"><h4>Movement Summary <span class="type-badge">IE815</span></h4><div class="parsed-grid">';
@@ -635,19 +615,17 @@ document.addEventListener('DOMContentLoaded', function() {
     return html;
   }
 
-  // Parse messages array and render as cards
   function renderMessagesParsed(msgs) {
     if (!msgs || !Array.isArray(msgs) || msgs.length === 0) {
       return '<p style="color:#666;">No messages found for this movement.</p>';
     }
     var html = '';
-    msgs.forEach(function(m, idx) {
+    msgs.forEach(function(m) {
       var xml = m.decodedXml || '';
       var type = m.messageType || 'Unknown';
       var typeName = MESSAGE_TYPE_NAMES[type] || type;
       var typeClass = type.toLowerCase();
 
-      // Extract key fields from XML
       var arc = extractXmlValue(xml, 'AdministrativeReferenceCode');
       var lrn = extractXmlValue(xml, 'LocalReferenceNumber');
       var msgId = extractXmlValue(xml, 'MessageIdentifier');
@@ -694,11 +672,8 @@ document.addEventListener('DOMContentLoaded', function() {
     return html;
   }
 
-  // Parse single XML message and render as cards
   function renderSingleMessageParsed(xml) {
     if (!xml) return '<p style="color:#666;">No XML data to display.</p>';
-    
-    // Determine message type from root element
     var typeMatch = xml.match(/<[^:>]+:(IE\d{3})/);
     var type = typeMatch ? typeMatch[1] : 'Unknown';
     var typeName = MESSAGE_TYPE_NAMES[type] || type;
@@ -707,37 +682,25 @@ document.addEventListener('DOMContentLoaded', function() {
     var html = '<div class="parsed-card">';
     html += '<h4>' + escapeHtml(type) + ' — ' + escapeHtml(typeName) + ' <span class="type-badge ' + typeClass + '">' + escapeHtml(type) + '</span></h4>';
     html += '<div class="parsed-grid">';
-    
-    // Header fields
     html += renderField('Message Sender', extractXmlValue(xml, 'MessageSender'));
     html += renderField('Message Recipient', extractXmlValue(xml, 'MessageRecipient'));
     html += renderField('Message Identifier', extractXmlValue(xml, 'MessageIdentifier'));
     html += renderField('Correlation ID', extractXmlValue(xml, 'CorrelationIdentifier'));
     html += renderField('Date Prepared', extractXmlValue(xml, 'DateOfPreparation'));
     html += renderField('Time Prepared', extractXmlValue(xml, 'TimeOfPreparation'));
-    
-    // Movement fields
     html += renderField('ARC', extractXmlValue(xml, 'AdministrativeReferenceCode'), 'arc');
     html += renderField('LRN', extractXmlValue(xml, 'LocalReferenceNumber'));
     html += renderField('Sequence Number', extractXmlValue(xml, 'SequenceNumber'));
-    
-    // Trader fields
     html += renderField('Consignor ERN', extractXmlValue(xml, 'TraderExciseNumber'));
     html += renderField('Consignor Name', extractXmlValue(xml, 'TraderName'));
     html += renderField('Consignee ID', extractXmlValue(xml, 'Traderid'));
-    
-    // Location fields
     html += renderField('Dispatch Warehouse', extractXmlValue(xml, 'ReferenceOfTaxWarehouse'));
     html += renderField('Dispatch Office', extractXmlValue(xml, 'ReferenceNumber'));
-    
-    // Movement details
     html += renderField('Destination Type', extractXmlValue(xml, 'DestinationTypeCode'));
     html += renderField('Journey Time', extractXmlValue(xml, 'JourneyTime'));
     html += renderField('Transport Arrangement', extractXmlValue(xml, 'TransportArrangement'));
     html += renderField('Transport Mode', extractXmlValue(xml, 'TransportModeCode'));
     html += renderField('Guarantor Type', extractXmlValue(xml, 'GuarantorTypeCode'));
-    
-    // Goods
     html += renderField('Product Code', extractXmlValue(xml, 'ExciseProductCode'));
     html += renderField('CN Code', extractXmlValue(xml, 'CnCode'));
     html += renderField('Quantity', extractXmlValue(xml, 'Quantity'));
@@ -746,25 +709,17 @@ document.addEventListener('DOMContentLoaded', function() {
     html += renderField('ABV %', extractXmlValue(xml, 'AlcoholicStrengthByVolumeInPercentage'));
     html += renderField('Package Kind', extractXmlValue(xml, 'KindOfPackages'));
     html += renderField('Package Count', extractXmlValue(xml, 'NumberOfPackages'));
-    
-    // Invoice
     html += renderField('Invoice Number', extractXmlValue(xml, 'InvoiceNumber'));
     html += renderField('Invoice Date', extractXmlValue(xml, 'InvoiceDate'));
     html += renderField('Origin Type', extractXmlValue(xml, 'OriginTypeCode'));
     html += renderField('Date of Dispatch', extractXmlValue(xml, 'DateOfDispatch'));
     html += renderField('Time of Dispatch', extractXmlValue(xml, 'TimeOfDispatch'));
-    
-    // Transport units
     var transportUnits = extractAllXmlValues(xml, 'IdentityOfTransportUnits');
-    if (transportUnits.length > 0) {
-      html += renderField('Transport Units', transportUnits.join(', '));
-    }
-    
+    if (transportUnits.length > 0) html += renderField('Transport Units', transportUnits.join(', '));
     html += '</div></div>';
     return html;
   }
 
-  // Parse pre-validate response
   function renderPrevalidateParsed(data) {
     if (!data) return '';
     var html = '<div class="parsed-card"><h4>Trader Validation Result</h4><div class="parsed-grid">';
@@ -1097,13 +1052,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // ==================== MONITOR DASHBOARD ====================
-  function getSimulatedInbounds() {
-    try { return JSON.parse(localStorage.getItem('emcs_simulated_inbounds') || '[]'); } catch(e) { return []; }
-  }
-  function saveSimulatedInbounds(list) {
-    localStorage.setItem('emcs_simulated_inbounds', JSON.stringify(list));
-  }
-
   async function fetchMonitorData() {
     if (!localStorage.getItem('hmrc_token')) return;
     document.getElementById('mon-loading').style.display = 'block';
@@ -1118,10 +1066,6 @@ document.addEventListener('DOMContentLoaded', function() {
       window.monitorData = JSON.parse(text);
       if (!Array.isArray(window.monitorData)) window.monitorData = [];
     } catch(e) { window.monitorData = []; }
-
-    // Add simulated inbound movements
-    var simulated = getSimulatedInbounds().filter(function(m) { return m.consigneeId === ern; });
-    window.monitorData = window.monitorData.concat(simulated);
 
     // Fetch ARCs for movements without them
     var movementsNeedingArc = window.monitorData.filter(function(m) { return !m.administrativeReferenceCode; });
@@ -1179,13 +1123,12 @@ document.addEventListener('DOMContentLoaded', function() {
       var isOverdue = daysOpen > 5;
       var rowClass = isOverdue ? 'warning-row' : '';
       var daysClass = isOverdue ? 'warning-text' : '';
-      var isSimulated = m._simulated;
 
       var arc = m.administrativeReferenceCode;
       var arcCell;
       if (arc) {
         arcCell = '<div class="arc-cell"><span class="arc-value">' + arc + '</span>' +
-          '<span class="lrn">LRN: ' + (m.localReferenceNumber || '') + (isSimulated ? ' <em style="color:#6f42c1;">(simulated)</em>' : '') + '</span></div>';
+          '<span class="lrn">LRN: ' + (m.localReferenceNumber || '') + '</span></div>';
       } else {
         arcCell = '<div class="arc-cell"><span class="pending">Pending ARC</span>' +
           '<span class="lrn">LRN: ' + (m.localReferenceNumber || '') + '</span></div>';
@@ -1234,43 +1177,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('[data-tab="tab-submit-msg"]').click();
   };
 
-  // ==================== SIMULATE INBOUND ====================
-  document.getElementById('mon-simulate-inbound').addEventListener('click', function() {
-    var p = getActiveProfile();
-    if (!p) { alert('No active profile.'); return; }
-    
-    var counterpartyErn = p.type === 'consignee' ? 'GBWK002281023' : 'GBWKQOZ8OVLYR';
-    var counterpartyName = p.type === 'consignee' ? 'Test Consignor Ltd' : 'Test Consignee Ltd';
-    
-    var now = new Date();
-    var arcYear = now.getFullYear().toString().slice(-2);
-    var arcNum = Math.floor(Math.random() * 9000000000000000) + 1000000000000000;
-    var arc = arcYear + 'GB' + arcNum.toString().padStart(17, '0');
-    var movId = 'sim-' + crypto.randomUUID();
-    var lrn = 'SIM' + Date.now().toString().slice(-10);
-    
-    var simulated = {
-      movementId: movId,
-      administrativeReferenceCode: arc,
-      localReferenceNumber: lrn,
-      consignorId: counterpartyErn,
-      consigneeId: p.ern,
-      lastUpdated: now.toISOString(),
-      _simulated: true,
-      _consignorName: counterpartyName,
-      _productCode: 'B000',
-      _quantity: 2000,
-      _grossMass: 20000
-    };
-    
-    var list = getSimulatedInbounds();
-    list.push(simulated);
-    saveSimulatedInbounds(list);
-    
-    alert('✅ Simulated inbound movement created!\n\nARC: ' + arc + '\nLRN: ' + lrn + '\nFrom: ' + counterpartyName + ' (' + counterpartyErn + ')\nTo: ' + p.name + ' (' + p.ern + ')\n\nClick "Refresh Data" to see it in the list.');
-    fetchMonitorData();
-  });
-
   document.getElementById('mon-apply-filters').addEventListener('click', applyMonitorFilters);
   document.getElementById('mon-clear-filters').addEventListener('click', function() {
     ['mon-direction', 'mon-status', 'mon-epc', 'mon-disp-from', 'mon-disp-to'].forEach(function(id) {
@@ -1289,21 +1195,6 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('load-818-items-btn').addEventListener('click', async function() {
     var movId = document.getElementById('sm-mov-id').value || localStorage.getItem('last_movement_id');
     if (!movId) { alert('Movement ID required.'); return; }
-    
-    // Check if it's a simulated inbound
-    var simulated = getSimulatedInbounds().find(function(m) { return m.movementId === movId; });
-    if (simulated) {
-      window.ie818Items = [{
-        bodyRecordUniqueReference: 1,
-        exciseProductCode: simulated._productCode || 'B000',
-        quantity: simulated._quantity || 2000,
-        grossMass: simulated._grossMass || 20000,
-        commercialDescription: 'Simulated Item'
-      }];
-      renderIE818Items(window.ie818Items);
-      return;
-    }
-    
     var h = await getHeaders();
     try {
       var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId), { headers: h });
@@ -1498,19 +1389,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var h = await getHeaders();
     var movId = document.getElementById('gsm-id').value || localStorage.getItem('last_movement_id');
     if (!movId) { alert('Movement ID required'); return; }
-    
-    // Check simulated first
-    var simulated = getSimulatedInbounds().find(function(m) { return m.movementId === movId; });
-    if (simulated) {
-      document.getElementById('gsm-output').innerText = 'Status: 200 (simulated)\n\n' + JSON.stringify(simulated, null, 2);
-      document.getElementById('gsm-parsed').innerHTML = renderMovementParsed(simulated);
-      return;
-    }
-    
     var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId), { headers: h });
     var text = await res.text();
     document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + text;
-    
     try {
       var data = JSON.parse(text);
       document.getElementById('gsm-parsed').innerHTML = renderMovementParsed(data);
@@ -1662,15 +1543,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages', { headers: h });
     var text = await res.text();
     document.getElementById('gmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
-    
     try {
       var msgs = JSON.parse(text);
       if (Array.isArray(msgs)) {
-        msgs.forEach(function(m) { 
-          if (m.encodedMessage) { 
-            try { m.decodedXml = atob(m.encodedMessage); } catch(e) {} 
-          } 
-        });
+        msgs.forEach(function(m) { if (m.encodedMessage) { try { m.decodedXml = atob(m.encodedMessage); } catch(e) {} } });
         document.getElementById('gmsg-count').textContent = msgs.length + ' message(s)';
         document.getElementById('gmsg-parsed').innerHTML = renderMessagesParsed(msgs);
       } else {
@@ -1694,7 +1570,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages/' + encodeURIComponent(msgId), { headers: h });
     var text = await res.text();
     document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
-    
     if (res.status === 200) {
       document.getElementById('gsmsg-parsed').innerHTML = renderSingleMessageParsed(text);
     } else {
@@ -1723,7 +1598,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     var text = await res.text();
     document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + text;
-    
     try {
       var data = JSON.parse(text);
       document.getElementById('pv-parsed').innerHTML = renderPrevalidateParsed(data);
