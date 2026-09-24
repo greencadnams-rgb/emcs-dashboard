@@ -757,59 +757,140 @@
       </div>
     </div>
 
-    <!-- TAB 7: PRE-VALIDATE -->
-    <div id="tab-validate" class="tab">
-      <div class="card">
-        <h2>Pre-Validate Trader</h2>
-        <p style="color:#666; font-size:13px; margin-bottom:15px;">Checks if a trader is authorized for specific products before submitting a movement.</p>
-        
-        <div class="form-grid">
-          <div class="field">
-            <label>Target ERN</label>
-            <input type="text" id="pv-ern" value="GBWK000000206">
-          </div>
-          <div class="field">
-            <label>Entity Group</label>
-            <select id="pv-group">
-              <option value="UK Record">UK Record</option>
-              <option value="EU Trader">EU Trader</option>
-              <option value="EU Warehouse">EU Warehouse</option>
-              <option value="UK Temporary Authorisation">UK Temp Auth</option>
-              <option value="EU Temporary Authorisation">EU Temp Auth</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Product Code 1</label>
-            <input type="text" id="pv-p1" value="W200">
-          </div>
-          <div class="field">
-            <label>Product Code 2 (optional)</label>
-            <input type="text" id="pv-p2" placeholder="Optional">
-          </div>
-        </div>
-        
-        <div style="margin-top:15px;">
-          <button id="pre-validate-btn">Validate Current Selection</button>
-          <button id="pre-validate-all-btn" class="btn-green">🚀 Run Full Matrix Test (All Groups x Top Products)</button>
-        </div>
+     // ==================== 7. PRE-VALIDATE ====================
+  
+  async function runSingleValidation(group, productCode, ern) {
+    var h = await getHeaders();
+    h['x-correlation-id'] = crypto.randomUUID();
+    
+    // Construct the EXACT object HMRC expects
+    var requestBody = {
+      exciseTraderValidationRequest: {
+        exciseRegistrationNumber: ern,
+        entityGroup: group,
+        validateProductAuthorisationRequest: [
+          { 
+            product: { 
+              exciseProductCode: productCode 
+            } 
+          }
+        ]
+      }
+    };
 
-        <h3 style="margin-top:20px;">Results Table</h3>
-        <table id="pv-results-table" style="width:100%; border-collapse:collapse; display:none;">
-          <thead>
-            <tr style="background:#eee;">
-              <th style="border:1px solid #ddd; padding:8px;">Entity Group</th>
-              <th style="border:1px solid #ddd; padding:8px;">Product Code</th>
-              <th style="border:1px solid #ddd; padding:8px;">Status</th>
-              <th style="border:1px solid #ddd; padding:8px;">Result / Error</th>
-            </tr>
-          </thead>
-          <tbody id="pv-results-body">
-          </tbody>
-        </table>
+    console.log('PRE-VALIDATE PAYLOAD:', JSON.stringify(requestBody));
 
-        <pre id="pv-output" style="margin-top:15px;">Waiting...</pre>
-      </div>
-    </div>
+    try {
+      var res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', {
+        method: 'POST',
+        headers: Object.assign({}, h, { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json' 
+        }),
+        body: JSON.stringify(requestBody)
+      });
+      
+      var text = await res.text();
+      var statusText = res.ok ? 'PASS' : 'FAIL (' + res.status + ')';
+      
+      // Try to parse error message for cleaner display
+      var detail = text;
+      try {
+        var errJson = JSON.parse(text);
+        if (errJson.debugMessage) detail = errJson.debugMessage;
+        else if (errJson.message) detail = errJson.message;
+      } catch(e) {}
+      
+      return { group, productCode, status: statusText, detail: detail.substring(0, 150) };
+    } catch (e) {
+      return { group, productCode, status: 'ERROR', detail: e.message };
+    }
+  }
+
+  document.getElementById('pre-validate-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+    
+    var ern = document.getElementById('pv-ern').value.trim();
+    var group = document.getElementById('pv-group').value;
+    var p1 = document.getElementById('pv-p1').value.trim().toUpperCase();
+    var p2 = document.getElementById('pv-p2').value.trim().toUpperCase();
+    
+    // Validation checks
+    if (!ern.match(/^[A-Z]{2}[A-Z0-9]{11}$/)) {
+      alert('Invalid ERN format. Must be 2 letters + 11 alphanumeric.');
+      return;
+    }
+    if (p1.length !== 4 || !/^[A-Z][0-9]{3}$/.test(p1)) {
+      alert('Product Code 1 must be 4 chars (e.g., W200). Got: ' + p1);
+      return;
+    }
+
+    var products = [{ product: { exciseProductCode: p1 } }];
+    if (p2 && /^[A-Z][0-9]{3}$/.test(p2)) {
+      products.push({ product: { exciseProductCode: p2 } });
+    }
+    
+    var h = await getHeaders();
+    h['x-correlation-id'] = crypto.randomUUID();
+    
+    var requestBody = {
+      exciseTraderValidationRequest: {
+        exciseRegistrationNumber: ern,
+        entityGroup: group,
+        validateProductAuthorisationRequest: products
+      }
+    };
+
+    console.log('Sending PreValidate:', requestBody);
+
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', {
+      method: 'POST',
+      headers: Object.assign({}, h, { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json' 
+      }),
+      body: JSON.stringify(requestBody)
+    });
+    
+    var responseText = await res.text();
+    document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
+  });
+
+  document.getElementById('pre-validate-all-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Click "Login to HMRC" first!'); return; }
+    
+    var ern = document.getElementById('pv-ern').value.trim();
+    if (!ern.match(/^[A-Z]{2}[A-Z0-9]{11}$/)) {
+      alert('Invalid ERN format for matrix test.');
+      return;
+    }
+
+    var groups = ['UK Record', 'EU Trader', 'EU Warehouse'];
+    var products = ['B000', 'W200', 'S200', 'E410']; 
+    
+    var tbody = document.getElementById('pv-results-body');
+    tbody.innerHTML = '<tr><td colspan="4" style="padding:10px; text-align:center;">Running tests...</td></tr>';
+    document.getElementById('pv-results-table').style.display = 'table';
+    document.getElementById('pv-output').innerText = '';
+
+    for (let g of groups) {
+      for (let p of products) {
+        var result = await runSingleValidation(g, p, ern);
+        
+        var tr = document.createElement('tr');
+        var color = result.status.includes('PASS') ? '#d4edda' : '#f8d7da';
+        tr.innerHTML = `
+          <td style="border:1px solid #ddd; padding:8px;">${result.group}</td>
+          <td style="border:1px solid #ddd; padding:8px;">${result.productCode}</td>
+          <td style="border:1px solid #ddd; padding:8px; background:${color};">${result.status}</td>
+          <td style="border:1px solid #ddd; padding:8px; font-size:11px; word-break:break-all;">${result.detail}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+    
+    document.getElementById('pv-output').innerText = 'Matrix Test Complete.';
+  });
 
     <!-- TAB 8: SUBSCRIBE -->
     <div id="tab-subscribe" class="tab">
