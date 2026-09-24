@@ -1,70 +1,60 @@
 // api/emcs.js
-import { NextResponse } from 'next/server'; // Or however you import fetch/response in your setup
-
-export async function POST(req) {
-  const url = new URL(req.url);
-  const endpoint = url.searchParams.get('endpoint');
+export default async function handler(req, res) {
+  const endpoint = req.query.endpoint;
   
   if (!endpoint) {
-    return NextResponse.json({ error: 'Missing endpoint param' }, { status: 400 });
+    return res.status(400).json({ error: 'Missing endpoint parameter' });
   }
 
-  // Get auth token from headers
-  const authHeader = req.headers.get('authorization');
+  // Get auth token
+  const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return res.status(401).json({ error: 'Unauthorized: No Bearer token' });
   }
 
-  // Read the raw body as text first to preserve exact formatting
-  const bodyText = await req.text(); 
-  
   // Determine content type from incoming request
-  const contentType = req.headers.get('content-type') || 'application/xml';
+  const contentType = req.headers['content-type'] || 'application/xml';
+  
+  // Read raw body to preserve exact JSON structure
+  let body = '';
+  if (req.method === 'POST' || req.method === 'PUT') {
+    body = await new Promise((resolve, reject) => {
+      let data = '';
+      req.on('data', chunk => data += chunk);
+      req.on('end', () => resolve(data));
+      req.on('error', reject);
+    });
+  }
+
+  console.log(`[EMCS Proxy] ${req.method} ${endpoint}`);
+  console.log(`[EMCS Proxy] Content-Type: ${contentType}`);
+  console.log(`[EMCS Proxy] Body Length: ${body.length}`);
 
   try {
     const response = await fetch(`https://test-api.service.hmrc.gov.uk${endpoint}`, {
-      method: 'POST',
+      method: req.method,
       headers: {
         'Authorization': authHeader,
-        'Content-Type': contentType, // Forward the original Content-Type
-        'Accept': 'application/json', // Usually expect JSON back for validation errors
+        'Content-Type': contentType,
+        'Accept': 'application/json',
         'User-Agent': 'EMCS-Dashboard/1.0'
       },
-      body: bodyText // Send the EXACT string received
+      body: body.length > 0 ? body : undefined
     });
 
     const responseBody = await response.text();
     
-    return new Response(responseBody, {
-      status: response.status,
-      headers: {
-        'Content-Type': response.headers.get('content-type') || 'text/plain',
-      }
-    });
+    // Forward HMRC's status and content-type exactly
+    res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json');
+    res.status(response.status).send(responseBody);
 
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[EMCS Proxy] Fetch Error:', error);
+    res.status(500).json({ 
+      error: { 
+        code: '500', 
+        message: 'Proxy fetch failed: ' + error.message 
+      } 
+    });
   }
-}
-
-// Handle GET requests similarly if needed
-export async function GET(req) {
-   const url = new URL(req.url);
-   const endpoint = url.searchParams.get('endpoint');
-   const authHeader = req.headers.get('authorization');
-   
-   if (!endpoint || !authHeader) return NextResponse.json({ error: 'Bad Request' }, { status: 400 });
-
-   const response = await fetch(`https://test-api.service.hmrc.gov.uk${endpoint}`, {
-     method: 'GET',
-     headers: {
-       'Authorization': authHeader,
-       'Accept': 'application/json'
-     }
-   });
-
-   return new Response(await response.text(), {
-     status: response.status,
-     headers: { 'Content-Type': response.headers.get('content-type') }
-   });
 }
