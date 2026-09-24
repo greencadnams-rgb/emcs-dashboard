@@ -757,6 +757,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // 🔑 CAPTURE HMRC TOKEN FROM OAUTH REDIRECT URL
+  var urlParams = new URLSearchParams(window.location.search);
+  var hmrcTokenFromUrl = urlParams.get('hmrc_token');
+  if (hmrcTokenFromUrl) {
+    localStorage.setItem('hmrc_token', hmrcTokenFromUrl);
+    window.history.replaceState({}, document.title, window.location.pathname);
+    console.log('HMRC Token saved from URL');
+  }
+
   checkAuth();
 
   document.getElementById('login-btn').addEventListener('click', async function() {
@@ -1438,10 +1447,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (parsed.movementId) {
           localStorage.setItem('last_movement_id', parsed.movementId);
           localStorage.setItem('last_ern', document.getElementById('s-consignor-ern').value);
-          localStorage.setItem('last_arc', parsed.administrativeReferenceCode || parsed.administrativeReferenceCode || '');
+          localStorage.setItem('last_arc', parsed.administrativeReferenceCode || '');
           localStorage.setItem('last_lrn', parsed.localReferenceNumber || uniqueLrn);
           localStorage.setItem('emcs_last_submission', JSON.stringify({
-            movementId: parsed.movementId, arc: parsed.adminCode || parsed.administrativeReferenceCode || '',
+            movementId: parsed.movementId, arc: parsed.administrativeReferenceCode || '',
             lrn: parsed.localReferenceNumber || uniqueLrn,
             consignorErn: document.getElementById('s-consignor-ern').value,
             consigneeErn: document.getElementById('s-consignee-ern').value,
