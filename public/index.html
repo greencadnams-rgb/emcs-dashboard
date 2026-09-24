@@ -1,98 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HMRC EMCS Dashboard</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
-    .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-    h1 { color: #005ea5; margin-bottom: 10px; }
-    h2 { color: #333; margin-bottom: 15px; font-size: 1.3em; }
-    h3 { color: #005ea5; margin-top: 20px; margin-bottom: 10px; font-size: 1.1em; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px; }
-    h4 { color: #505a5f; margin-bottom: 8px; }
-    .card { background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #005ea5; color: white; border: none; border-radius: 5px; font-size: 14px; }
-    button:hover { background: #003d6b; }
-    .btn-green { background: #00703c; }
-    .btn-green:hover { background: #005a30; }
-    .btn-red { background: #d4351c; }
-    .btn-red:hover { background: #aa2a16; }
-    .btn-small { padding: 4px 10px; font-size: 12px; margin: 2px; }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-    input, select { padding: 8px 12px; border: 2px solid #b1b4b6; border-radius: 4px; font-size: 14px; width: 100%; }
-    input:focus, select:focus { border-color: #005ea5; outline: none; }
-    input.invalid, select.invalid { border-color: #d4351c; background: #fff5f5; }
-    input.valid, select.valid { border-color: #00703c; }
-    .validation-msg { font-size: 12px; color: #d4351c; margin-top: 2px; min-height: 16px; }
-    pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; overflow-x: auto; max-height: 400px; font-size: 13px; white-space: pre-wrap; word-wrap: break-word; margin-top: 15px; }
-    .success { color: #00703c; font-weight: bold; }
-    .error { color: #d4351c; font-weight: bold; }
-    .nav { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 20px; }
-    .nav button { background: #505a5f; font-size: 13px; padding: 8px 14px; }
-    .nav button.active { background: #005ea5; }
-    .nav button:hover { background: #005ea5; }
-    .tab { display: none; }
-    .tab.active { display: block; }
-    .field { position: relative; }
-    .field label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 14px; }
-    .field-help { display: inline-block; width: 18px; height: 18px; background: #005ea5; color: white; border-radius: 50%; text-align: center; line-height: 18px; font-size: 12px; font-weight: bold; cursor: help; margin-left: 5px; position: relative; }
-    .field-help:hover .tooltip { visibility: visible; opacity: 1; }
-    .tooltip { visibility: hidden; opacity: 0; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 12px; border-radius: 5px; font-size: 12px; font-weight: normal; width: 300px; z-index: 1000; transition: opacity 0.3s; line-height: 1.4; }
-    .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
-    .format-badge { display: inline-block; background: #e8f4fd; color: #005ea5; padding: 2px 6px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace; }
-    .cheat-sheet { background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin-top: 15px; font-size: 13px; }
-    .cheat-sheet h3 { margin-bottom: 8px; margin-top: 0; }
-    .cheat-sheet table { width: 100%; border-collapse: collapse; }
-    .cheat-sheet th, .cheat-sheet td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
-    .cheat-sheet th { background: #ffeeba; }
-    #login-screen { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
-    .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 450px; width: 100%; text-align: center; }
-    .status-bar { background: #005ea5; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-    .status-bar a { color: #ffdd57; text-decoration: none; margin-left: 15px; }
-    .status-bar a:hover { text-decoration: underline; }
-    .token-status { padding: 5px 10px; border-radius: 3px; font-size: 12px; }
-    .token-ok { background: #00703c; }
-    .token-missing { background: #d4351c; }
-    .item-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 15px; background: #fafafa; }
-    .transport-unit-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 15px; background: #f0f9ff; }
-    .mode-indicator { padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; }
-    .mode-test { background: #ff9800; color: white; }
-    .mode-prod { background: #d32f2f; color: white; }
-    .required-asterisk { color: #d4351c; font-weight: bold; }
-    .section-optional { background: #f9f9f9; border-left: 3px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-    .section-filter { background: #f0f4f8; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-    
-    /* Monitor Table Styles */
-    .monitor-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
-    .monitor-table th { background: #005ea5; color: white; padding: 10px; text-align: left; position: sticky; top: 0; }
-    .monitor-table td { padding: 10px; border-bottom: 1px solid #ddd; }
-    .monitor-table tr:hover { background: #f9f9f9; }
-    .status-badge { padding: 3px 8px; border-radius: 12px; color: white; font-size: 11px; font-weight: bold; }
-    .status-open { background: #005ea5; }
-    .status-receipted { background: #00703c; }
-    .status-cancelled { background: #d4351c; }
-    .status-interrupted { background: #ff9800; }
-    .warning-row { background-color: #fff5f5 !important; }
-    .warning-text { color: #d4351c; font-weight: bold; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HMRC EMCS Dashboard</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
+.container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+h1 { color: #005ea5; margin-bottom: 10px; }
+h2 { color: #333; margin-bottom: 15px; font-size: 1.3em; }
+h3 { color: #005ea5; margin-top: 20px; margin-bottom: 10px; font-size: 1.1em; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px; }
+h4 { color: #505a5f; margin-bottom: 8px; }
+.card { background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #005ea5; color: white; border: none; border-radius: 5px; font-size: 14px; }
+button:hover { background: #003d6b; }
+.btn-green { background: #00703c; } .btn-green:hover { background: #005a30; }
+.btn-red { background: #d4351c; } .btn-red:hover { background: #aa2a16; }
+.btn-small { padding: 4px 10px; font-size: 12px; margin: 2px; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+input, select { padding: 8px 12px; border: 2px solid #b1b4b6; border-radius: 4px; font-size: 14px; width: 100%; }
+input:focus, select:focus { border-color: #005ea5; outline: none; }
+input.invalid, select.invalid { border-color: #d4351c; background: #fff5f5; }
+input.valid, select.valid { border-color: #00703c; }
+.validation-msg { font-size: 12px; color: #d4351c; margin-top: 2px; min-height: 16px; }
+pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; overflow-x: auto; max-height: 400px; font-size: 13px; white-space: pre-wrap; word-wrap: break-word; margin-top: 15px; }
+.success { color: #00703c; font-weight: bold; }
+.error { color: #d4351c; font-weight: bold; }
+.nav { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 20px; }
+.nav button { background: #505a5f; font-size: 13px; padding: 8px 14px; }
+.nav button.active { background: #005ea5; }
+.nav button:hover { background: #005ea5; }
+.tab { display: none; }
+.tab.active { display: block; }
+.field { position: relative; }
+.field label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 14px; }
+.field-help { display: inline-block; width: 18px; height: 18px; background: #005ea5; color: white; border-radius: 50%; text-align: center; line-height: 18px; font-size: 12px; font-weight: bold; cursor: help; margin-left: 5px; position: relative; }
+.field-help:hover .tooltip { visibility: visible; opacity: 1; }
+.tooltip { visibility: hidden; opacity: 0; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 12px; border-radius: 5px; font-size: 12px; font-weight: normal; width: 300px; z-index: 1000; transition: opacity 0.3s; line-height: 1.4; }
+.tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
+.format-badge { display: inline-block; background: #e8f4fd; color: #005ea5; padding: 2px 6px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace; }
+.cheat-sheet { background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin-top: 15px; font-size: 13px; }
+.cheat-sheet h3 { margin-bottom: 8px; margin-top: 0; }
+.cheat-sheet table { width: 100%; border-collapse: collapse; }
+.cheat-sheet th, .cheat-sheet td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
+.cheat-sheet th { background: #ffeeba; }
+#login-screen { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+.login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 450px; width: 100%; text-align: center; }
+.status-bar { background: #005ea5; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.status-bar a { color: #ffdd57; text-decoration: none; margin-left: 15px; }
+.status-bar a:hover { text-decoration: underline; }
+.token-status { padding: 5px 10px; border-radius: 3px; font-size: 12px; }
+.token-ok { background: #00703c; }
+.token-missing { background: #d4351c; }
+.item-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 15px; background: #fafafa; }
+.item-field.collapsed .form-grid { display: none; }
+.transport-unit-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 15px; background: #f0f9ff; }
+.mode-indicator { padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; }
+.mode-test { background: #ff9800; color: white; }
+.mode-prod { background: #d32f2f; color: white; }
+.required-asterisk { color: #d4351c; font-weight: bold; }
+.section-optional { background: #f9f9f9; border-left: 3px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+.section-filter { background: #f0f4f8; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+.section-templates { background: #f0fff4; border-left: 3px solid #00703c; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+.section-duty { background: #fff8e1; border-left: 3px solid #ff9800; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+.section-recent { background: #e3f2fd; border-left: 3px solid #2196f3; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+
+/* Monitor Table */
+.monitor-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
+.monitor-table th { background: #005ea5; color: white; padding: 10px; text-align: left; position: sticky; top: 0; }
+.monitor-table td { padding: 10px; border-bottom: 1px solid #ddd; }
+.monitor-table tr:hover { background: #f9f9f9; }
+.status-badge { padding: 3px 8px; border-radius: 12px; color: white; font-size: 11px; font-weight: bold; }
+.status-open { background: #005ea5; }
+.status-receipted { background: #00703c; }
+.status-cancelled { background: #d4351c; }
+.warning-row { background-color: #fff5f5 !important; }
+.warning-text { color: #d4351c; font-weight: bold; }
+
+/* Recent Movements */
+.recent-movements { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
+.recent-card { background: white; border: 1px solid #ddd; border-radius: 5px; padding: 10px; min-width: 200px; cursor: pointer; transition: transform 0.2s; }
+.recent-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-color: #005ea5; }
+.recent-card .rc-lrn { font-weight: bold; color: #005ea5; font-size: 12px; }
+.recent-card .rc-date { font-size: 11px; color: #666; }
+.recent-card .rc-party { font-size: 12px; margin-top: 5px; }
+
+/* Templates */
+.template-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.template-chip { background: white; border: 1px solid #00703c; color: #00703c; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.template-chip:hover { background: #00703c; color: white; }
+.template-chip .del-tpl { color: #d4351c; font-weight: bold; cursor: pointer; margin-left: 4px; }
+.template-chip .del-tpl:hover { color: white; }
+
+/* Duty Estimator */
+.duty-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+.duty-table th { background: #ff9800; color: white; padding: 8px; text-align: left; }
+.duty-table td { padding: 8px; border-bottom: 1px solid #eee; }
+.duty-total { font-size: 1.2em; font-weight: bold; color: #00703c; margin-top: 10px; padding: 10px; background: #e8f5e9; border-radius: 5px; text-align: right; }
+
+/* Modal */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
+.modal-overlay.active { display: flex; }
+.modal { background: white; border-radius: 8px; padding: 25px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; }
+.modal h2 { margin-bottom: 15px; }
+
+/* Item header with actions */
+.item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.item-actions { display: flex; gap: 5px; }
+</style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-box">
     <h1>🔒 EMCS Dashboard</h1>
     <p style="margin-bottom:20px; color:#666;">Enter your password to continue</p>
     <input type="password" id="password" placeholder="Dashboard Password" style="margin-bottom:10px;">
-    <input type="text" id="totp-code" placeholder="6-digit 2FA code (if enabled)" maxlength="6" style="display:none; margin-bottom:10px;">
     <button id="login-btn" style="width:100%; margin-top:10px;">Login</button>
     <p id="login-error" class="error" style="margin-top:10px;"></p>
   </div>
 </div>
 
-<!-- MAIN DASHBOARD -->
 <div id="dashboard" style="display:none;">
   <div class="status-bar">
     <span>🇬🇧 HMRC EMCS Dashboard <span id="mode-indicator" class="mode-indicator mode-test">TEST MODE</span></span>
@@ -116,77 +145,24 @@
       <button class="nav-btn" data-tab="tab-unsubscribe">9. Unsubscribe ERN</button>
     </div>
 
-    <!-- TAB 1: MONITOR DASHBOARD -->
+    <!-- TAB 1: MONITOR -->
     <div id="tab-monitor" class="tab active">
       <div class="card">
         <h2>Monitor Movements</h2>
-        
         <div class="section-filter">
           <h3 style="margin-top:0; border:none; font-size:1em;">Apply Filters</h3>
           <div class="form-grid">
-            <div class="field">
-              <label>Direction</label>
-              <select id="mon-direction">
-                <option value="">All</option>
-                <option value="in">Goods in</option>
-                <option value="out">Goods out</option>
-              </select>
+            <div class="field"><label>Direction</label>
+              <select id="mon-direction"><option value="">All</option><option value="in">Goods in</option><option value="out">Goods out</option></select>
             </div>
-            <div class="field">
-              <label style="display:flex; align-items:center; gap:8px; margin-top:25px;">
-                <input type="checkbox" id="mon-undischarged" style="width:auto;"> Undischarged only
-              </label>
+            <div class="field"><label>Status</label>
+              <select id="mon-status"><option value="">All</option><option value="open">Open</option><option value="receipted">Receipted</option><option value="cancelled">Cancelled</option></select>
             </div>
-            <div class="field">
-              <label>Status</label>
-              <select id="mon-status">
-                <option value="">All Statuses</option>
-                <option value="open">Open</option>
-                <option value="receipted">Receipted</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="interrupted">Interrupted</option>
-              </select>
+            <div class="field"><label>Product Code</label>
+              <select id="mon-epc"><option value="">All</option><option value="B000">B000 - Beer</option><option value="W200">W200 - Still Wine</option><option value="W300">W300 - Sparkling Wine</option><option value="S200">S200 - Spirits</option><option value="E410">E410 - Leaded Petrol</option><option value="E420">E420 - Unleaded Petrol</option></select>
             </div>
-            <div class="field">
-              <label>Excise Product Code</label>
-              <select id="mon-epc">
-                <option value="">All Items</option>
-                <option value="B000">B000 - Beer</option>
-                <option value="W200">W200 - Still Wine</option>
-                <option value="W300">W300 - Sparkling Wine</option>
-                <option value="S200">S200 - Spirits</option>
-                <option value="E410">E410 - Leaded Petrol</option>
-                <option value="E420">E420 - Unleaded Petrol</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Country of Origin</label>
-              <select id="mon-country">
-                <option value="">All Countries</option>
-                <option value="GB">GB - Great Britain</option>
-                <option value="XI">XI - Northern Ireland</option>
-                <option value="FR">FR - France</option>
-                <option value="DE">DE - Germany</option>
-                <option value="ES">ES - Spain</option>
-                <option value="IT">IT - Italy</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Dispatched From</label>
-              <input type="date" id="mon-disp-from">
-            </div>
-            <div class="field">
-              <label>Dispatched To</label>
-              <input type="date" id="mon-disp-to">
-            </div>
-            <div class="field">
-              <label>Receipted From</label>
-              <input type="date" id="mon-receipt-from">
-            </div>
-            <div class="field">
-              <label>Receipted To</label>
-              <input type="date" id="mon-receipt-to">
-            </div>
+            <div class="field"><label>Dispatched From</label><input type="date" id="mon-disp-from"></div>
+            <div class="field"><label>Dispatched To</label><input type="date" id="mon-disp-to"></div>
           </div>
           <div style="margin-top: 15px; display: flex; gap: 10px;">
             <button id="mon-apply-filters" class="btn-green">Apply filters</button>
@@ -194,24 +170,13 @@
             <button id="mon-refresh" style="margin-left: auto;">🔄 Refresh Data</button>
           </div>
         </div>
-
         <div id="mon-loading" style="text-align: center; padding: 20px; display: none;">Loading movements...</div>
         <div id="mon-no-results" style="text-align: center; padding: 20px; display: none;">No movements match your filters.</div>
-        
         <div style="overflow-x: auto;">
           <table id="mon-table" class="monitor-table" style="display: none;">
-            <thead>
-              <tr>
-                <th>ARC / LRN</th>
-                <th>Direction</th>
-                <th>Counterparty</th>
-                <th>Product</th>
-                <th>Dispatch Date</th>
-                <th>Status</th>
-                <th style="text-align:center;">Days Open</th>
-                <th style="text-align:center;">Actions</th>
-              </tr>
-            </thead>
+            <thead><tr>
+              <th>ARC / LRN</th><th>Direction</th><th>Counterparty</th><th>Dispatch Date</th><th>Status</th><th style="text-align:center;">Days Open</th><th style="text-align:center;">Actions</th>
+            </tr></thead>
             <tbody id="mon-tbody"></tbody>
           </table>
         </div>
@@ -222,36 +187,42 @@
     <div id="tab-submit" class="tab">
       <div class="card">
         <h2>Submit Draft Movement (IE815) - EMCS Phase 4 V3.23</h2>
-        <!-- (Keep all the existing Box 1 to Box 16 HTML from previous version here for brevity, it remains unchanged) -->
+
+        <!-- RECENT MOVEMENTS WIDGET -->
+        <div class="section-recent">
+          <h3 style="margin-top:0; border:none; font-size:1em;">🕐 Recent Movements (click to reuse)</h3>
+          <div id="recent-movements" class="recent-movements">
+            <p style="color:#666; font-size:13px;">No recent movements yet. Submit one to see it here.</p>
+          </div>
+        </div>
+
+        <!-- TEMPLATES SECTION -->
+        <div class="section-templates">
+          <h3 style="margin-top:0; border:none; font-size:1em;">💾 Templates</h3>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <input type="text" id="template-name" placeholder="Template name (e.g., 'Weekly Beer to Manchester')" style="max-width: 300px;">
+            <button id="save-template-btn" class="btn-green btn-small">💾 Save Current as Template</button>
+          </div>
+          <div id="template-list" class="template-list"></div>
+        </div>
+
+        <!-- BOX 1: eAD Header -->
         <h3>Box 1: eAD Header <span class="format-badge">Required</span></h3>
         <div class="form-grid">
-          <div class="field">
-            <label>Destination Type Code <span class="required-asterisk">*</span></label>
+          <div class="field"><label>Destination Type Code <span class="required-asterisk">*</span></label>
             <select id="s-dest-type" required>
-              <option value="1" selected>1 - Tax Warehouse</option>
-              <option value="2">2 - Registered Consignee</option>
-              <option value="3">3 - Temporary Registered Consignee</option>
-              <option value="4">4 - Direct Delivery</option>
-              <option value="5">5 - Exempted Organisation</option>
-              <option value="6">6 - Export</option>
-              <option value="8">8 - Unknown destination</option>
+              <option value="1" selected>1 - Tax Warehouse</option><option value="2">2 - Registered Consignee</option><option value="3">3 - Temporary Registered Consignee</option><option value="4">4 - Direct Delivery</option><option value="5">5 - Exempted Organisation</option><option value="6">6 - Export</option><option value="8">8 - Unknown destination</option>
             </select>
           </div>
-          <div class="field">
-            <label>Journey Time <span class="required-asterisk">*</span></label>
-            <input type="text" id="s-journey-time" value="D07" pattern="^[HD]\d{1,2}$" maxlength="3" required>
-          </div>
-          <div class="field">
-            <label>Transport Arrangement <span class="required-asterisk">*</span></label>
+          <div class="field"><label>Journey Time <span class="required-asterisk">*</span></label><input type="text" id="s-journey-time" value="D07" pattern="^[HD]\d{1,2}$" maxlength="3" required></div>
+          <div class="field"><label>Transport Arrangement <span class="required-asterisk">*</span></label>
             <select id="s-transport-arrangement" required>
-              <option value="1" selected>1 - Consignor</option>
-              <option value="2">2 - Consignee</option>
-              <option value="3">3 - Owner of Goods</option>
-              <option value="4">4 - Other</option>
+              <option value="1" selected>1 - Consignor</option><option value="2">2 - Consignee</option><option value="3">3 - Owner of Goods</option><option value="4">4 - Other</option>
             </select>
           </div>
         </div>
 
+        <!-- BOX 2: Consignor -->
         <h3>Box 2: Consignor <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field"><label>Trader Excise Number (ERN) <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-ern" value="GBWK002281023" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13" required></div>
@@ -262,6 +233,7 @@
           <div class="field"><label>City <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-city" value="London" maxlength="50" required></div>
         </div>
 
+        <!-- BOX 3: Place of Dispatch -->
         <div class="section-optional">
           <h3 style="margin-top:0;">Box 3: Place of Dispatch <span class="format-badge">Conditional</span></h3>
           <div class="form-grid">
@@ -274,6 +246,7 @@
           </div>
         </div>
 
+        <!-- BOX 5: Consignee -->
         <h3>Box 5: Consignee <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field"><label>Trader ID (ERN) <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-ern" value="GBWKQOZ8OVLYR" maxlength="16" required></div>
@@ -284,6 +257,7 @@
           <div class="field"><label>City <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-city" value="Manchester" maxlength="50" required></div>
         </div>
 
+        <!-- BOX 7: Place of Delivery -->
         <h3>Box 7: Place of Delivery <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field"><label>Trader ID <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-trader-id" value="GB00AIP67RAO3" maxlength="16" required></div>
@@ -294,6 +268,7 @@
           <div class="field"><label>City <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-city" value="Manchester" maxlength="50" required></div>
         </div>
 
+        <!-- BOX 9: e-AD -->
         <h3>Box 9: e-AD <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field"><label>Local Reference Number (LRN)</label><input type="text" id="s-lrn" value="" maxlength="22" placeholder="Auto-generated"></div>
@@ -306,7 +281,8 @@
           <div class="field"><label>Time of Dispatch <span class="required-asterisk">*</span></label><input type="time" id="s-time" value="12:00" required></div>
         </div>
 
-        <h3>Box 10 & 11 & 13 & 15: Authorities & Transport <span class="format-badge">Required</span></h3>
+        <!-- BOX 10/11/13/15 -->
+        <h3>Boxes 10/11/13/15: Authorities & Transport <span class="format-badge">Required</span></h3>
         <div class="form-grid">
           <div class="field"><label>Dispatch Office Ref <span class="required-asterisk">*</span></label><input type="text" id="s-dispatch-office" value="GB004098" maxlength="8" required></div>
           <div class="field"><label>Guarantor Type <span class="required-asterisk">*</span></label>
@@ -320,15 +296,41 @@
           <div class="field"><label>Transporter City <span class="required-asterisk">*</span></label><input type="text" id="s-transporter-city" value="Dover" maxlength="50" required></div>
         </div>
 
-        <!-- ENHANCED BOX 17: e-AD Body (Goods Items) -->
+        <!-- BOX 16: Transport Details -->
+        <h3>Box 16: Transport Details <span class="format-badge">Required</span></h3>
+        <div id="transport-units-container">
+          <div class="transport-unit-field" data-unit="1">
+            <h4>Transport Unit 1</h4>
+            <div class="form-grid">
+              <div class="field"><label>Transport Unit Code <span class="required-asterisk">*</span></label>
+                <select class="s-transport-unit-code" required>
+                  <option value="1" selected>1 - Container</option><option value="2">2 - Vehicle</option><option value="3">3 - Trailer</option><option value="4">4 - Tractor</option>
+                </select>
+              </div>
+              <div class="field"><label>Identity of Transport Units <span class="required-asterisk">*</span></label><input type="text" class="s-identity-transport" value="AB12CDE" maxlength="35" required></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOX 17: e-AD Body (Enhanced) -->
         <h3>Box 17: e-AD Body (Goods Items) <span class="format-badge">Required</span></h3>
-        <div class="form-grid">
-          <div class="field"><label>Number of Items <span class="required-asterisk">*</span></label><input type="number" id="s-item-count" value="1" min="1" max="999" onchange="generateItemFields()"></div>
+        <div style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" id="add-goods-item-btn" class="btn-green btn-small">+ Add Item</button>
+          <button type="button" id="import-csv-btn" class="btn-small">📥 Import from CSV</button>
+          <button type="button" id="download-csv-template-btn" class="btn-small">📄 Download CSV Template</button>
         </div>
         <div id="goods-items-container"></div>
-        <button type="button" id="add-goods-item-btn" class="btn-green btn-small">+ Add Another Goods Item</button>
+
+        <!-- DUTY ESTIMATOR -->
+        <div class="section-duty">
+          <h3 style="margin-top:0; border:none; font-size:1em;">💷 Estimated Excise Duty</h3>
+          <div id="duty-display">
+            <p style="color:#666; font-size:13px;">Add goods items to see duty estimate.</p>
+          </div>
+        </div>
 
         <button id="submit-movement-btn" style="margin-top:20px;">Submit Movement</button>
+        <button id="export-last-csv-btn" class="btn-green" style="display:none;">📤 Export Last Submission to CSV</button>
         <pre id="submit-output">Waiting...</pre>
       </div>
     </div>
@@ -348,7 +350,7 @@
       <div class="card">
         <h2>Submit Message</h2>
         <div class="form-grid">
-          <div class="field"><label>Movement ID <span class="required-asterisk">*</span></label><input type="text" id="sm-mov-id" placeholder="Auto-filled or paste"></div>
+          <div class="field"><label>Movement ID <span class="required-asterisk">*</span></label><input type="text" id="sm-mov-id" placeholder="Paste movementId"></div>
           <div class="field"><label>ARC <span class="required-asterisk">*</span></label><input type="text" id="sm-arc" placeholder="e.g., 23XI00000000000000013"></div>
           <div class="field"><label>Sequence Number</label><input type="number" id="sm-seq" value="1" min="1"></div>
           <div class="field"><label>Message Type <span class="required-asterisk">*</span></label>
@@ -399,7 +401,7 @@
         <div class="form-grid">
           <div class="field"><label>Target ERN</label><input type="text" id="pv-ern" value="GBWK000000206"></div>
           <div class="field"><label>Entity Group</label>
-            <select id="pv-group"><option value="UK Record">UK Record</option><option value="EU Trader">EU Trader</option></select>
+            <select id="pv-group"><option value="UK Record">UK Record</option><option value="EU Trader">EU Trader</option><option value="EU Warehouse">EU Warehouse</option></select>
           </div>
           <div class="field"><label>Product Code</label><input type="text" id="pv-p1" value="W200"></div>
         </div>
@@ -408,7 +410,7 @@
       </div>
     </div>
 
-    <!-- TAB 8 & 9: SUBSCRIBE / UNSUBSCRIBE -->
+    <!-- TAB 8: SUBSCRIBE -->
     <div id="tab-subscribe" class="tab">
       <div class="card">
         <h2>Subscribe ERN</h2>
@@ -417,6 +419,8 @@
         <pre id="sub-output">Waiting...</pre>
       </div>
     </div>
+
+    <!-- TAB 9: UNSUBSCRIBE -->
     <div id="tab-unsubscribe" class="tab">
       <div class="card">
         <h2>Unsubscribe ERN</h2>
@@ -425,7 +429,20 @@
         <pre id="unsub-output">Waiting...</pre>
       </div>
     </div>
+  </div>
+</div>
 
+<!-- CSV IMPORT MODAL -->
+<div id="csv-modal" class="modal-overlay">
+  <div class="modal">
+    <h2>📥 Import Goods Items from CSV</h2>
+    <p style="margin-bottom:15px; color:#666;">Upload a CSV file with goods items. Required columns: ExciseProductCode, CNCode, Quantity, GrossMass, NetMass, PackageKind, PackageCount</p>
+    <input type="file" id="csv-file-input" accept=".csv">
+    <div id="csv-preview" style="margin-top:15px;"></div>
+    <div style="margin-top:15px; display:flex; gap:10px;">
+      <button id="csv-confirm-btn" class="btn-green" style="display:none;">✓ Confirm Import</button>
+      <button id="csv-cancel-btn" class="btn-red">Cancel</button>
+    </div>
   </div>
 </div>
 
@@ -436,10 +453,33 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('s-invoice-date').value = today;
 
   var TMS_NS = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.23';
-  var goodsItemCount = 1;
   window.monitorData = [];
+  window.parsedCsvRows = [];
 
-  // ==================== AUTH & TABS ====================
+  // UK Excise Duty Rates (approximate 2026)
+  var DUTY_RATES = {
+    'B000': { name: 'Beer', unit: 'hl/%ABV', rate: 21.01 },
+    'W200': { name: 'Still Wine (≤5.5%)', unit: 'hl', rate: 46.09 },
+    'W200H': { name: 'Still Wine (>5.5-15%)', unit: 'hl', rate: 288.65 },
+    'W300': { name: 'Sparkling Wine', unit: 'hl', rate: 288.65 },
+    'I000': { name: 'Intermediate Products', unit: 'hl', rate: 288.65 },
+    'S200': { name: 'Spirits', unit: 'L alcohol', rate: 31.64 },
+    'S300': { name: 'Ethyl Alcohol', unit: 'L alcohol', rate: 31.64 },
+    'T200': { name: 'Cigarettes', unit: '1000 sticks', rate: 239.49 },
+    'T300': { name: 'Cigars', unit: 'kg', rate: 239.49 },
+    'E410': { name: 'Leaded Petrol', unit: 'L', rate: 0.5795 },
+    'E420': { name: 'Unleaded Petrol', unit: 'L', rate: 0.5295 }
+  };
+
+  // CN Code auto-fill mapping
+  var CN_CODES = {
+    'B000': '22030001', 'W200': '22042142', 'W300': '22041011',
+    'I000': '22042999', 'S200': '22089091', 'S300': '22071000',
+    'T200': '24022010', 'T300': '24021000', 'E410': '27101231',
+    'E420': '27101211'
+  };
+
+  // ==================== AUTH ====================
   function checkAuth() {
     if (localStorage.getItem('dashboard_auth') === 'authenticated') {
       document.getElementById('login-screen').style.display = 'none';
@@ -486,12 +526,577 @@ document.addEventListener('DOMContentLoaded', function() {
     return '<urn:' + tag + '>' + value + '</urn:' + tag + '>';
   }
 
+  // ==================== TEMPLATES ====================
+  function getTemplates() {
+    try { return JSON.parse(localStorage.getItem('emcs_templates') || '[]'); } catch(e) { return []; }
+  }
+
+  function saveTemplates(templates) {
+    localStorage.setItem('emcs_templates', JSON.stringify(templates));
+  }
+
+  function initDefaultTemplates() {
+    if (localStorage.getItem('emcs_templates_initialized')) return;
+    var defaults = [
+      {
+        name: 'UK Beer to Tax Warehouse',
+        created: today,
+        data: {
+          destType: '1', journeyTime: 'D07', transportArrangement: '1',
+          consignorErn: 'GBWK002281023', consignorName: 'Test Consignor Ltd',
+          consigneeErn: 'GBWKQOZ8OVLYR', consigneeName: 'Test Consignee Ltd',
+          dispatchWarehouse: 'GB00DO459DMNX', dispatchOffice: 'GB004098',
+          transporterVat: '123798354', transporterName: 'Fast Freight Ltd',
+          items: [{ productCode: 'B000', cnCode: '22030001', qty: 2000, gross: 20000, net: 19999, abv: 5.0, commDesc: 'Standard Lager', brand: 'TestBrand', pkgKind: 'BA', pkgCount: 2 }]
+        }
+      }
+    ];
+    saveTemplates(defaults);
+    localStorage.setItem('emcs_templates_initialized', '1');
+  }
+  initDefaultTemplates();
+
+  function renderTemplates() {
+    var templates = getTemplates();
+    var container = document.getElementById('template-list');
+    if (templates.length === 0) {
+      container.innerHTML = '<p style="color:#666; font-size:13px;">No templates saved yet.</p>';
+      return;
+    }
+    container.innerHTML = templates.map(function(t, i) {
+      return '<div class="template-chip" data-idx="' + i + '">' +
+        '<span class="load-tpl">' + t.name + '</span>' +
+        '<span class="del-tpl" data-idx="' + i + '" title="Delete">✕</span>' +
+        '</div>';
+    }).join('');
+
+    container.querySelectorAll('.load-tpl').forEach(function(el) {
+      el.addEventListener('click', function() {
+        var idx = this.parentElement.getAttribute('data-idx');
+        loadTemplate(parseInt(idx));
+      });
+    });
+    container.querySelectorAll('.del-tpl').forEach(function(el) {
+      el.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var idx = parseInt(this.getAttribute('data-idx'));
+        if (confirm('Delete template "' + templates[idx].name + '"?')) {
+          templates.splice(idx, 1);
+          saveTemplates(templates);
+          renderTemplates();
+        }
+      });
+    });
+  }
+  renderTemplates();
+
+  function captureFormData() {
+    var items = [];
+    document.querySelectorAll('#goods-items-container .item-field').forEach(function(item) {
+      items.push({
+        productCode: item.querySelector('.s-product-code').value,
+        cnCode: item.querySelector('.s-cn-code').value,
+        qty: item.querySelector('.s-qty').value,
+        gross: item.querySelector('.s-weight').value,
+        net: item.querySelector('.s-net-weight').value,
+        abv: item.querySelector('.s-abv').value,
+        commDesc: item.querySelector('.s-comm-desc').value,
+        brand: item.querySelector('.s-brand').value,
+        pkgKind: item.querySelector('.s-package-kind').value,
+        pkgCount: item.querySelector('.s-package-count').value,
+        bulk: item.querySelector('.s-bulk').checked,
+        smallProducer: item.querySelector('.s-small-producer').checked,
+        shipMark: item.querySelector('.s-ship-mark').value,
+        seal: item.querySelector('.s-seal').value
+      });
+    });
+    return {
+      destType: document.getElementById('s-dest-type').value,
+      journeyTime: document.getElementById('s-journey-time').value,
+      transportArrangement: document.getElementById('s-transport-arrangement').value,
+      consignorErn: document.getElementById('s-consignor-ern').value,
+      consignorName: document.getElementById('s-consignor-name').value,
+      consignorStreet: document.getElementById('s-consignor-street').value,
+      consignorPostcode: document.getElementById('s-consignor-postcode').value,
+      consignorCity: document.getElementById('s-consignor-city').value,
+      consigneeErn: document.getElementById('s-consignee-ern').value,
+      consigneeName: document.getElementById('s-consignee-name').value,
+      consigneeStreet: document.getElementById('s-consignee-street').value,
+      consigneePostcode: document.getElementById('s-consignee-postcode').value,
+      consigneeCity: document.getElementById('s-consignee-city').value,
+      dispatchWarehouse: document.getElementById('s-dispatch-warehouse').value,
+      dispatchOffice: document.getElementById('s-dispatch-office').value,
+      transporterVat: document.getElementById('s-transporter-vat').value,
+      transporterName: document.getElementById('s-transporter-name').value,
+      transporterCity: document.getElementById('s-transporter-city').value,
+      items: items
+    };
+  }
+
+  function applyFormData(data) {
+    if (data.destType) document.getElementById('s-dest-type').value = data.destType;
+    if (data.journeyTime) document.getElementById('s-journey-time').value = data.journeyTime;
+    if (data.transportArrangement) document.getElementById('s-transport-arrangement').value = data.transportArrangement;
+    if (data.consignorErn) document.getElementById('s-consignor-ern').value = data.consignorErn;
+    if (data.consignorName) document.getElementById('s-consignor-name').value = data.consignorName;
+    if (data.consignorStreet) document.getElementById('s-consignor-street').value = data.consignorStreet;
+    if (data.consignorPostcode) document.getElementById('s-consignor-postcode').value = data.consignorPostcode;
+    if (data.consignorCity) document.getElementById('s-consignor-city').value = data.consignorCity;
+    if (data.consigneeErn) document.getElementById('s-consignee-ern').value = data.consigneeErn;
+    if (data.consigneeName) document.getElementById('s-consignee-name').value = data.consigneeName;
+    if (data.consigneeStreet) document.getElementById('s-consignee-street').value = data.consigneeStreet;
+    if (data.consigneePostcode) document.getElementById('s-consignee-postcode').value = data.consigneePostcode;
+    if (data.consigneeCity) document.getElementById('s-consignee-city').value = data.consigneeCity;
+    if (data.dispatchWarehouse !== undefined) document.getElementById('s-dispatch-warehouse').value = data.dispatchWarehouse;
+    if (data.dispatchOffice) document.getElementById('s-dispatch-office').value = data.dispatchOffice;
+    if (data.transporterVat) document.getElementById('s-transporter-vat').value = data.transporterVat;
+    if (data.transporterName) document.getElementById('s-transporter-name').value = data.transporterName;
+    if (data.transporterCity) document.getElementById('s-transporter-city').value = data.transporterCity;
+
+    if (data.items && data.items.length > 0) {
+      document.getElementById('s-item-count').value = data.items.length;
+      renderGoodsItems(data.items.length);
+      data.items.forEach(function(it, idx) {
+        var item = document.querySelectorAll('#goods-items-container .item-field')[idx];
+        if (!item) return;
+        if (it.productCode) item.querySelector('.s-product-code').value = it.productCode;
+        if (it.cnCode) item.querySelector('.s-cn-code').value = it.cnCode;
+        if (it.qty) item.querySelector('.s-qty').value = it.qty;
+        if (it.gross) item.querySelector('.s-weight').value = it.gross;
+        if (it.net) item.querySelector('.s-net-weight').value = it.net;
+        if (it.abv !== undefined) item.querySelector('.s-abv').value = it.abv;
+        if (it.commDesc) item.querySelector('.s-comm-desc').value = it.commDesc;
+        if (it.brand !== undefined) item.querySelector('.s-brand').value = it.brand;
+        if (it.pkgKind) item.querySelector('.s-package-kind').value = it.pkgKind;
+        if (it.pkgCount !== undefined) item.querySelector('.s-package-count').value = it.pkgCount;
+        if (it.bulk) { item.querySelector('.s-bulk').checked = true; item.querySelector('.s-net-weight').disabled = true; }
+        if (it.smallProducer) item.querySelector('.s-small-producer').checked = true;
+        if (it.shipMark) item.querySelector('.s-ship-mark').value = it.shipMark;
+        if (it.seal) item.querySelector('.s-seal').value = it.seal;
+        updateItemFieldVisibility(item);
+      });
+    }
+    updateDutyEstimate();
+  }
+
+  function loadTemplate(idx) {
+    var templates = getTemplates();
+    if (templates[idx]) {
+      applyFormData(templates[idx].data);
+      alert('Template "' + templates[idx].name + '" loaded.');
+    }
+  }
+
+  document.getElementById('save-template-btn').addEventListener('click', function() {
+    var name = document.getElementById('template-name').value.trim();
+    if (!name) { alert('Please enter a template name.'); return; }
+    var templates = getTemplates();
+    templates.push({ name: name, created: today, data: captureFormData() });
+    saveTemplates(templates);
+    renderTemplates();
+    document.getElementById('template-name').value = '';
+    alert('Template "' + name + '" saved.');
+  });
+
+  // ==================== RECENT MOVEMENTS ====================
+  function getRecentMovements() {
+    try { return JSON.parse(localStorage.getItem('emcs_recent') || '[]'); } catch(e) { return []; }
+  }
+
+  function addRecentMovement(data) {
+    var recent = getRecentMovements();
+    recent.unshift(data);
+    if (recent.length > 5) recent = recent.slice(0, 5);
+    localStorage.setItem('emcs_recent', JSON.stringify(recent));
+    renderRecentMovements();
+  }
+
+  function renderRecentMovements() {
+    var recent = getRecentMovements();
+    var container = document.getElementById('recent-movements');
+    if (recent.length === 0) {
+      container.innerHTML = '<p style="color:#666; font-size:13px;">No recent movements yet.</p>';
+      return;
+    }
+    container.innerHTML = recent.map(function(r, i) {
+      return '<div class="recent-card" data-idx="' + i + '">' +
+        '<div class="rc-lrn">' + (r.lrn || 'N/A') + '</div>' +
+        '<div class="rc-date">' + (r.date || '') + '</div>' +
+        '<div class="rc-party">→ ' + (r.consignee || '') + '</div>' +
+        '<div class="rc-party">' + (r.product || '') + '</div>' +
+        '</div>';
+    }).join('');
+    container.querySelectorAll('.recent-card').forEach(function(card) {
+      card.addEventListener('click', function() {
+        var idx = parseInt(this.getAttribute('data-idx'));
+        var r = recent[idx];
+        if (r && r.formData) {
+          applyFormData(r.formData);
+          alert('Movement reused. Update LRN and dates before submitting.');
+        }
+      });
+    });
+  }
+  renderRecentMovements();
+
+  // ==================== GOODS ITEMS (Enhanced) ====================
+  function updateItemFieldVisibility(item) {
+    var pc = item.querySelector('.s-product-code').value.toUpperCase();
+    var abvField = item.querySelector('.s-abv').parentElement;
+    // Show ABV for alcohol products
+    var alcoholCodes = ['B000', 'W200', 'W300', 'I000', 'S200', 'S300', 'S400', 'S500'];
+    abvField.style.display = alcoholCodes.includes(pc) ? 'block' : 'none';
+  }
+
+  function autoFillCNCode(item) {
+    var pc = item.querySelector('.s-product-code').value.toUpperCase();
+    if (CN_CODES[pc]) {
+      item.querySelector('.s-cn-code').value = CN_CODES[pc];
+    }
+  }
+
+  function renderGoodsItems(count, existingItems) {
+    var container = document.getElementById('goods-items-container');
+    container.innerHTML = '';
+    for (var i = 1; i <= count; i++) {
+      var it = (existingItems && existingItems[i-1]) || {};
+      var div = document.createElement('div');
+      div.className = 'item-field';
+      div.setAttribute('data-item', i);
+      div.innerHTML = 
+        '<div class="item-header">' +
+          '<h4>Item ' + i + '</h4>' +
+          '<div class="item-actions">' +
+            '<button type="button" class="btn-small collapse-btn">▼</button>' +
+            '<button type="button" class="btn-small btn-green dup-btn">⎘ Duplicate</button>' +
+            '<button type="button" class="btn-small btn-red remove-btn">✕ Remove</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="form-grid">' +
+          '<div class="field"><label>Excise Product Code <span class="required-asterisk">*</span></label><input type="text" class="s-product-code" value="' + (it.productCode || 'B000') + '" pattern="^[A-Z][0-9]{3}$" maxlength="4" required></div>' +
+          '<div class="field"><label>CN Code <span class="required-asterisk">*</span></label><input type="text" class="s-cn-code" value="' + (it.cnCode || '22030001') + '" pattern="^\\d{8}$" maxlength="8" required></div>' +
+          '<div class="field"><label>Quantity <span class="required-asterisk">*</span></label><input type="number" class="s-qty" value="' + (it.qty || 2000) + '" step="0.001" required></div>' +
+          '<div class="field"><label>Bulk Movement</label><input type="checkbox" class="s-bulk" style="width:auto; margin-top:10px;"></div>' +
+          '<div class="field"><label>Gross Mass (kg) <span class="required-asterisk">*</span></label><input type="number" class="s-weight" value="' + (it.gross || 20000) + '" step="0.000001" required></div>' +
+          '<div class="field"><label>Net Mass (kg) <span class="required-asterisk">*</span></label><input type="number" class="s-net-weight" value="' + (it.net || 19999) + '" step="0.000001" required></div>' +
+          '<div class="field"><label>Commercial Description <span class="required-asterisk">*</span></label><input type="text" class="s-comm-desc" value="' + (it.commDesc || '') + '" required></div>' +
+          '<div class="field"><label>Brand Name</label><input type="text" class="s-brand" value="' + (it.brand || '') + '"></div>' +
+          '<div class="field"><label>ABV %</label><input type="number" class="s-abv" value="' + (it.abv !== undefined ? it.abv : 5.0) + '" step="0.01"></div>' +
+          '<div class="field"><label>Kind of Packages <span class="required-asterisk">*</span></label>' +
+            '<select class="s-package-kind" required>' +
+              '<option value="BA"' + (it.pkgKind === 'BA' ? ' selected' : '') + '>BA - Barrel</option>' +
+              '<option value="BX"' + (it.pkgKind === 'BX' ? ' selected' : '') + '>BX - Box</option>' +
+              '<option value="CT"' + (it.pkgKind === 'CT' ? ' selected' : '') + '>CT - Carton</option>' +
+              '<option value="DR"' + (it.pkgKind === 'DR' ? ' selected' : '') + '>DR - Drum</option>' +
+              '<option value="PK"' + (it.pkgKind === 'PK' ? ' selected' : '') + '>PK - Package</option>' +
+              '<option value="RL"' + (it.pkgKind === 'RL' ? ' selected' : '') + '>RL - Reel</option>' +
+              '<option value="UN"' + (it.pkgKind === 'UN' ? ' selected' : '') + '>UN - Unit</option>' +
+            '</select>' +
+          '</div>' +
+          '<div class="field"><label>Number of Packages <span class="required-asterisk">*</span></label><input type="number" class="s-package-count" value="' + (it.pkgCount !== undefined ? it.pkgCount : 2) + '" min="0" required></div>' +
+          '<div class="field"><label>Shipping Mark</label><input type="text" class="s-ship-mark" value="' + (it.shipMark || '') + '" placeholder="Optional"></div>' +
+          '<div class="field"><label>Commercial Seal ID</label><input type="text" class="s-seal" value="' + (it.seal || '') + '" placeholder="Optional"></div>' +
+          '<div class="field" style="grid-column: 1 / -1;"><label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="s-small-producer" style="width:auto;"> Independent Small Producer Declaration</label></div>' +
+        '</div>';
+      container.appendChild(div);
+
+      // Event listeners for this item
+      div.querySelector('.s-product-code').addEventListener('change', function() {
+        autoFillCNCode(this.closest('.item-field'));
+        updateItemFieldVisibility(this.closest('.item-field'));
+        updateDutyEstimate();
+      });
+      div.querySelector('.s-bulk').addEventListener('change', function() {
+        var p = this.closest('.item-field');
+        var netField = p.querySelector('.s-net-weight');
+        if (this.checked) {
+          netField.value = p.querySelector('.s-weight').value;
+          netField.disabled = true;
+        } else {
+          netField.disabled = false;
+        }
+        updateDutyEstimate();
+      });
+      div.querySelector('.s-weight').addEventListener('input', function() {
+        var p = this.closest('.item-field');
+        if (p.querySelector('.s-bulk').checked) p.querySelector('.s-net-weight').value = this.value;
+        updateDutyEstimate();
+      });
+      ['s-qty', 's-net-weight', 's-abv', 's-small-producer'].forEach(function(cls) {
+        var el = div.querySelector('.' + cls);
+        if (el) el.addEventListener('input', updateDutyEstimate);
+        if (el) el.addEventListener('change', updateDutyEstimate);
+      });
+      div.querySelector('.collapse-btn').addEventListener('click', function() {
+        var item = this.closest('.item-field');
+        item.classList.toggle('collapsed');
+        this.textContent = item.classList.contains('collapsed') ? '▶' : '▼';
+      });
+      div.querySelector('.dup-btn').addEventListener('click', function() {
+        var item = this.closest('.item-field');
+        var clone = item.cloneNode(true);
+        container.appendChild(clone);
+        document.getElementById('s-item-count').value = container.children.length;
+        rebindItemEvents(clone);
+        updateDutyEstimate();
+      });
+      div.querySelector('.remove-btn').addEventListener('click', function() {
+        this.closest('.item-field').remove();
+        var items = document.querySelectorAll('#goods-items-container .item-field');
+        document.getElementById('s-item-count').value = items.length;
+        items.forEach(function(it, idx) { it.querySelector('h4').textContent = 'Item ' + (idx + 1); });
+        updateDutyEstimate();
+      });
+      updateItemFieldVisibility(div);
+    }
+    updateDutyEstimate();
+  }
+
+  function rebindItemEvents(item) {
+    item.querySelector('.s-product-code').addEventListener('change', function() {
+      autoFillCNCode(this.closest('.item-field'));
+      updateItemFieldVisibility(this.closest('.item-field'));
+      updateDutyEstimate();
+    });
+    item.querySelector('.s-bulk').addEventListener('change', function() {
+      var p = this.closest('.item-field');
+      var netField = p.querySelector('.s-net-weight');
+      if (this.checked) {
+        netField.value = p.querySelector('.s-weight').value;
+        netField.disabled = true;
+      } else {
+        netField.disabled = false;
+      }
+      updateDutyEstimate();
+    });
+    item.querySelector('.s-weight').addEventListener('input', function() {
+      var p = this.closest('.item-field');
+      if (p.querySelector('.s-bulk').checked) p.querySelector('.s-net-weight').value = this.value;
+      updateDutyEstimate();
+    });
+    ['s-qty', 's-net-weight', 's-abv', 's-small-producer'].forEach(function(cls) {
+      var el = item.querySelector('.' + cls);
+      if (el) el.addEventListener('input', updateDutyEstimate);
+      if (el) el.addEventListener('change', updateDutyEstimate);
+    });
+    item.querySelector('.collapse-btn').addEventListener('click', function() {
+      var it = this.closest('.item-field');
+      it.classList.toggle('collapsed');
+      this.textContent = it.classList.contains('collapsed') ? '▶' : '▼';
+    });
+    item.querySelector('.dup-btn').addEventListener('click', function() {
+      var it = this.closest('.item-field');
+      var clone = it.cloneNode(true);
+      document.getElementById('goods-items-container').appendChild(clone);
+      document.getElementById('s-item-count').value = document.querySelectorAll('#goods-items-container .item-field').length;
+      rebindItemEvents(clone);
+      updateDutyEstimate();
+    });
+    item.querySelector('.remove-btn').addEventListener('click', function() {
+      this.closest('.item-field').remove();
+      var items = document.querySelectorAll('#goods-items-container .item-field');
+      document.getElementById('s-item-count').value = items.length;
+      items.forEach(function(it, idx) { it.querySelector('h4').textContent = 'Item ' + (idx + 1); });
+      updateDutyEstimate();
+    });
+    updateItemFieldVisibility(item);
+  }
+
+  window.generateItemFields = function() {
+    var count = parseInt(document.getElementById('s-item-count').value) || 1;
+    renderGoodsItems(count);
+  };
+  renderGoodsItems(1);
+
+  document.getElementById('add-goods-item-btn').addEventListener('click', function() {
+    var count = parseInt(document.getElementById('s-item-count').value) + 1;
+    document.getElementById('s-item-count').value = count;
+    renderGoodsItems(count);
+  });
+
+  // ==================== DUTY ESTIMATOR ====================
+  function calculateDuty(item) {
+    var pc = item.querySelector('.s-product-code').value.toUpperCase();
+    var qty = parseFloat(item.querySelector('.s-qty').value) || 0;
+    var netMass = parseFloat(item.querySelector('.s-net-weight').value) || 0;
+    var abv = parseFloat(item.querySelector('.s-abv').value) || 0;
+    var smallProducer = item.querySelector('.s-small-producer').checked;
+
+    var rate = DUTY_RATES[pc];
+    if (!rate) return { product: pc, qty: qty, duty: 0, rateInfo: 'Unknown product' };
+
+    var duty = 0;
+    var rateInfo = '';
+
+    if (pc === 'B000') {
+      // Beer: hl × ABV × rate
+      var hl = qty / 100; // assuming qty in litres
+      duty = hl * abv * rate.rate;
+      rateInfo = hl.toFixed(2) + ' hl × ' + abv + '% × £' + rate.rate;
+    } else if (pc === 'W200') {
+      var hl = qty / 100;
+      duty = abv <= 5.5 ? hl * 46.09 : hl * 288.65;
+      rateInfo = hl.toFixed(2) + ' hl × £' + (abv <= 5.5 ? '46.09' : '288.65');
+    } else if (pc === 'W300' || pc === 'I000') {
+      var hl = qty / 100;
+      duty = hl * rate.rate;
+      rateInfo = hl.toFixed(2) + ' hl × £' + rate.rate;
+    } else if (pc === 'S200' || pc === 'S300') {
+      // Spirits: litres of pure alcohol
+      var lpa = (qty * abv) / 100;
+      duty = lpa * rate.rate;
+      rateInfo = lpa.toFixed(2) + ' L alcohol × £' + rate.rate;
+    } else if (pc === 'T200') {
+      // Cigarettes: qty in thousands of sticks
+      duty = qty * rate.rate;
+      rateInfo = qty + ' × £' + rate.rate;
+    } else if (pc === 'T300') {
+      // Cigars: qty in kg
+      duty = netMass * rate.rate;
+      rateInfo = netMass.toFixed(2) + ' kg × £' + rate.rate;
+    } else if (pc.startsWith('E')) {
+      // Energy: qty in litres
+      duty = qty * rate.rate;
+      rateInfo = qty.toFixed(2) + ' L × £' + rate.rate;
+    }
+
+    if (smallProducer && (pc === 'B000')) {
+      duty = duty * 0.5;
+      rateInfo += ' (50% SPR)';
+    }
+
+    return { product: pc, productName: rate.name, qty: qty, duty: duty, rateInfo: rateInfo };
+  }
+
+  function updateDutyEstimate() {
+    var items = document.querySelectorAll('#goods-items-container .item-field');
+    if (items.length === 0) {
+      document.getElementById('duty-display').innerHTML = '<p style="color:#666; font-size:13px;">Add goods items to see duty estimate.</p>';
+      return;
+    }
+
+    var totalDuty = 0;
+    var rows = '';
+    items.forEach(function(item, idx) {
+      var result = calculateDuty(item);
+      totalDuty += result.duty;
+      rows += '<tr><td>' + (idx + 1) + '</td><td>' + result.product + ' - ' + (result.productName || '') + '</td><td>' + result.rateInfo + '</td><td style="text-align:right; font-weight:bold;">£' + result.duty.toFixed(2) + '</td></tr>';
+    });
+
+    document.getElementById('duty-display').innerHTML = 
+      '<table class="duty-table"><thead><tr><th>#</th><th>Product</th><th>Calculation</th><th style="text-align:right;">Duty</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<div class="duty-total">Total Estimated Excise Duty: £' + totalDuty.toFixed(2) + '</div>';
+  }
+
+  // ==================== CSV IMPORT ====================
+  document.getElementById('import-csv-btn').addEventListener('click', function() {
+    document.getElementById('csv-modal').classList.add('active');
+    document.getElementById('csv-preview').innerHTML = '';
+    document.getElementById('csv-confirm-btn').style.display = 'none';
+    document.getElementById('csv-file-input').value = '';
+  });
+
+  document.getElementById('csv-cancel-btn').addEventListener('click', function() {
+    document.getElementById('csv-modal').classList.remove('active');
+  });
+
+  document.getElementById('download-csv-template-btn').addEventListener('click', function() {
+    var csv = 'ExciseProductCode,CNCode,Quantity,GrossMass,NetMass,ABV,CommercialDescription,BrandName,PackageKind,PackageCount\nB000,22030001,2000,20000,19999,5.0,Standard Lager,TestBrand,BA,2\nW200,22042142,500,800,750,12.5,Red Wine,TestVineyard,BX,10';
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'emcs-goods-items-template.csv';
+    a.click();
+  });
+
+  document.getElementById('csv-file-input').addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var text = ev.target.result;
+      var lines = text.split(/\r?\n/).filter(function(l) { return l.trim(); });
+      if (lines.length < 2) {
+        document.getElementById('csv-preview').innerHTML = '<p class="error">CSV must have at least a header row and one data row.</p>';
+        return;
+      }
+      var headers = lines[0].split(',').map(function(h) { return h.trim(); });
+      var required = ['ExciseProductCode', 'CNCode', 'Quantity', 'GrossMass', 'NetMass', 'PackageKind', 'PackageCount'];
+      var missing = required.filter(function(r) { return !headers.includes(r); });
+      if (missing.length > 0) {
+        document.getElementById('csv-preview').innerHTML = '<p class="error">Missing required columns: ' + missing.join(', ') + '</p>';
+        return;
+      }
+      var rows = [];
+      for (var i = 1; i < lines.length; i++) {
+        var cols = lines[i].split(',').map(function(c) { return c.trim(); });
+        var row = {};
+        headers.forEach(function(h, idx) { row[h] = cols[idx] || ''; });
+        rows.push(row);
+      }
+      window.parsedCsvRows = rows;
+      var preview = '<h4>Preview (' + rows.length + ' items)</h4><table class="duty-table"><thead><tr>';
+      headers.forEach(function(h) { preview += '<th>' + h + '</th>'; });
+      preview += '</tr></thead><tbody>';
+      rows.forEach(function(r) {
+        preview += '<tr>';
+        headers.forEach(function(h) { preview += '<td>' + (r[h] || '') + '</td>'; });
+        preview += '</tr>';
+      });
+      preview += '</tbody></table>';
+      document.getElementById('csv-preview').innerHTML = preview;
+      document.getElementById('csv-confirm-btn').style.display = 'inline-block';
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('csv-confirm-btn').addEventListener('click', function() {
+    var rows = window.parsedCsvRows;
+    if (!rows || rows.length === 0) return;
+    document.getElementById('s-item-count').value = rows.length;
+    var items = rows.map(function(r) {
+      return {
+        productCode: r.ExciseProductCode,
+        cnCode: r.CNCode,
+        qty: r.Quantity,
+        gross: r.GrossMass,
+        net: r.NetMass,
+        abv: r.ABV || 0,
+        commDesc: r.CommercialDescription || '',
+        brand: r.BrandName || '',
+        pkgKind: r.PackageKind,
+        pkgCount: r.PackageCount,
+        shipMark: r.ShippingMark || '',
+        seal: r.CommercialSeal || ''
+      };
+    });
+    renderGoodsItems(items.length, items);
+    document.getElementById('csv-modal').classList.remove('active');
+    updateDutyEstimate();
+    alert('Imported ' + items.length + ' items from CSV.');
+  });
+
+  // ==================== CSV EXPORT ====================
+  document.getElementById('export-last-csv-btn').addEventListener('click', function() {
+    var last = JSON.parse(localStorage.getItem('emcs_last_submission') || 'null');
+    if (!last) { alert('No submission to export.'); return; }
+    var headers = ['MovementID', 'ARC', 'LRN', 'ConsignorERN', 'ConsigneeERN', 'ProductCode', 'Quantity', 'DispatchDate', 'Status'];
+    var rows = [headers.join(',')];
+    last.items.forEach(function(it) {
+      rows.push([last.movementId, last.arc, last.lrn, last.consignorErn, last.consigneeErn, it.productCode, it.qty, last.date, 'Submitted'].map(function(v) { return '"' + (v || '') + '"'; }).join(','));
+    });
+    var blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'emcs-submission-' + last.lrn + '.csv';
+    a.click();
+  });
+
   // ==================== MONITOR DASHBOARD ====================
   async function fetchMonitorData() {
     if (!localStorage.getItem('hmrc_token')) return;
     document.getElementById('mon-loading').style.display = 'block';
     document.getElementById('mon-table').style.display = 'none';
-    
     var h = await getHeaders();
     var ern = localStorage.getItem('last_ern') || 'GBWK002281023';
     try {
@@ -500,34 +1105,39 @@ document.addEventListener('DOMContentLoaded', function() {
       window.monitorData = JSON.parse(text);
       if (!Array.isArray(window.monitorData)) window.monitorData = [];
     } catch(e) { window.monitorData = []; }
-    
     document.getElementById('mon-loading').style.display = 'none';
     applyMonitorFilters();
   }
 
   function applyMonitorFilters() {
     var direction = document.getElementById('mon-direction').value;
-    var status = document.getElementById('mon-status').value;
     var myErn = localStorage.getItem('last_ern') || 'GBWK002281023';
     var today = new Date();
+    var dispFrom = document.getElementById('mon-disp-from').value;
+    var dispTo = document.getElementById('mon-disp-to').value;
 
     var filtered = window.monitorData.filter(function(m) {
-      if (direction === 'in' && m.consignorId === myErn) return false;
-      if (direction === 'out' && m.consigneeId === myErn) return false;
-      // Note: Advanced filtering (dates, EPC) requires fetching single movement details. 
-      // For speed, we filter by what the summary list provides.
+      var isOut = m.consignorId === myErn;
+      if (direction === 'in' && isOut) return false;
+      if (direction === 'out' && !isOut) return false;
+      if (dispFrom) {
+        var d = m.lastUpdated ? m.lastUpdated.split('T')[0] : '';
+        if (d < dispFrom) return false;
+      }
+      if (dispTo) {
+        var d = m.lastUpdated ? m.lastUpdated.split('T')[0] : '';
+        if (d > dispTo) return false;
+      }
       return true;
     });
 
     var tbody = document.getElementById('mon-tbody');
     tbody.innerHTML = '';
-    
     if (filtered.length === 0) {
       document.getElementById('mon-table').style.display = 'none';
       document.getElementById('mon-no-results').style.display = 'block';
       return;
     }
-
     document.getElementById('mon-table').style.display = 'table';
     document.getElementById('mon-no-results').style.display = 'none';
 
@@ -535,30 +1145,24 @@ document.addEventListener('DOMContentLoaded', function() {
       var isOut = m.consignorId === myErn;
       var counterparty = isOut ? m.consigneeId : m.consignorId;
       var directionText = isOut ? 'Goods out' : 'Goods in';
-      
       var dispatchDate = m.lastUpdated ? new Date(m.lastUpdated) : new Date();
       var daysOpen = Math.floor((today - dispatchDate) / (1000 * 60 * 60 * 24));
-      var isOverdue = daysOpen > 5; 
-
-      var statusText = 'Open'; // Simplified for summary view
+      var isOverdue = daysOpen > 5;
       var rowClass = isOverdue ? 'warning-row' : '';
       var daysClass = isOverdue ? 'warning-text' : '';
 
       var tr = document.createElement('tr');
       tr.className = rowClass;
-      tr.innerHTML = `
-        <td><div style="font-weight:bold;">${m.administrativeReferenceCode || 'Pending ARC'}</div><div style="font-size:11px; color:#666;">${m.localReferenceNumber}</div></td>
-        <td>${directionText}</td>
-        <td>${counterparty}</td>
-        <td>Mixed</td>
-        <td>${m.lastUpdated ? m.lastUpdated.split('T')[0] : '-'}</td>
-        <td><span class="status-badge status-open">${statusText}</span></td>
-        <td style="text-align:center;" class="${daysClass}">${daysOpen} days</td>
-        <td style="text-align:center;">
-          <button class="btn-small" onclick="viewMovement('${m.movementId}')">View</button>
-          ${isOut ? `<button class="btn-small btn-red" onclick="cancelMovement('${m.movementId}', '${m.administrativeReferenceCode || ''}')">Cancel</button>` : ''}
-        </td>
-      `;
+      tr.innerHTML = '<td><div style="font-weight:bold;">' + (m.administrativeReferenceCode || 'Pending ARC') + '</div><div style="font-size:11px; color:#666;">' + m.localReferenceNumber + '</div></td>' +
+        '<td>' + directionText + '</td>' +
+        '<td>' + counterparty + '</td>' +
+        '<td>' + (m.lastUpdated ? m.lastUpdated.split('T')[0] : '-') + '</td>' +
+        '<td><span class="status-badge status-open">Open</span></td>' +
+        '<td style="text-align:center;" class="' + daysClass + '">' + daysOpen + ' days</td>' +
+        '<td style="text-align:center;">' +
+          '<button class="btn-small" onclick="viewMovement(\'' + m.movementId + '\')">View</button>' +
+          (isOut ? '<button class="btn-small btn-red" onclick="cancelMovement(\'' + m.movementId + '\', \'' + (m.administrativeReferenceCode || '') + '\')">Cancel</button>' : '') +
+        '</td>';
       tbody.appendChild(tr);
     });
   }
@@ -579,109 +1183,114 @@ document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById('mon-apply-filters').addEventListener('click', applyMonitorFilters);
   document.getElementById('mon-clear-filters').addEventListener('click', function() {
-    document.getElementById('mon-direction').value = '';
-    document.getElementById('mon-status').value = '';
+    ['mon-direction', 'mon-status', 'mon-epc', 'mon-disp-from', 'mon-disp-to'].forEach(function(id) {
+      document.getElementById(id).value = '';
+    });
     applyMonitorFilters();
   });
   document.getElementById('mon-refresh').addEventListener('click', fetchMonitorData);
 
-  // ==================== ENHANCED GOODS ITEMS ====================
-  window.generateItemFields = function() {
-    var count = parseInt(document.getElementById('s-item-count').value) || 1;
-    var container = document.getElementById('goods-items-container');
-    container.innerHTML = '';
-
-    for (var i = 1; i <= count; i++) {
-      container.innerHTML += `
-        <div class="item-field" data-item="${i}">
-          <h4>Item ${i} <button type="button" class="btn-red btn-small" style="float:right;" onclick="this.parentElement.parentElement.remove()">Remove</button></h4>
-          <div class="form-grid">
-            <div class="field"><label>Excise Product Code <span class="required-asterisk">*</span></label><input type="text" class="s-product-code" value="B000" pattern="^[A-Z][0-9]{3}$" maxlength="4" required></div>
-            <div class="field"><label>CN Code <span class="required-asterisk">*</span></label><input type="text" class="s-cn-code" value="22030001" pattern="^\\d{8}$" maxlength="8" required></div>
-            <div class="field"><label>Quantity <span class="required-asterisk">*</span></label><input type="number" class="s-qty" value="2000" step="0.001" required></div>
-            <div class="field">
-              <label>Bulk Movement</label>
-              <input type="checkbox" class="s-bulk" style="width:auto; margin-top:10px;" onchange="var p=this.parentElement; if(this.checked){ p.querySelector('.s-net-weight').value=p.querySelector('.s-weight').value; p.querySelector('.s-net-weight').disabled=true; } else { p.querySelector('.s-net-weight').disabled=false; }">
-            </div>
-            <div class="field"><label>Gross Mass (kg) <span class="required-asterisk">*</span></label><input type="number" class="s-weight" value="20000" step="0.000001" required></div>
-            <div class="field"><label>Net Mass (kg) <span class="required-asterisk">*</span></label><input type="number" class="s-net-weight" value="19999" step="0.000001" required></div>
-            <div class="field"><label>Commercial Description <span class="required-asterisk">*</span></label><input type="text" class="s-comm-desc" value="Standard Lager" required></div>
-            <div class="field"><label>Brand Name</label><input type="text" class="s-brand" value="TestBrand"></div>
-            <div class="field"><label>Kind of Packages <span class="required-asterisk">*</span></label>
-              <select class="s-package-kind" required>
-                <option value="BA">BA - Barrel</option>
-                <option value="BX">BX - Box</option>
-                <option value="CT">CT - Carton</option>
-                <option value="DR">DR - Drum</option>
-                <option value="PK">PK - Package</option>
-                <option value="RL">RL - Reel</option>
-                <option value="UN">UN - Unit</option>
-              </select>
-            </div>
-            <div class="field"><label>Number of Packages <span class="required-asterisk">*</span></label><input type="number" class="s-package-count" value="2" min="0" required></div>
-            <div class="field"><label>Shipping Mark</label><input type="text" class="s-ship-mark" placeholder="Optional"></div>
-            <div class="field"><label>Commercial Seal ID</label><input type="text" class="s-seal" placeholder="Optional"></div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label style="display:flex; align-items:center; gap:8px;">
-                <input type="checkbox" class="s-small-producer" style="width:auto;"> Independent Small Producer Declaration
-              </label>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-  };
-  window.generateItemFields(); // Init
-
-  document.getElementById('add-goods-item-btn').addEventListener('click', function() {
-    var count = parseInt(document.getElementById('s-item-count').value) + 1;
-    document.getElementById('s-item-count').value = count;
-    window.generateItemFields();
-  });
-
-  // ==================== SUBMIT MOVEMENT (Simplified for brevity, uses enhanced fields) ====================
+  // ==================== SUBMIT MOVEMENT ====================
   document.getElementById('submit-movement-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Login to HMRC first!'); return; }
     var h = await getHeaders();
     var uniqueLrn = document.getElementById('s-lrn').value || ('LRN' + Date.now().toString().slice(-10));
-    
+    var submitDate = new Date().toISOString().slice(0, 10);
+    var prepareTime = new Date().toISOString().slice(11, 19);
+
     var bodyEadEsadXml = '';
+    var itemSummary = [];
     document.querySelectorAll('#goods-items-container .item-field').forEach(function(item, idx) {
       var bulk = item.querySelector('.s-bulk').checked;
       var netW = bulk ? item.querySelector('.s-weight').value : item.querySelector('.s-net-weight').value;
-      
+      var pc = item.querySelector('.s-product-code').value;
+      var qty = item.querySelector('.s-qty').value;
+      var abv = item.querySelector('.s-abv').value;
+      var commDesc = item.querySelector('.s-comm-desc').value;
+      var brand = item.querySelector('.s-brand').value;
+      var shipMark = item.querySelector('.s-ship-mark').value;
+      var seal = item.querySelector('.s-seal').value;
+
       bodyEadEsadXml += '<urn:BodyEadEsad>' +
         '<urn:BodyRecordUniqueReference>' + (idx + 1) + '</urn:BodyRecordUniqueReference>' +
-        '<urn:ExciseProductCode>' + item.querySelector('.s-product-code').value + '</urn:ExciseProductCode>' +
+        '<urn:ExciseProductCode>' + pc + '</urn:ExciseProductCode>' +
         '<urn:CnCode>' + item.querySelector('.s-cn-code').value + '</urn:CnCode>' +
-        '<urn:Quantity>' + item.querySelector('.s-qty').value + '</urn:Quantity>' +
+        '<urn:Quantity>' + qty + '</urn:Quantity>' +
         '<urn:GrossMass>' + item.querySelector('.s-weight').value + '</urn:GrossMass>' +
         '<urn:NetMass>' + netW + '</urn:NetMass>' +
+        (abv ? '<urn:AlcoholicStrengthByVolumeInPercentage>' + abv + '</urn:AlcoholicStrengthByVolumeInPercentage>' : '') +
+        '<urn:FiscalMarkUsedFlag>0</urn:FiscalMarkUsedFlag>' +
+        (commDesc ? '<urn:CommercialDescription>' + commDesc + '</urn:CommercialDescription>' : '') +
+        (brand ? '<urn:BrandName>' + brand + '</urn:BrandName>' : '') +
         '<urn:Package><urn:KindOfPackages>' + item.querySelector('.s-package-kind').value + '</urn:KindOfPackages>' +
-        '<urn:NumberOfPackages>' + item.querySelector('.s-package-count').value + '</urn:NumberOfPackages></urn:Package>' +
-        (item.querySelector('.s-comm-desc').value ? '<urn:CommercialDescription>' + item.querySelector('.s-comm-desc').value + '</urn:CommercialDescription>' : '') +
-        (item.querySelector('.s-brand').value ? '<urn:BrandName>' + item.querySelector('.s-brand').value + '</urn:BrandName>' : '') +
+        '<urn:NumberOfPackages>' + item.querySelector('.s-package-count').value + '</urn:NumberOfPackages>' +
+        (shipMark ? '<urn:ShippingMarks>' + shipMark + '</urn:ShippingMarks>' : '') +
+        '</urn:Package>' +
         '</urn:BodyEadEsad>';
+      itemSummary.push({ productCode: pc, qty: qty });
     });
 
     var xml = '<urn:IE815 xmlns:urn="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:IE815:V3.23" xmlns:urn1="' + TMS_NS + '">' +
       '<urn:Header><urn1:MessageSender>NDEA.GB</urn1:MessageSender><urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>' +
-      '<urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation><urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation>' +
+      '<urn1:DateOfPreparation>' + submitDate + '</urn1:DateOfPreparation><urn1:TimeOfPreparation>' + prepareTime + '</urn1:TimeOfPreparation>' +
       '<urn1:MessageIdentifier>' + uniqueLrn + '</urn1:MessageIdentifier><urn1:CorrelationIdentifier>PORTAL' + uniqueLrn + '</urn1:CorrelationIdentifier></urn:Header>' +
       '<urn:Body><urn:SubmittedDraftOfEADESAD><urn:Attributes><urn:SubmissionMessageType>1</urn:SubmissionMessageType></urn:Attributes>' +
-      '<urn:ConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName></urn:ConsigneeTrader>' +
-      '<urn:ConsignorTrader language="en"><urn:TraderExciseNumber>' + document.getElementById('s-consignor-ern').value + '</urn:TraderExciseNumber><urn:TraderName>' + document.getElementById('s-consignor-name').value + '</urn:TraderName></urn:ConsignorTrader>' +
-      '<urn:DeliveryPlaceTrader language="en"><urn:Traderid>' + document.getElementById('s-delivery-trader-id').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('s-delivery-name').value + '</urn:TraderName></urn:DeliveryPlaceTrader>' +
+      '<urn:ConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid>' +
+      '<urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName>' +
+      '<urn:StreetName>' + document.getElementById('s-consignee-street').value + '</urn:StreetName>' +
+      xmlField('StreetNumber', document.getElementById('s-consignee-street-num').value) +
+      '<urn:Postcode>' + document.getElementById('s-consignee-postcode').value + '</urn:Postcode>' +
+      '<urn:City>' + document.getElementById('s-consignee-city').value + '</urn:City></urn:ConsigneeTrader>' +
+      '<urn:ConsignorTrader language="en"><urn:TraderExciseNumber>' + document.getElementById('s-consignor-ern').value + '</urn:TraderExciseNumber>' +
+      '<urn:TraderName>' + document.getElementById('s-consignor-name').value + '</urn:TraderName>' +
+      '<urn:StreetName>' + document.getElementById('s-consignor-street').value + '</urn:StreetName>' +
+      xmlField('StreetNumber', document.getElementById('s-consignor-street-num').value) +
+      '<urn:Postcode>' + document.getElementById('s-consignor-postcode').value + '</urn:Postcode>' +
+      '<urn:City>' + document.getElementById('s-consignor-city').value + '</urn:City></urn:ConsignorTrader>';
+
+    var dw = document.getElementById('s-dispatch-warehouse').value.trim();
+    if (dw) {
+      xml += '<urn:PlaceOfDispatchTrader language="en"><urn:ReferenceOfTaxWarehouse>' + dw + '</urn:ReferenceOfTaxWarehouse>' +
+        xmlField('TraderName', document.getElementById('s-dispatch-name').value) +
+        xmlField('StreetName', document.getElementById('s-dispatch-street').value) +
+        xmlField('StreetNumber', document.getElementById('s-dispatch-street-num').value) +
+        xmlField('Postcode', document.getElementById('s-dispatch-postcode').value) +
+        xmlField('City', document.getElementById('s-dispatch-city').value) +
+        '</urn:PlaceOfDispatchTrader>';
+    }
+
+    xml += '<urn:DeliveryPlaceTrader language="en"><urn:Traderid>' + document.getElementById('s-delivery-trader-id').value + '</urn:Traderid>' +
+      '<urn:TraderName>' + document.getElementById('s-delivery-name').value + '</urn:TraderName>' +
+      '<urn:StreetName>' + document.getElementById('s-delivery-street').value + '</urn:StreetName>' +
+      xmlField('StreetNumber', document.getElementById('s-delivery-street-num').value) +
+      '<urn:Postcode>' + document.getElementById('s-delivery-postcode').value + '</urn:Postcode>' +
+      '<urn:City>' + document.getElementById('s-delivery-city').value + '</urn:City></urn:DeliveryPlaceTrader>' +
       '<urn:CompetentAuthorityDispatchOffice><urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber></urn:CompetentAuthorityDispatchOffice>' +
-      '<urn:FirstTransporterTrader language="en"><urn:VatNumber>' + document.getElementById('s-transporter-vat').value + '</urn:VatNumber><urn:TraderName>' + document.getElementById('s-transporter-name').value + '</urn:TraderName></urn:FirstTransporterTrader>' +
-      '<urn:HeaderEadEsad><urn:DestinationTypeCode>' + document.getElementById('s-dest-type').value + '</urn:DestinationTypeCode><urn:JourneyTime>' + document.getElementById('s-journey-time').value + '</urn:JourneyTime><urn:TransportArrangement>' + document.getElementById('s-transport-arrangement').value + '</urn:TransportArrangement></urn:HeaderEadEsad>' +
+      '<urn:FirstTransporterTrader language="en"><urn:VatNumber>' + document.getElementById('s-transporter-vat').value + '</urn:VatNumber>' +
+      '<urn:TraderName>' + document.getElementById('s-transporter-name').value + '</urn:TraderName>' +
+      '<urn:StreetName>Logistics Way</urn:StreetName><urn:StreetNumber>5</urn:StreetNumber>' +
+      '<urn:Postcode>' + 'FR5 4RN' + '</urn:Postcode>' +
+      '<urn:City>' + document.getElementById('s-transporter-city').value + '</urn:City></urn:FirstTransporterTrader>' +
+      '<urn:HeaderEadEsad><urn:DestinationTypeCode>' + document.getElementById('s-dest-type').value + '</urn:DestinationTypeCode>' +
+      '<urn:JourneyTime>' + document.getElementById('s-journey-time').value + '</urn:JourneyTime>' +
+      '<urn:TransportArrangement>' + document.getElementById('s-transport-arrangement').value + '</urn:TransportArrangement></urn:HeaderEadEsad>' +
       '<urn:TransportMode><urn:TransportModeCode>' + document.getElementById('s-transport-mode').value + '</urn:TransportModeCode></urn:TransportMode>' +
       '<urn:MovementGuarantee><urn:GuarantorTypeCode>' + document.getElementById('s-guarantor-type').value + '</urn:GuarantorTypeCode></urn:MovementGuarantee>' +
       bodyEadEsadXml +
-      '<urn:EadEsadDraft><urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber><urn:InvoiceNumber>' + document.getElementById('s-invoice-number').value + '</urn:InvoiceNumber>' +
-      '<urn:InvoiceDate>' + document.getElementById('s-invoice-date').value + '</urn:InvoiceDate><urn:OriginTypeCode>' + document.getElementById('s-origin-type').value + '</urn:OriginTypeCode>' +
-      '<urn:DateOfDispatch>' + document.getElementById('s-date').value + '</urn:DateOfDispatch><urn:TimeOfDispatch>' + document.getElementById('s-time').value + ':00</urn:TimeOfDispatch></urn:EadEsadDraft>' +
-      '</urn:SubmittedDraftOfEADESAD></urn:Body></urn:IE815>';
+      '<urn:EadEsadDraft><urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>' +
+      '<urn:InvoiceNumber>' + document.getElementById('s-invoice-number').value + '</urn:InvoiceNumber>' +
+      '<urn:InvoiceDate>' + document.getElementById('s-invoice-date').value + '</urn:InvoiceDate>' +
+      '<urn:OriginTypeCode>' + document.getElementById('s-origin-type').value + '</urn:OriginTypeCode>' +
+      '<urn:DateOfDispatch>' + document.getElementById('s-date').value + '</urn:DateOfDispatch>' +
+      '<urn:TimeOfDispatch>' + document.getElementById('s-time').value + ':00</urn:TimeOfDispatch></urn:EadEsadDraft>';
+
+    document.querySelectorAll('.transport-unit-field').forEach(function(unit) {
+      var uc = unit.querySelector('.s-transport-unit-code').value;
+      var ui = unit.querySelector('.s-identity-transport').value;
+      if (uc && ui) xml += '<urn:TransportDetails><urn:TransportUnitCode>' + uc + '</urn:TransportUnitCode><urn:IdentityOfTransportUnits>' + ui + '</urn:IdentityOfTransportUnits></urn:TransportDetails>';
+    });
+
+    xml += '</urn:SubmittedDraftOfEADESAD></urn:Body></urn:IE815>';
 
     var res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { method: 'POST', headers: Object.assign({}, h, { 'Content-Type': 'application/xml' }), body: xml });
     var responseText = await res.text();
@@ -693,50 +1302,226 @@ document.addEventListener('DOMContentLoaded', function() {
         if (parsed.movementId) {
           localStorage.setItem('last_movement_id', parsed.movementId);
           localStorage.setItem('last_ern', document.getElementById('s-consignor-ern').value);
+          localStorage.setItem('last_arc', parsed.administrativeReferenceCode || '');
+          localStorage.setItem('last_lrn', parsed.localReferenceNumber || uniqueLrn);
+
+          // Save to recent
+          addRecentMovement({
+            lrn: parsed.localReferenceNumber || uniqueLrn,
+            date: submitDate,
+            consignee: document.getElementById('s-consignee-name').value,
+            product: itemSummary.map(function(i) { return i.productCode; }).join(', '),
+            formData: captureFormData()
+          });
+
+          // Save for CSV export
+          localStorage.setItem('emcs_last_submission', JSON.stringify({
+            movementId: parsed.movementId,
+            arc: parsed.administrativeReferenceCode || '',
+            lrn: parsed.localReferenceNumber || uniqueLrn,
+            consignorErn: document.getElementById('s-consignor-ern').value,
+            consigneeErn: document.getElementById('s-consignee-ern').value,
+            date: submitDate,
+            items: itemSummary
+          }));
+          document.getElementById('export-last-csv-btn').style.display = 'inline-block';
         }
-      } catch(e) {}
+      } catch(e) { console.error(e); }
     }
   });
 
-  // ==================== OTHER TABS (Stubs for brevity, keep your existing logic) ====================
+  // ==================== TAB 3: GET SINGLE MOVEMENT ====================
   document.getElementById('get-single-movement-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
     var h = await getHeaders();
-    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + document.getElementById('gsm-id').value, { headers: h });
+    var movId = document.getElementById('gsm-id').value || localStorage.getItem('last_movement_id');
+    if (!movId) { alert('Movement ID required'); return; }
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId), { headers: h });
     document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
+  // ==================== TAB 4: SUBMIT MESSAGE ====================
   document.getElementById('sm-type').addEventListener('change', function() {
     var container = document.getElementById('msg-specific-fields');
-    if (this.value === 'IE837') {
-      container.innerHTML = '<div class="form-grid"><div class="field"><label>Explanation Code</label><select id="msg-explanation-code"><option value="6">6 - Other</option></select></div><div class="field"><label>Info</label><input type="text" id="msg-delay-info" value="Accident on M5"></div></div>';
-    } else if (this.value === 'IE810') {
-      container.innerHTML = '<div class="form-grid"><div class="field"><label>Reason</label><select id="msg-cancel-reason"><option value="3">3 - Cancelled before dispatch</option></select></div></div>';
-    } else {
-      container.innerHTML = '<p>Fields for ' + this.value + ' loaded.</p>';
+    var msgType = this.value;
+    var html = '<h3 style="margin-top:20px;">Message-Specific Fields</h3><div class="form-grid">';
+    if (msgType === 'IE810') {
+      html += '<div class="field"><label>Cancellation Reason</label><select id="msg-cancel-reason"><option value="1">1 - Duplicate</option><option value="2">2 - Erroneous</option><option value="3" selected>3 - Before dispatch</option><option value="4">4 - During transit</option></select></div>';
+    } else if (msgType === 'IE818') {
+      html += '<div class="field"><label>Date of Arrival</label><input type="date" id="msg-arrival-date" value="' + today + '"></div>';
+      html += '<div class="field"><label>Global Conclusion</label><select id="msg-receipt-conclusion"><option value="1">1 - Acceptable</option><option value="2">2 - Unacceptable with reservations</option><option value="3">3 - Refusal</option></select></div>';
+    } else if (msgType === 'IE813') {
+      html += '<div class="field"><label>New Destination Type</label><select id="msg-dest-type"><option value="1">1 - Tax warehouse</option><option value="2">2 - Registered consignee</option></select></div>';
+      html += '<div class="field"><label>New Consignee ERN</label><input type="text" id="msg-new-consignee" value="GBWK240176600"></div>';
+      html += '<div class="field"><label>New Consignee Name</label><input type="text" id="msg-new-consignee-name" value="New Consignee Ltd"></div>';
+    } else if (msgType === 'IE819') {
+      html += '<div class="field"><label>Date of Alert</label><input type="date" id="msg-alert-date" value="' + today + '"></div>';
+      html += '<div class="field"><label>Rejected Flag</label><select id="msg-rejected-flag"><option value="0">0 - No</option><option value="1" selected>1 - Yes</option></select></div>';
+      html += '<div class="field"><label>Reason Code</label><select id="msg-rejection-reason"><option value="1">1 - Other</option><option value="2" selected>2 - Quantity discrepancy</option></select></div>';
+      html += '<div class="field"><label>Info</label><input type="text" id="msg-rejection-info" value="Goods rejected"></div>';
+    } else if (msgType === 'IE837') {
+      html += '<div class="field"><label>Submitter Type</label><select id="msg-submitter-type"><option value="1" selected>1 - Consignor</option><option value="2">2 - Consignee</option></select></div>';
+      html += '<div class="field"><label>Explanation Code</label><select id="msg-explanation-code"><option value="1">1 - Transport problems</option><option value="2">2 - Force majeure</option><option value="6" selected>6 - Other</option></select></div>';
+      html += '<div class="field"><label>Info</label><input type="text" id="msg-delay-info" value="Accident on M5"></div>';
+    } else if (msgType === 'IE871') {
+      html += '<div class="field"><label>Date of Analysis</label><input type="date" id="msg-analysis-date" value="' + today + '"></div>';
+      html += '<div class="field"><label>Global Explanation</label><input type="text" id="msg-shortage-explanation" value="Courier drank the wine"></div>';
     }
+    html += '</div>';
+    container.innerHTML = html;
   });
   document.getElementById('sm-type').dispatchEvent(new Event('change'));
 
   document.getElementById('submit-message-btn').addEventListener('click', async function() {
-    var movId = document.getElementById('sm-mov-id').value;
-    var arc = document.getElementById('sm-arc').value;
-    if (!movId || !arc) { alert('Movement ID and ARC required'); return; }
+    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
+    var movId = document.getElementById('sm-mov-id').value || localStorage.getItem('last_movement_id');
+    var arc = document.getElementById('sm-arc').value || localStorage.getItem('last_arc');
+    if (!movId) { alert('Movement ID required'); return; }
+    if (!arc) { alert('ARC required'); return; }
+
     var h = await getHeaders();
     var msgType = document.getElementById('sm-type').value;
-    var bodyXml = msgType === 'IE810' ? '<urn:CancellationOfEAD><urn:ExciseMovementEad><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode></urn:ExciseMovementEad><urn:Cancellation><urn:CancellationReasonCode>' + (document.getElementById('msg-cancel-reason')?.value || '3') + '</urn:CancellationReasonCode></urn:Cancellation></urn:CancellationOfEAD>' :
-                  '<urn:ExplanationOnDelayForDelivery><urn:Attributes><urn:ExplanationCode>' + (document.getElementById('msg-explanation-code')?.value || '6') + '</urn:ExplanationCode><urn:ComplementaryInformation language="en">' + (document.getElementById('msg-delay-info')?.value || '') + '</urn:ComplementaryInformation></urn:Attributes><urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode></urn:ExciseMovement></urn:ExplanationOnDelayForDelivery>';
-    
-    var xml = '<urn:' + msgType + ' xmlns:urn="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:' + msgType + ':V3.23" xmlns:urn1="' + TMS_NS + '"><urn:Header><urn1:MessageSender>NDEA.GB</urn1:MessageSender><urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient><urn1:DateOfPreparation>' + today + '</urn1:DateOfPreparation><urn1:TimeOfPreparation>12:00:00</urn1:TimeOfPreparation><urn1:MessageIdentifier>MSG' + Date.now() + '</urn1:MessageIdentifier></urn:Header><urn:Body>' + bodyXml + '</urn:Body></urn:' + msgType + '>';
-    
+    var seq = document.getElementById('sm-seq').value || '1';
+    var msgId = document.getElementById('sm-msgid').value || ('MSG' + Date.now());
+    var submitDate = new Date().toISOString().slice(0, 10);
+    var prepareTime = new Date().toISOString().slice(11, 19);
+    var namespace = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:' + msgType + ':V3.23';
+    var bodyXml = '';
+
+    if (msgType === 'IE810') {
+      var reason = document.getElementById('msg-cancel-reason').value;
+      bodyXml = '<urn:CancellationOfEAD><urn:Attributes><urn:DateAndTimeOfValidationOfCancellation>' + prepareTime + '</urn:DateAndTimeOfValidationOfCancellation></urn:Attributes>' +
+        '<urn:ExciseMovementEad><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode></urn:ExciseMovementEad>' +
+        '<urn:Cancellation><urn:CancellationReasonCode>' + reason + '</urn:CancellationReasonCode></urn:Cancellation></urn:CancellationOfEAD>';
+    } else if (msgType === 'IE818') {
+      var arrivalDate = document.getElementById('msg-arrival-date').value;
+      var conclusion = document.getElementById('msg-receipt-conclusion').value;
+      bodyXml = '<urn:AcceptedOrRejectedReportOfReceiptExport><urn:Attributes><urn:DateAndTimeOfValidationOfReportOfReceiptExport>' + prepareTime + '</urn:DateAndTimeOfValidationOfReportOfReceiptExport></urn:Attributes>' +
+        '<urn:ConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName></urn:ConsigneeTrader>' +
+        '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
+        '<urn:DestinationOffice><urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber></urn:DestinationOffice>' +
+        '<urn:ReportOfReceiptExport><urn:DateOfArrivalOfExciseProducts>' + arrivalDate + '</urn:DateOfArrivalOfExciseProducts><urn:GlobalConclusionOfReceipt>' + conclusion + '</urn:GlobalConclusionOfReceipt></urn:ReportOfReceiptExport>' +
+        '</urn:AcceptedOrRejectedReportOfReceiptExport>';
+    } else if (msgType === 'IE837') {
+      var submitterType = document.getElementById('msg-submitter-type').value;
+      var submitterId = submitterType === '1' ? document.getElementById('s-consignor-ern').value : document.getElementById('s-consignee-ern').value;
+      bodyXml = '<urn:ExplanationOnDelayForDelivery><urn:Attributes>' +
+        '<urn:SubmitterIdentification>' + submitterId + '</urn:SubmitterIdentification>' +
+        '<urn:SubmitterType>' + submitterType + '</urn:SubmitterType>' +
+        '<urn:ExplanationCode>' + document.getElementById('msg-explanation-code').value + '</urn:ExplanationCode>' +
+        '<urn:ComplementaryInformation language="en">' + document.getElementById('msg-delay-info').value + '</urn:ComplementaryInformation>' +
+        '<urn:MessageRole>1</urn:MessageRole></urn:Attributes>' +
+        '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
+        '</urn:ExplanationOnDelayForDelivery>';
+    } else if (msgType === 'IE871') {
+      bodyXml = '<urn:ExplanationOnReasonForShortage><urn:Attributes><urn:SubmitterType>1</urn:SubmitterType>' +
+        '<urn:DateAndTimeOfValidationOfExplanationOnShortage>' + prepareTime + '</urn:DateAndTimeOfValidationOfExplanationOnShortage></urn:Attributes>' +
+        '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
+        '<urn:ConsignorTrader language="en"><urn:TraderExciseNumber>' + document.getElementById('s-consignor-ern').value + '</urn:TraderExciseNumber><urn:TraderName>' + document.getElementById('s-consignor-name').value + '</urn:TraderName></urn:ConsignorTrader>' +
+        '<urn:Analysis><urn:DateOfAnalysis>' + document.getElementById('msg-analysis-date').value + '</urn:DateOfAnalysis><urn:GlobalExplanation language="en">' + document.getElementById('msg-shortage-explanation').value + '</urn:GlobalExplanation></urn:Analysis>' +
+        '</urn:ExplanationOnReasonForShortage>';
+    } else {
+      alert('Message type ' + msgType + ' not yet fully implemented in Sprint 2. Please use existing logic.');
+      return;
+    }
+
+    var xml = '<urn:' + msgType + ' xmlns:urn="' + namespace + '" xmlns:urn1="' + TMS_NS + '"><urn:Header>' +
+      '<urn1:MessageSender>NDEA.GB</urn1:MessageSender><urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>' +
+      '<urn1:DateOfPreparation>' + submitDate + '</urn1:DateOfPreparation><urn1:TimeOfPreparation>' + prepareTime + '</urn1:TimeOfPreparation>' +
+      '<urn1:MessageIdentifier>' + msgId + '</urn1:MessageIdentifier><urn1:CorrelationIdentifier>PORTAL' + msgId + '</urn1:CorrelationIdentifier></urn:Header>' +
+      '<urn:Body>' + bodyXml + '</urn:Body></urn:' + msgType + '>';
+
     var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages', { method: 'POST', headers: Object.assign({}, h, { 'Content-Type': 'application/xml' }), body: xml });
     document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
-  // Stub for remaining tabs to prevent errors
-  ['get-messages-btn', 'get-single-message-btn', 'pre-validate-btn', 'subscribe-ern-btn', 'unsubscribe-ern-btn'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.addEventListener('click', function() { alert('Feature ready in full version. Use Monitor tab for daily tasks!'); });
+  // ==================== TAB 5: GET MESSAGES ====================
+  document.getElementById('get-messages-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
+    var h = await getHeaders();
+    var movId = document.getElementById('gmsg-id').value || localStorage.getItem('last_movement_id');
+    if (!movId) { alert('Movement ID required'); return; }
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages', { headers: h });
+    var text = await res.text();
+    try {
+      var msgs = JSON.parse(text);
+      if (Array.isArray(msgs)) {
+        msgs.forEach(function(m) { if (m.encodedMessage) { try { m.decodedXml = atob(m.encodedMessage); } catch(e) {} } });
+        document.getElementById('gmsg-output').innerText = JSON.stringify(msgs, null, 2);
+        return;
+      }
+    } catch(e) {}
+    document.getElementById('gmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
   });
+
+  // ==================== TAB 6: GET SINGLE MESSAGE ====================
+  document.getElementById('get-single-message-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
+    var h = await getHeaders();
+    h['Accept'] = 'application/vnd.hmrc.1.0+xml';
+    var movId = document.getElementById('gsmsg-mid').value || localStorage.getItem('last_movement_id');
+    var msgId = document.getElementById('gsmsg-id').value;
+    if (!movId || !msgId) { alert('Both IDs required'); return; }
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages/' + encodeURIComponent(msgId), { headers: h });
+    document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+  });
+
+  // ==================== TAB 7: PRE-VALIDATE ====================
+  document.getElementById('pre-validate-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
+    var h = await getHeaders();
+    h['x-correlation-id'] = crypto.randomUUID();
+    var ern = document.getElementById('pv-ern').value;
+    var group = document.getElementById('pv-group').value;
+    var p1 = document.getElementById('pv-p1').value;
+    var requestBody = {
+      exciseTraderValidationRequest: {
+        exciseTraderRequest: {
+          exciseRegistrationNumber: ern,
+          entityGroup: group,
+          validateProductAuthorisationRequest: [{ product: { exciseProductCode: p1 } }]
+        }
+      }
+    };
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', {
+      method: 'POST',
+      headers: Object.assign({}, h, { 'Content-Type': 'application/json' }),
+      body: JSON.stringify(requestBody)
+    });
+    document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+  });
+
+  // ==================== TAB 8: SUBSCRIBE ====================
+  document.getElementById('subscribe-ern-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
+    var h = await getHeaders();
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + document.getElementById('sub-ern').value + '/subscription', {
+      method: 'POST',
+      headers: Object.assign({}, h, { 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ boxId: '42c75e22-7bba-44f2-a610-4b4c3b262e3e' })
+    });
+    document.getElementById('sub-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+  });
+
+  // ==================== TAB 9: UNSUBSCRIBE ====================
+  document.getElementById('unsubscribe-ern-btn').addEventListener('click', async function() {
+    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
+    var h = await getHeaders();
+    var res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + document.getElementById('unsub-ern').value + '/subscription', { method: 'DELETE', headers: h });
+    var text = await res.text();
+    document.getElementById('unsub-output').innerText = res.status === 202 ? 'Successfully unsubscribed' : 'Status: ' + res.status + '\n\n' + text;
+  });
+
+  // Initial load
+  if (localStorage.getItem('last_movement_id')) {
+    ['gsm-id', 'sm-mov-id', 'gmsg-id', 'gsmsg-mid'].forEach(function(fid) {
+      var el = document.getElementById(fid);
+      if (el) el.value = localStorage.getItem('last_movement_id');
+    });
+  }
+  if (localStorage.getItem('last_arc')) {
+    document.getElementById('sm-arc').value = localStorage.getItem('last_arc');
+  }
 });
 </script>
 </body>
