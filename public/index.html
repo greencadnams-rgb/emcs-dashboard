@@ -17,13 +17,12 @@ button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #005ea5; 
 button:hover { background: #003d6b; }
 .btn-green { background: #00703c; } .btn-green:hover { background: #005a30; }
 .btn-red { background: #d4351c; } .btn-red:hover { background: #aa2a16; }
+.btn-orange { background: #ff9800; } .btn-orange:hover { background: #e68900; }
+.btn-purple { background: #6f42c1; } .btn-purple:hover { background: #5a32a3; }
 .btn-small { padding: 4px 10px; font-size: 12px; margin: 2px; }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
 input, select { padding: 8px 12px; border: 2px solid #b1b4b6; border-radius: 4px; font-size: 14px; width: 100%; }
 input:focus, select:focus { border-color: #005ea5; outline: none; }
-input.invalid, select.invalid { border-color: #d4351c; background: #fff5f5; }
-input.valid, select.valid { border-color: #00703c; }
-.validation-msg { font-size: 12px; color: #d4351c; margin-top: 2px; min-height: 16px; }
 pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; overflow-x: auto; max-height: 400px; font-size: 13px; white-space: pre-wrap; word-wrap: break-word; margin-top: 15px; }
 .success { color: #00703c; font-weight: bold; }
 .error { color: #d4351c; font-weight: bold; }
@@ -51,7 +50,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .transport-unit-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 15px; background: #f0f9ff; }
 .mode-indicator { padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; }
 .mode-test { background: #ff9800; color: white; }
-.mode-prod { background: #d32f2f; color: white; }
 .required-asterisk { color: #d4351c; font-weight: bold; }
 .section-optional { background: #f9f9f9; border-left: 3px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 .section-filter { background: #f0f4f8; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
@@ -59,19 +57,23 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 
 .monitor-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
 .monitor-table th { background: #005ea5; color: white; padding: 10px; text-align: left; position: sticky; top: 0; }
-.monitor-table td { padding: 10px; border-bottom: 1px solid #ddd; }
+.monitor-table td { padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; }
 .monitor-table tr:hover { background: #f9f9f9; }
-.status-badge { padding: 3px 8px; border-radius: 12px; color: white; font-size: 11px; font-weight: bold; }
+.status-badge { padding: 3px 8px; border-radius: 12px; color: white; font-size: 11px; font-weight: bold; display: inline-block; }
 .status-open { background: #005ea5; }
 .status-receipted { background: #00703c; }
 .status-cancelled { background: #d4351c; }
+.status-pending { background: #ff9800; }
 .warning-row { background-color: #fff5f5 !important; }
 .warning-text { color: #d4351c; font-weight: bold; }
+.arc-cell { font-family: monospace; font-size: 11px; }
+.arc-cell .arc-value { font-weight: bold; color: #00703c; }
+.arc-cell .pending { color: #ff9800; font-style: italic; }
+.arc-cell .lrn { color: #666; font-size: 10px; display: block; margin-top: 2px; }
 
 .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .item-actions { display: flex; gap: 5px; }
 
-/* IE818 Receipt Table - matches rest of design */
 .receipt-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
 .receipt-table th { background: #005ea5; color: white; padding: 8px; text-align: left; }
 .receipt-table td { padding: 8px; border-bottom: 1px solid #ddd; }
@@ -79,12 +81,49 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .receipt-table .shortage { background: #fff5f5; }
 .receipt-table .excess { background: #f0f9ff; }
 
-/* Profile chips */
 .profile-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .profile-chip { background: white; border: 1px solid #9c27b0; color: #9c27b0; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 .profile-chip:hover { background: #9c27b0; color: white; }
 .profile-chip.active { background: #9c27b0; color: white; }
 .profile-chip .del-prof { color: #ffeb3b; font-weight: bold; cursor: pointer; margin-left: 4px; }
+
+.loading-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #ccc; border-top-color: #005ea5; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 5px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Magic LRN cheat sheet */
+.cheat-sheet { background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin-top: 15px; font-size: 13px; }
+.cheat-sheet h3 { margin-bottom: 8px; margin-top: 0; border: none; color: #856404; }
+.cheat-sheet table { width: 100%; border-collapse: collapse; }
+.cheat-sheet th, .cheat-sheet td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
+.cheat-sheet th { background: #ffeeba; }
+
+/* Parsed data cards */
+.parsed-container { margin-top: 15px; }
+.parsed-card { background: white; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.parsed-card h4 { color: #005ea5; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+.parsed-card .type-badge { background: #005ea5; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+.parsed-card .type-badge.ie801 { background: #00703c; }
+.parsed-card .type-badge.ie810 { background: #d4351c; }
+.parsed-card .type-badge.ie818 { background: #1976d2; }
+.parsed-card .type-badge.ie837 { background: #ff9800; }
+.parsed-card .type-badge.ie813 { background: #6f42c1; }
+.parsed-card .type-badge.ie819 { background: #e91e63; }
+.parsed-card .type-badge.ie871 { background: #795548; }
+.parsed-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.parsed-field { padding: 8px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #005ea5; }
+.parsed-field .label { font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
+.parsed-field .value { font-size: 14px; color: #333; margin-top: 3px; word-break: break-word; font-family: monospace; }
+.parsed-field .value.arc { color: #00703c; font-weight: bold; }
+.parsed-field .value.warn { color: #d4351c; }
+
+.raw-toggle { margin-top: 10px; }
+.raw-toggle summary { cursor: pointer; color: #005ea5; font-size: 12px; padding: 5px 0; }
+.raw-toggle summary:hover { text-decoration: underline; }
+.raw-toggle pre { margin-top: 8px; }
+
+.section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.view-toggle button { padding: 4px 10px; font-size: 12px; margin: 0 2px; }
+.view-toggle button.active { background: #00703c; }
 </style>
 </head>
 <body>
@@ -146,13 +185,14 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
             <div class="field"><label>Dispatched From</label><input type="date" id="mon-disp-from"></div>
             <div class="field"><label>Dispatched To</label><input type="date" id="mon-disp-to"></div>
           </div>
-          <div style="margin-top: 15px; display: flex; gap: 10px;">
+          <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
             <button id="mon-apply-filters" class="btn-green">Apply filters</button>
             <button id="mon-clear-filters" class="btn-red">Clear filters</button>
             <button id="mon-refresh" style="margin-left: auto;">🔄 Refresh Data</button>
+            <button id="mon-simulate-inbound" class="btn-purple">📥 Simulate Inbound Movement</button>
           </div>
         </div>
-        <div id="mon-loading" style="text-align: center; padding: 20px; display: none;">Loading movements...</div>
+        <div id="mon-loading" style="text-align: center; padding: 20px; display: none;"><span class="loading-spinner"></span>Loading movements...</div>
         <div id="mon-no-results" style="text-align: center; padding: 20px; display: none;">No movements match your filters.</div>
         <div style="overflow-x: auto;">
           <table id="mon-table" class="monitor-table" style="display: none;">
@@ -229,7 +269,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 
         <h3>Box 9: e-AD <span class="format-badge">Required</span></h3>
         <div class="form-grid">
-          <div class="field"><label>Local Reference Number (LRN)</label><input type="text" id="s-lrn" value="" maxlength="22" placeholder="Auto-generated"></div>
+          <div class="field"><label>Local Reference Number (LRN)</label><input type="text" id="s-lrn" value="" maxlength="22" placeholder="Auto-generated or use magic LRN"></div>
           <div class="field"><label>Invoice Number <span class="required-asterisk">*</span></label><input type="text" id="s-invoice-number" value="INV-2026-001" maxlength="35" required></div>
           <div class="field"><label>Invoice Date <span class="required-asterisk">*</span></label><input type="date" id="s-invoice-date" required></div>
           <div class="field"><label>Origin Type Code <span class="required-asterisk">*</span></label>
@@ -277,16 +317,45 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
         <button id="submit-movement-btn" style="margin-top:20px;">Submit Movement</button>
         <button id="export-last-csv-btn" class="btn-green" style="display:none;">📤 Export Last Submission to CSV</button>
         <pre id="submit-output">Waiting...</pre>
+
+        <div class="cheat-sheet">
+          <h3>🎯 Sandbox Magic LRNs (for testing specific scenarios)</h3>
+          <p style="margin-bottom:10px; font-size:12px;">Copy one of these into the LRN field above to trigger a specific sandbox response.</p>
+          <table>
+            <tr><th>LRN Value</th><th>Result</th></tr>
+            <tr><td><code>lrnie8156540856</code></td><td>202 Success + IE801 Acceptance (ARC issued)</td></tr>
+            <tr><td><code>lrnie8155973812</code></td><td>Success + IE818 Report of Receipt</td></tr>
+            <tr><td><code>lrnie8155743934</code></td><td>Success + IE810 Cancellation</td></tr>
+            <tr><td><code>lrnie8154968571</code></td><td>Success + IE813 Change of Destination</td></tr>
+            <tr><td><code>lrnie8153786132</code></td><td>Success + IE819 Rejection</td></tr>
+            <tr><td><code>lrnie8155755321</code></td><td>Success + IE807 Interrupted</td></tr>
+            <tr><td><code>lrnie8155755325</code></td><td>Success + IE803 Change Destination</td></tr>
+            <tr><td><code>lrnie8155755329</code></td><td>Success + IE839 Custom Rejection</td></tr>
+            <tr><td><code>lrnie8155755330</code></td><td>Success + IE881 Manual Closure</td></tr>
+            <tr><td><code>SendA400</code></td><td>400 Bad Request</td></tr>
+            <tr><td><code>SendA404</code></td><td>404 Not Found</td></tr>
+            <tr><td><code>SendA500</code></td><td>500 Server Error</td></tr>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- TAB 3: GET SINGLE MOVEMENT -->
+    <!-- TAB 3: GET SINGLE MOVEMENT (with parsed view) -->
     <div id="tab-get-movement" class="tab">
       <div class="card">
         <h2>Get Single Movement</h2>
         <div class="field"><label>Movement ID</label><input type="text" id="gsm-id" placeholder="Paste a Movement ID"></div>
         <button id="get-single-movement-btn" style="margin-top:15px;">Get Movement</button>
-        <pre id="gsm-output">Waiting...</pre>
+        
+        <div class="section-title" style="margin-top:20px;">
+          <h3 style="margin:0; border:none;">Parsed View</h3>
+        </div>
+        <div id="gsm-parsed" class="parsed-container"></div>
+        
+        <details class="raw-toggle">
+          <summary>📄 Show Raw JSON Response</summary>
+          <pre id="gsm-output">Waiting...</pre>
+        </details>
       </div>
     </div>
 
@@ -311,7 +380,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <div class="field"><label>Message Identifier</label><input type="text" id="sm-msgid" value="GB100000000302249"></div>
         </div>
 
-        <!-- IE818 Item-Level Section (neutral styling) -->
         <div id="ie818-section" style="display:none; margin-top:20px;">
           <h3>Item-Level Report of Receipt</h3>
           <p style="font-size:13px; color:#666; margin-bottom:10px;">Load the original movement's goods items to report per-item receipts, shortages, or excesses.</p>
@@ -325,17 +393,27 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
       </div>
     </div>
 
-    <!-- TAB 5: GET MESSAGES -->
+    <!-- TAB 5: GET MESSAGES (with parsed view) -->
     <div id="tab-get-messages" class="tab">
       <div class="card">
         <h2>Get All Messages</h2>
         <div class="field"><label>Movement ID</label><input type="text" id="gmsg-id" placeholder="Paste a Movement ID"></div>
         <button id="get-messages-btn" style="margin-top:15px;">Get Messages</button>
-        <pre id="gmsg-output">Waiting...</pre>
+        
+        <div class="section-title" style="margin-top:20px;">
+          <h3 style="margin:0; border:none;">Parsed Messages</h3>
+          <span id="gmsg-count" style="color:#666; font-size:13px;"></span>
+        </div>
+        <div id="gmsg-parsed" class="parsed-container"></div>
+        
+        <details class="raw-toggle">
+          <summary>📄 Show Raw JSON Response</summary>
+          <pre id="gmsg-output">Waiting...</pre>
+        </details>
       </div>
     </div>
 
-    <!-- TAB 6: GET SINGLE MESSAGE -->
+    <!-- TAB 6: GET SINGLE MESSAGE (with parsed view) -->
     <div id="tab-get-message" class="tab">
       <div class="card">
         <h2>Get Single Message</h2>
@@ -344,7 +422,16 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <div class="field"><label>Message ID</label><input type="text" id="gsmsg-id" placeholder="e.g. XI000002"></div>
         </div>
         <button id="get-single-message-btn" style="margin-top:15px;">Get Message</button>
-        <pre id="gsmsg-output">Waiting...</pre>
+        
+        <div class="section-title" style="margin-top:20px;">
+          <h3 style="margin:0; border:none;">Parsed Message</h3>
+        </div>
+        <div id="gsmsg-parsed" class="parsed-container"></div>
+        
+        <details class="raw-toggle">
+          <summary>📄 Show Raw XML Response</summary>
+          <pre id="gsmsg-output">Waiting...</pre>
+        </details>
       </div>
     </div>
 
@@ -360,7 +447,13 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <div class="field"><label>Product Code</label><input type="text" id="pv-p1" value="W200"></div>
         </div>
         <button id="pre-validate-btn" style="margin-top:15px;">Validate</button>
-        <pre id="pv-output">Waiting...</pre>
+        
+        <div id="pv-parsed" class="parsed-container" style="margin-top:15px;"></div>
+        
+        <details class="raw-toggle">
+          <summary>📄 Show Raw JSON Response</summary>
+          <pre id="pv-output">Waiting...</pre>
+        </details>
       </div>
     </div>
 
@@ -388,7 +481,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
     <div id="tab-profiles" class="tab">
       <div class="card">
         <h2>Manage Profiles</h2>
-        <p style="color:#666; font-size:13px; margin-bottom:15px;">Create multiple trader profiles (e.g., one for your warehouse role, one for your consignee role). Switch between them using the dropdown in the status bar.</p>
+        <p style="color:#666; font-size:13px; margin-bottom:15px;">Create multiple trader profiles. Switch between them using the dropdown in the status bar.</p>
         
         <div class="section-profile">
           <h3 style="margin-top:0; border:none; font-size:1em;">Create New Profile</h3>
@@ -426,6 +519,23 @@ document.addEventListener('DOMContentLoaded', function() {
   var TMS_NS = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.23';
   window.monitorData = [];
   window.ie818Items = [];
+
+  // Friendly names for message types
+  var MESSAGE_TYPE_NAMES = {
+    'IE801': 'Acceptance (ARC Issued)',
+    'IE802': 'Acceptance Rejected',
+    'IE803': 'Change of Destination',
+    'IE807': 'Movement Interrupted',
+    'IE810': 'Cancellation',
+    'IE813': 'Change of Destination Accepted',
+    'IE818': 'Report of Receipt',
+    'IE819': 'Alert or Rejection',
+    'IE837': 'Explanation of Delay',
+    'IE838': 'Delay Explanation Accepted',
+    'IE871': 'Reason for Shortage',
+    'IE881': 'Manual Closure',
+    'IE905': 'Control Report'
+  };
 
   var CN_CODES = {
     'B000': '22030001', 'W200': '22042142', 'W300': '22041011',
@@ -467,19 +577,216 @@ document.addEventListener('DOMContentLoaded', function() {
     }).join('');
   }
 
+  // ==================== PARSING HELPERS ====================
+  function escapeHtml(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function extractXmlValue(xml, tagName) {
+    if (!xml) return null;
+    // Try with namespace prefix first, then without
+    var patterns = [
+      new RegExp('<[^:>]+:' + tagName + '[^>]*>([^<]*)</[^:>]+:' + tagName + '>'),
+      new RegExp('<' + tagName + '[^>]*>([^<]*)</' + tagName + '>')
+    ];
+    for (var i = 0; i < patterns.length; i++) {
+      var match = xml.match(patterns[i]);
+      if (match) return match[1];
+    }
+    return null;
+  }
+
+  function extractAllXmlValues(xml, tagName) {
+    if (!xml) return [];
+    var results = [];
+    var patterns = [
+      new RegExp('<[^:>]+:' + tagName + '[^>]*>([^<]*)</[^:>]+:' + tagName + '>', 'g'),
+      new RegExp('<' + tagName + '[^>]*>([^<]*)</' + tagName + '>', 'g')
+    ];
+    for (var i = 0; i < patterns.length; i++) {
+      var match;
+      while ((match = patterns[i].exec(xml)) !== null) {
+        results.push(match[1]);
+      }
+      if (results.length > 0) return results;
+    }
+    return results;
+  }
+
+  function renderField(label, value, valueClass) {
+    if (value === null || value === undefined || value === '') return '';
+    var cls = valueClass ? ' class="' + valueClass + '"' : '';
+    return '<div class="parsed-field"><div class="label">' + escapeHtml(label) + '</div><div class="value"' + cls + '>' + escapeHtml(value) + '</div></div>';
+  }
+
+  // Parse a single movement JSON and render as cards
+  function renderMovementParsed(data) {
+    if (!data) return '<p style="color:#666;">No data to display.</p>';
+    var html = '<div class="parsed-card"><h4>Movement Summary <span class="type-badge">IE815</span></h4><div class="parsed-grid">';
+    html += renderField('Movement ID', data.movementId);
+    html += renderField('ARC', data.administrativeReferenceCode, 'arc');
+    html += renderField('LRN', data.localReferenceNumber);
+    html += renderField('Consignor ERN', data.consignorId);
+    html += renderField('Consignee ERN', data.consigneeId);
+    html += renderField('Last Updated', data.lastUpdated);
+    html += renderField('Box ID', data.boxId);
+    html += '</div></div>';
+    return html;
+  }
+
+  // Parse messages array and render as cards
+  function renderMessagesParsed(msgs) {
+    if (!msgs || !Array.isArray(msgs) || msgs.length === 0) {
+      return '<p style="color:#666;">No messages found for this movement.</p>';
+    }
+    var html = '';
+    msgs.forEach(function(m, idx) {
+      var xml = m.decodedXml || '';
+      var type = m.messageType || 'Unknown';
+      var typeName = MESSAGE_TYPE_NAMES[type] || type;
+      var typeClass = type.toLowerCase();
+
+      // Extract key fields from XML
+      var arc = extractXmlValue(xml, 'AdministrativeReferenceCode');
+      var lrn = extractXmlValue(xml, 'LocalReferenceNumber');
+      var msgId = extractXmlValue(xml, 'MessageIdentifier');
+      var corrId = extractXmlValue(xml, 'CorrelationIdentifier');
+      var datePrep = extractXmlValue(xml, 'DateOfPreparation');
+      var timePrep = extractXmlValue(xml, 'TimeOfPreparation');
+      var consignorErn = extractXmlValue(xml, 'TraderExciseNumber');
+      var consigneeId = extractXmlValue(xml, 'Traderid');
+      var consignorName = extractXmlValue(xml, 'TraderName');
+      var destType = extractXmlValue(xml, 'DestinationTypeCode');
+      var journeyTime = extractXmlValue(xml, 'JourneyTime');
+      var productCode = extractXmlValue(xml, 'ExciseProductCode');
+      var quantity = extractXmlValue(xml, 'Quantity');
+      var grossMass = extractXmlValue(xml, 'GrossMass');
+      var netMass = extractXmlValue(xml, 'NetMass');
+      var dateDispatch = extractXmlValue(xml, 'DateOfDispatch');
+      var invoiceNum = extractXmlValue(xml, 'InvoiceNumber');
+
+      html += '<div class="parsed-card">';
+      html += '<h4>' + escapeHtml(type) + ' — ' + escapeHtml(typeName) + ' <span class="type-badge ' + typeClass + '">' + escapeHtml(type) + '</span></h4>';
+      html += '<div class="parsed-grid">';
+      html += renderField('Message ID', m.messageId || msgId);
+      html += renderField('ARC', arc, 'arc');
+      html += renderField('LRN', lrn);
+      html += renderField('Received', m.createdOn);
+      html += renderField('Date Prepared', datePrep);
+      html += renderField('Time Prepared', timePrep);
+      html += renderField('Correlation ID', corrId);
+      html += renderField('Consignor ERN', consignorErn);
+      html += renderField('Consignee ID', consigneeId);
+      html += renderField('Consignor Name', consignorName);
+      html += renderField('Destination Type', destType);
+      html += renderField('Journey Time', journeyTime);
+      html += renderField('Product Code', productCode);
+      html += renderField('Quantity', quantity);
+      html += renderField('Gross Mass (kg)', grossMass);
+      html += renderField('Net Mass (kg)', netMass);
+      html += renderField('Date of Dispatch', dateDispatch);
+      html += renderField('Invoice Number', invoiceNum);
+      html += '</div>';
+      html += '<details class="raw-toggle" style="margin-top:10px;"><summary>📄 Show Raw XML</summary><pre>' + escapeHtml(xml) + '</pre></details>';
+      html += '</div>';
+    });
+    return html;
+  }
+
+  // Parse single XML message and render as cards
+  function renderSingleMessageParsed(xml) {
+    if (!xml) return '<p style="color:#666;">No XML data to display.</p>';
+    
+    // Determine message type from root element
+    var typeMatch = xml.match(/<[^:>]+:(IE\d{3})/);
+    var type = typeMatch ? typeMatch[1] : 'Unknown';
+    var typeName = MESSAGE_TYPE_NAMES[type] || type;
+    var typeClass = type.toLowerCase();
+
+    var html = '<div class="parsed-card">';
+    html += '<h4>' + escapeHtml(type) + ' — ' + escapeHtml(typeName) + ' <span class="type-badge ' + typeClass + '">' + escapeHtml(type) + '</span></h4>';
+    html += '<div class="parsed-grid">';
+    
+    // Header fields
+    html += renderField('Message Sender', extractXmlValue(xml, 'MessageSender'));
+    html += renderField('Message Recipient', extractXmlValue(xml, 'MessageRecipient'));
+    html += renderField('Message Identifier', extractXmlValue(xml, 'MessageIdentifier'));
+    html += renderField('Correlation ID', extractXmlValue(xml, 'CorrelationIdentifier'));
+    html += renderField('Date Prepared', extractXmlValue(xml, 'DateOfPreparation'));
+    html += renderField('Time Prepared', extractXmlValue(xml, 'TimeOfPreparation'));
+    
+    // Movement fields
+    html += renderField('ARC', extractXmlValue(xml, 'AdministrativeReferenceCode'), 'arc');
+    html += renderField('LRN', extractXmlValue(xml, 'LocalReferenceNumber'));
+    html += renderField('Sequence Number', extractXmlValue(xml, 'SequenceNumber'));
+    
+    // Trader fields
+    html += renderField('Consignor ERN', extractXmlValue(xml, 'TraderExciseNumber'));
+    html += renderField('Consignor Name', extractXmlValue(xml, 'TraderName'));
+    html += renderField('Consignee ID', extractXmlValue(xml, 'Traderid'));
+    
+    // Location fields
+    html += renderField('Dispatch Warehouse', extractXmlValue(xml, 'ReferenceOfTaxWarehouse'));
+    html += renderField('Dispatch Office', extractXmlValue(xml, 'ReferenceNumber'));
+    
+    // Movement details
+    html += renderField('Destination Type', extractXmlValue(xml, 'DestinationTypeCode'));
+    html += renderField('Journey Time', extractXmlValue(xml, 'JourneyTime'));
+    html += renderField('Transport Arrangement', extractXmlValue(xml, 'TransportArrangement'));
+    html += renderField('Transport Mode', extractXmlValue(xml, 'TransportModeCode'));
+    html += renderField('Guarantor Type', extractXmlValue(xml, 'GuarantorTypeCode'));
+    
+    // Goods
+    html += renderField('Product Code', extractXmlValue(xml, 'ExciseProductCode'));
+    html += renderField('CN Code', extractXmlValue(xml, 'CnCode'));
+    html += renderField('Quantity', extractXmlValue(xml, 'Quantity'));
+    html += renderField('Gross Mass', extractXmlValue(xml, 'GrossMass'));
+    html += renderField('Net Mass', extractXmlValue(xml, 'NetMass'));
+    html += renderField('ABV %', extractXmlValue(xml, 'AlcoholicStrengthByVolumeInPercentage'));
+    html += renderField('Package Kind', extractXmlValue(xml, 'KindOfPackages'));
+    html += renderField('Package Count', extractXmlValue(xml, 'NumberOfPackages'));
+    
+    // Invoice
+    html += renderField('Invoice Number', extractXmlValue(xml, 'InvoiceNumber'));
+    html += renderField('Invoice Date', extractXmlValue(xml, 'InvoiceDate'));
+    html += renderField('Origin Type', extractXmlValue(xml, 'OriginTypeCode'));
+    html += renderField('Date of Dispatch', extractXmlValue(xml, 'DateOfDispatch'));
+    html += renderField('Time of Dispatch', extractXmlValue(xml, 'TimeOfDispatch'));
+    
+    // Transport units
+    var transportUnits = extractAllXmlValues(xml, 'IdentityOfTransportUnits');
+    if (transportUnits.length > 0) {
+      html += renderField('Transport Units', transportUnits.join(', '));
+    }
+    
+    html += '</div></div>';
+    return html;
+  }
+
+  // Parse pre-validate response
+  function renderPrevalidateParsed(data) {
+    if (!data) return '';
+    var html = '<div class="parsed-card"><h4>Trader Validation Result</h4><div class="parsed-grid">';
+    html += renderField('ERN', data.exciseRegistrationNumber);
+    html += renderField('Entity Group', data.entityGroup);
+    html += renderField('Valid Trader', data.validTrader ? '✅ YES' : '❌ NO', data.validTrader ? '' : 'warn');
+    html += renderField('Trader Type', data.traderType);
+    html += renderField('Validation Time', data.validationTimeStamp);
+    if (data.validateProductAuthorisationResponse) {
+      html += renderField('Product Authorised', data.validateProductAuthorisationResponse.valid ? '✅ YES' : '❌ NO', data.validateProductAuthorisationResponse.valid ? '' : 'warn');
+    }
+    html += '</div></div>';
+    return html;
+  }
+
   // ==================== PROFILES ====================
   function getProfiles() {
     try { return JSON.parse(localStorage.getItem('emcs_profiles') || '[]'); } catch(e) { return []; }
   }
-  function saveProfiles(profiles) {
-    localStorage.setItem('emcs_profiles', JSON.stringify(profiles));
-  }
-  function getActiveProfileId() {
-    return parseInt(localStorage.getItem('emcs_active_profile') || '0');
-  }
-  function setActiveProfileId(id) {
-    localStorage.setItem('emcs_active_profile', id.toString());
-  }
+  function saveProfiles(profiles) { localStorage.setItem('emcs_profiles', JSON.stringify(profiles)); }
+  function getActiveProfileId() { return parseInt(localStorage.getItem('emcs_active_profile') || '0'); }
+  function setActiveProfileId(id) { localStorage.setItem('emcs_active_profile', id.toString()); }
   function getActiveProfile() {
     var profiles = getProfiles();
     var id = getActiveProfileId();
@@ -513,15 +820,14 @@ document.addEventListener('DOMContentLoaded', function() {
     var activeId = getActiveProfileId();
     var container = document.getElementById('profile-chips');
     if (profiles.length === 0) {
-      container.innerHTML = '<p style="color:#666;">No profiles yet. Create one above.</p>';
+      container.innerHTML = '<p style="color:#666;">No profiles yet.</p>';
       return;
     }
     container.innerHTML = profiles.map(function(p) {
       var activeClass = (p.id === activeId) ? ' active' : '';
       return '<div class="profile-chip' + activeClass + '" data-id="' + p.id + '">' +
         '<span class="load-prof">' + p.name + ' (' + p.ern + ') - ' + p.type + '</span>' +
-        '<span class="del-prof" data-id="' + p.id + '" title="Delete">✕</span>' +
-        '</div>';
+        '<span class="del-prof" data-id="' + p.id + '" title="Delete">✕</span></div>';
     }).join('');
 
     container.querySelectorAll('.load-prof').forEach(function(el) {
@@ -652,6 +958,34 @@ document.addEventListener('DOMContentLoaded', function() {
     return '<urn:' + tag + '>' + value + '</urn:' + tag + '>';
   }
 
+  function extractArcFromXml(xml) {
+    if (!xml) return null;
+    var match = xml.match(/<[^>]*AdministrativeReferenceCode[^>]*>([^<]+)<\/[^>]+>/);
+    return match ? match[1] : null;
+  }
+
+  async function fetchArcForMovement(movId, h) {
+    try {
+      var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages', { headers: h });
+      if (!res.ok) return null;
+      var text = await res.text();
+      var msgs = JSON.parse(text);
+      if (!Array.isArray(msgs)) return null;
+      for (var i = 0; i < msgs.length; i++) {
+        var m = msgs[i];
+        if (m.messageType === 'IE801') {
+          var xml = m.decodedXml;
+          if (!xml && m.encodedMessage) {
+            try { xml = atob(m.encodedMessage); } catch(e) {}
+          }
+          var arc = extractArcFromXml(xml);
+          if (arc) return arc;
+        }
+      }
+      return null;
+    } catch(e) { return null; }
+  }
+
   // ==================== GOODS ITEMS ====================
   function updateItemFieldVisibility(item) {
     var pc = item.querySelector('.s-product-code').value.toUpperCase();
@@ -703,13 +1037,11 @@ document.addEventListener('DOMContentLoaded', function() {
     div.className = 'item-field';
     div.setAttribute('data-item', idx);
     div.innerHTML = 
-      '<div class="item-header">' +
-        '<h4>Item ' + idx + '</h4>' +
+      '<div class="item-header"><h4>Item ' + idx + '</h4>' +
         '<div class="item-actions">' +
           '<button type="button" class="btn-small collapse-btn">▼</button>' +
           '<button type="button" class="btn-small btn-red remove-btn">✕ Remove</button>' +
-        '</div>' +
-      '</div>' +
+        '</div></div>' +
       '<div class="form-grid">' +
         '<div class="field"><label>Excise Product Code <span class="required-asterisk">*</span></label><input type="text" class="s-product-code" value="' + (it.productCode || 'B000') + '" pattern="^[A-Z][0-9]{3}$" maxlength="4" required></div>' +
         '<div class="field"><label>CN Code <span class="required-asterisk">*</span></label><input type="text" class="s-cn-code" value="' + (it.cnCode || '22030001') + '" pattern="^\\d{8}$" maxlength="8" required></div>' +
@@ -765,6 +1097,13 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // ==================== MONITOR DASHBOARD ====================
+  function getSimulatedInbounds() {
+    try { return JSON.parse(localStorage.getItem('emcs_simulated_inbounds') || '[]'); } catch(e) { return []; }
+  }
+  function saveSimulatedInbounds(list) {
+    localStorage.setItem('emcs_simulated_inbounds', JSON.stringify(list));
+  }
+
   async function fetchMonitorData() {
     if (!localStorage.getItem('hmrc_token')) return;
     document.getElementById('mon-loading').style.display = 'block';
@@ -772,12 +1111,34 @@ document.addEventListener('DOMContentLoaded', function() {
     var h = await getHeaders();
     var p = getActiveProfile();
     var ern = (p && p.ern) || localStorage.getItem('last_ern') || 'GBWK002281023';
+    
     try {
       var res = await fetch('/api/emcs?endpoint=/customs/excise/movements?ern=' + encodeURIComponent(ern), { headers: h });
       var text = await res.text();
       window.monitorData = JSON.parse(text);
       if (!Array.isArray(window.monitorData)) window.monitorData = [];
     } catch(e) { window.monitorData = []; }
+
+    // Add simulated inbound movements
+    var simulated = getSimulatedInbounds().filter(function(m) { return m.consigneeId === ern; });
+    window.monitorData = window.monitorData.concat(simulated);
+
+    // Fetch ARCs for movements without them
+    var movementsNeedingArc = window.monitorData.filter(function(m) { return !m.administrativeReferenceCode; });
+    if (movementsNeedingArc.length > 0) {
+      document.getElementById('mon-loading').innerHTML = '<span class="loading-spinner"></span>Fetching ARCs for ' + movementsNeedingArc.length + ' movement(s)...';
+      var batchSize = 5;
+      for (var i = 0; i < movementsNeedingArc.length; i += batchSize) {
+        var batch = movementsNeedingArc.slice(i, i + batchSize);
+        var promises = batch.map(function(m) {
+          return fetchArcForMovement(m.movementId, h).then(function(arc) {
+            if (arc) m.administrativeReferenceCode = arc;
+          });
+        });
+        await Promise.all(promises);
+      }
+    }
+
     document.getElementById('mon-loading').style.display = 'none';
     applyMonitorFilters();
   }
@@ -818,19 +1179,34 @@ document.addEventListener('DOMContentLoaded', function() {
       var isOverdue = daysOpen > 5;
       var rowClass = isOverdue ? 'warning-row' : '';
       var daysClass = isOverdue ? 'warning-text' : '';
+      var isSimulated = m._simulated;
+
+      var arc = m.administrativeReferenceCode;
+      var arcCell;
+      if (arc) {
+        arcCell = '<div class="arc-cell"><span class="arc-value">' + arc + '</span>' +
+          '<span class="lrn">LRN: ' + (m.localReferenceNumber || '') + (isSimulated ? ' <em style="color:#6f42c1;">(simulated)</em>' : '') + '</span></div>';
+      } else {
+        arcCell = '<div class="arc-cell"><span class="pending">Pending ARC</span>' +
+          '<span class="lrn">LRN: ' + (m.localReferenceNumber || '') + '</span></div>';
+      }
+
+      var statusBadge = arc 
+        ? '<span class="status-badge status-receipted">Accepted</span>' 
+        : '<span class="status-badge status-pending">Pending</span>';
 
       var tr = document.createElement('tr');
       tr.className = rowClass;
-      tr.innerHTML = '<td><div style="font-weight:bold;">' + (m.administrativeReferenceCode || 'Pending ARC') + '</div><div style="font-size:11px; color:#666;">' + m.localReferenceNumber + '</div></td>' +
+      tr.innerHTML = '<td>' + arcCell + '</td>' +
         '<td>' + directionText + '</td>' +
         '<td>' + counterparty + '</td>' +
         '<td>' + (m.lastUpdated ? m.lastUpdated.split('T')[0] : '-') + '</td>' +
-        '<td><span class="status-badge status-open">Open</span></td>' +
+        '<td>' + statusBadge + '</td>' +
         '<td style="text-align:center;" class="' + daysClass + '">' + daysOpen + ' days</td>' +
         '<td style="text-align:center;">' +
           '<button class="btn-small" onclick="viewMovement(\'' + m.movementId + '\')">View</button>' +
-          (isOut ? '<button class="btn-small btn-red" onclick="cancelMovement(\'' + m.movementId + '\', \'' + (m.administrativeReferenceCode || '') + '\')">Cancel</button>' : '') +
-          (!isOut ? '<button class="btn-small btn-green" onclick="receiptMovement(\'' + m.movementId + '\', \'' + (m.administrativeReferenceCode || '') + '\')">Receipt</button>' : '') +
+          (isOut ? '<button class="btn-small btn-red" onclick="cancelMovement(\'' + m.movementId + '\', \'' + (arc || '') + '\')">Cancel</button>' : '') +
+          (!isOut && arc ? '<button class="btn-small btn-green" onclick="receiptMovement(\'' + m.movementId + '\', \'' + arc + '\')">Receipt</button>' : '') +
         '</td>';
       tbody.appendChild(tr);
     });
@@ -842,6 +1218,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('get-single-movement-btn').click();
   };
   window.cancelMovement = function(movId, arc) {
+    if (!arc) { alert('Cannot cancel: this movement has no ARC yet.'); return; }
     document.getElementById('sm-mov-id').value = movId;
     document.getElementById('sm-arc').value = arc;
     document.getElementById('sm-type').value = 'IE810';
@@ -849,12 +1226,50 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('[data-tab="tab-submit-msg"]').click();
   };
   window.receiptMovement = function(movId, arc) {
+    if (!arc) { alert('Cannot receipt: this movement has no ARC yet.'); return; }
     document.getElementById('sm-mov-id').value = movId;
     document.getElementById('sm-arc').value = arc;
     document.getElementById('sm-type').value = 'IE818';
     document.getElementById('sm-type').dispatchEvent(new Event('change'));
     document.querySelector('[data-tab="tab-submit-msg"]').click();
   };
+
+  // ==================== SIMULATE INBOUND ====================
+  document.getElementById('mon-simulate-inbound').addEventListener('click', function() {
+    var p = getActiveProfile();
+    if (!p) { alert('No active profile.'); return; }
+    
+    var counterpartyErn = p.type === 'consignee' ? 'GBWK002281023' : 'GBWKQOZ8OVLYR';
+    var counterpartyName = p.type === 'consignee' ? 'Test Consignor Ltd' : 'Test Consignee Ltd';
+    
+    var now = new Date();
+    var arcYear = now.getFullYear().toString().slice(-2);
+    var arcNum = Math.floor(Math.random() * 9000000000000000) + 1000000000000000;
+    var arc = arcYear + 'GB' + arcNum.toString().padStart(17, '0');
+    var movId = 'sim-' + crypto.randomUUID();
+    var lrn = 'SIM' + Date.now().toString().slice(-10);
+    
+    var simulated = {
+      movementId: movId,
+      administrativeReferenceCode: arc,
+      localReferenceNumber: lrn,
+      consignorId: counterpartyErn,
+      consigneeId: p.ern,
+      lastUpdated: now.toISOString(),
+      _simulated: true,
+      _consignorName: counterpartyName,
+      _productCode: 'B000',
+      _quantity: 2000,
+      _grossMass: 20000
+    };
+    
+    var list = getSimulatedInbounds();
+    list.push(simulated);
+    saveSimulatedInbounds(list);
+    
+    alert('✅ Simulated inbound movement created!\n\nARC: ' + arc + '\nLRN: ' + lrn + '\nFrom: ' + counterpartyName + ' (' + counterpartyErn + ')\nTo: ' + p.name + ' (' + p.ern + ')\n\nClick "Refresh Data" to see it in the list.');
+    fetchMonitorData();
+  });
 
   document.getElementById('mon-apply-filters').addEventListener('click', applyMonitorFilters);
   document.getElementById('mon-clear-filters').addEventListener('click', function() {
@@ -874,19 +1289,30 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('load-818-items-btn').addEventListener('click', async function() {
     var movId = document.getElementById('sm-mov-id').value || localStorage.getItem('last_movement_id');
     if (!movId) { alert('Movement ID required.'); return; }
+    
+    // Check if it's a simulated inbound
+    var simulated = getSimulatedInbounds().find(function(m) { return m.movementId === movId; });
+    if (simulated) {
+      window.ie818Items = [{
+        bodyRecordUniqueReference: 1,
+        exciseProductCode: simulated._productCode || 'B000',
+        quantity: simulated._quantity || 2000,
+        grossMass: simulated._grossMass || 20000,
+        commercialDescription: 'Simulated Item'
+      }];
+      renderIE818Items(window.ie818Items);
+      return;
+    }
+    
     var h = await getHeaders();
     try {
       var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId), { headers: h });
       var text = await res.text();
       var data = JSON.parse(text);
       var items = [];
-      if (data.bodyEadEsad && Array.isArray(data.bodyEadEsad)) {
-        items = data.bodyEadEsad;
-      } else if (data.items && Array.isArray(data.items)) {
-        items = data.items;
-      } else {
-        items = [{ bodyRecordUniqueReference: 1, exciseProductCode: 'B000', quantity: 0, description: 'Item (details unavailable - please fill manually)' }];
-      }
+      if (data.bodyEadEsad && Array.isArray(data.bodyEadEsad)) items = data.bodyEadEsad;
+      else if (data.items && Array.isArray(data.items)) items = data.items;
+      else items = [{ bodyRecordUniqueReference: 1, exciseProductCode: 'B000', quantity: 0, description: 'Item (details unavailable - please fill manually)' }];
       window.ie818Items = items;
       renderIE818Items(items);
     } catch(e) {
@@ -910,22 +1336,15 @@ document.addEventListener('DOMContentLoaded', function() {
       var desc = it.commercialDescription || it.description || '';
       var expQty = it.quantity || 0;
       html += '<tr data-idx="' + idx + '">' +
-        '<td>' + ref + '</td>' +
-        '<td>' + pc + '</td>' +
-        '<td>' + desc + '</td>' +
+        '<td>' + ref + '</td><td>' + pc + '</td><td>' + desc + '</td>' +
         '<td><input type="number" class="ie818-expected" value="' + expQty + '" step="0.001" readonly style="background:#eee;"></td>' +
         '<td><input type="number" class="ie818-received" value="' + expQty + '" step="0.001" onchange="updateIE818Row(this)"></td>' +
         '<td class="ie818-status">OK</td>' +
-        '<td><select class="ie818-reason">' +
-          '<option value="">-- None --</option>' +
-          '<option value="1">1 - Breakage</option>' +
-          '<option value="2">2 - Leakage</option>' +
-          '<option value="3">3 - Quantity discrepancy</option>' +
-          '<option value="4">4 - Product type discrepancy</option>' +
-          '<option value="5">5 - Other</option>' +
-        '</select></td>' +
-        '<td><input type="text" class="ie818-notes" placeholder="Optional notes"></td>' +
-        '</tr>';
+        '<td><select class="ie818-reason"><option value="">-- None --</option>' +
+          '<option value="1">1 - Breakage</option><option value="2">2 - Leakage</option>' +
+          '<option value="3">3 - Quantity discrepancy</option><option value="4">4 - Product type discrepancy</option>' +
+          '<option value="5">5 - Other</option></select></td>' +
+        '<td><input type="text" class="ie818-notes" placeholder="Optional notes"></td></tr>';
     });
     html += '</tbody></table>';
     container.innerHTML = html;
@@ -982,8 +1401,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '<urn:Package><urn:KindOfPackages>' + item.querySelector('.s-package-kind').value + '</urn:KindOfPackages>' +
         '<urn:NumberOfPackages>' + item.querySelector('.s-package-count').value + '</urn:NumberOfPackages>' +
         (shipMark ? '<urn:ShippingMarks>' + shipMark + '</urn:ShippingMarks>' : '') +
-        '</urn:Package>' +
-        '</urn:BodyEadEsad>';
+        '</urn:Package></urn:BodyEadEsad>';
       itemSummary.push({ productCode: pc, qty: qty });
     });
 
@@ -1074,14 +1492,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // ==================== TAB 3: GET SINGLE MOVEMENT ====================
+  // ==================== TAB 3: GET SINGLE MOVEMENT (with parsed view) ====================
   document.getElementById('get-single-movement-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
     var h = await getHeaders();
     var movId = document.getElementById('gsm-id').value || localStorage.getItem('last_movement_id');
     if (!movId) { alert('Movement ID required'); return; }
+    
+    // Check simulated first
+    var simulated = getSimulatedInbounds().find(function(m) { return m.movementId === movId; });
+    if (simulated) {
+      document.getElementById('gsm-output').innerText = 'Status: 200 (simulated)\n\n' + JSON.stringify(simulated, null, 2);
+      document.getElementById('gsm-parsed').innerHTML = renderMovementParsed(simulated);
+      return;
+    }
+    
     var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId), { headers: h });
-    document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+    var text = await res.text();
+    document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+    
+    try {
+      var data = JSON.parse(text);
+      document.getElementById('gsm-parsed').innerHTML = renderMovementParsed(data);
+    } catch(e) {
+      document.getElementById('gsm-parsed').innerHTML = '<p style="color:#d4351c;">Could not parse response: ' + e.message + '</p>';
+    }
   });
 
   // ==================== TAB 4: SUBMIT MESSAGE ====================
@@ -1089,20 +1524,18 @@ document.addEventListener('DOMContentLoaded', function() {
     showHideIE818Section();
     var container = document.getElementById('msg-specific-fields');
     var msgType = this.value;
-    
     if (msgType === 'IE818') {
       container.innerHTML = '<h3 style="margin-top:20px;">IE818 Global Fields</h3><div class="form-grid">' +
         '<div class="field"><label>Date of Arrival</label><input type="date" id="msg-arrival-date" value="' + today + '"></div>' +
         '<div class="field"><label>Global Conclusion</label>' +
         '<select id="msg-receipt-conclusion">' +
         '<option value="1">1 - Acceptable (all items OK)</option>' +
-        '<option value="2" selected>2 - Unacceptable with reservations (some items short/damaged)</option>' +
+        '<option value="2" selected>2 - Unacceptable with reservations</option>' +
         '<option value="3">3 - Refusal (entire shipment rejected)</option>' +
         '</select></div></div>' +
-        '<p style="font-size:12px; color:#666; margin-top:10px;">Use the item-level table above to report per-item shortages/excesses. The global conclusion should match: if any item has a shortage, use option 2.</p>';
+        '<p style="font-size:12px; color:#666; margin-top:10px;">Use the item-level table above to report per-item shortages/excesses.</p>';
       return;
     }
-
     var html = '<h3 style="margin-top:20px;">Message-Specific Fields</h3><div class="form-grid">';
     if (msgType === 'IE810') {
       html += '<div class="field"><label>Cancellation Reason</label><select id="msg-cancel-reason"><option value="1">1 - Duplicate</option><option value="2">2 - Erroneous</option><option value="3" selected>3 - Before dispatch</option><option value="4">4 - During transit</option></select></div>';
@@ -1164,18 +1597,14 @@ document.addEventListener('DOMContentLoaded', function() {
         var ref = it.bodyRecordUniqueReference || (idx + 1);
         if (received !== expected || reason) {
           hasShortage = true;
-          bodyReportXml += '<urn:BodyReportOfReceiptExport>' +
-            '<urn:BodyRecordUniqueReference>' + ref + '</urn:BodyRecordUniqueReference>';
+          bodyReportXml += '<urn:BodyReportOfReceiptExport><urn:BodyRecordUniqueReference>' + ref + '</urn:BodyRecordUniqueReference>';
           if (received !== expected) {
             var diffCode = received < expected ? 'S' : 'E';
-            bodyReportXml += '<urn:ObservedShortageOrExcess>' +
-              '<urn:ObservedQuantity>' + received + '</urn:ObservedQuantity>' +
-              '<urn:ObservedShortageOrExcessCode>' + diffCode + '</urn:ObservedShortageOrExcessCode>' +
-              '</urn:ObservedShortageOrExcess>';
+            bodyReportXml += '<urn:ObservedShortageOrExcess><urn:ObservedQuantity>' + received + '</urn:ObservedQuantity>' +
+              '<urn:ObservedShortageOrExcessCode>' + diffCode + '</urn:ObservedShortageOrExcessCode></urn:ObservedShortageOrExcess>';
           }
           if (reason) {
-            bodyReportXml += '<urn:UnsatisfactoryReason>' +
-              '<urn:UnsatisfactoryReasonCode>' + reason + '</urn:UnsatisfactoryReasonCode>' +
+            bodyReportXml += '<urn:UnsatisfactoryReason><urn:UnsatisfactoryReasonCode>' + reason + '</urn:UnsatisfactoryReasonCode>' +
               (notes ? '<urn:ComplementaryInformation language="en">' + notes + '</urn:ComplementaryInformation>' : '') +
               '</urn:UnsatisfactoryReason>';
           }
@@ -1188,12 +1617,9 @@ document.addEventListener('DOMContentLoaded', function() {
         '<urn:ConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName></urn:ConsigneeTrader>' +
         '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
         '<urn:DestinationOffice><urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber></urn:DestinationOffice>' +
-        '<urn:ReportOfReceiptExport>' +
-        '<urn:DateOfArrivalOfExciseProducts>' + arrivalDate + '</urn:DateOfArrivalOfExciseProducts>' +
-        '<urn:GlobalConclusionOfReceipt>' + conclusion + '</urn:GlobalConclusionOfReceipt>' +
-        '</urn:ReportOfReceiptExport>' +
-        bodyReportXml +
-        '</urn:AcceptedOrRejectedReportOfReceiptExport>';
+        '<urn:ReportOfReceiptExport><urn:DateOfArrivalOfExciseProducts>' + arrivalDate + '</urn:DateOfArrivalOfExciseProducts>' +
+        '<urn:GlobalConclusionOfReceipt>' + conclusion + '</urn:GlobalConclusionOfReceipt></urn:ReportOfReceiptExport>' +
+        bodyReportXml + '</urn:AcceptedOrRejectedReportOfReceiptExport>';
     } else if (msgType === 'IE837') {
       var submitterType = document.getElementById('msg-submitter-type').value;
       var submitterId = submitterType === '1' ? document.getElementById('s-consignor-ern').value : document.getElementById('s-consignee-ern').value;
@@ -1227,7 +1653,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
-  // ==================== TAB 5: GET MESSAGES ====================
+  // ==================== TAB 5: GET MESSAGES (with parsed view) ====================
   document.getElementById('get-messages-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
     var h = await getHeaders();
@@ -1235,18 +1661,29 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!movId) { alert('Movement ID required'); return; }
     var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages', { headers: h });
     var text = await res.text();
+    document.getElementById('gmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+    
     try {
       var msgs = JSON.parse(text);
       if (Array.isArray(msgs)) {
-        msgs.forEach(function(m) { if (m.encodedMessage) { try { m.decodedXml = atob(m.encodedMessage); } catch(e) {} } });
-        document.getElementById('gmsg-output').innerText = JSON.stringify(msgs, null, 2);
-        return;
+        msgs.forEach(function(m) { 
+          if (m.encodedMessage) { 
+            try { m.decodedXml = atob(m.encodedMessage); } catch(e) {} 
+          } 
+        });
+        document.getElementById('gmsg-count').textContent = msgs.length + ' message(s)';
+        document.getElementById('gmsg-parsed').innerHTML = renderMessagesParsed(msgs);
+      } else {
+        document.getElementById('gmsg-count').textContent = '';
+        document.getElementById('gmsg-parsed').innerHTML = '<p style="color:#d4351c;">Unexpected response format.</p>';
       }
-    } catch(e) {}
-    document.getElementById('gmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+    } catch(e) {
+      document.getElementById('gmsg-count').textContent = '';
+      document.getElementById('gmsg-parsed').innerHTML = '<p style="color:#d4351c;">Could not parse response: ' + e.message + '</p>';
+    }
   });
 
-  // ==================== TAB 6: GET SINGLE MESSAGE ====================
+  // ==================== TAB 6: GET SINGLE MESSAGE (with parsed view) ====================
   document.getElementById('get-single-message-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
     var h = await getHeaders();
@@ -1255,10 +1692,17 @@ document.addEventListener('DOMContentLoaded', function() {
     var msgId = document.getElementById('gsmsg-id').value;
     if (!movId || !msgId) { alert('Both IDs required'); return; }
     var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages/' + encodeURIComponent(msgId), { headers: h });
-    document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+    var text = await res.text();
+    document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+    
+    if (res.status === 200) {
+      document.getElementById('gsmsg-parsed').innerHTML = renderSingleMessageParsed(text);
+    } else {
+      document.getElementById('gsmsg-parsed').innerHTML = '<p style="color:#d4351c;">Error: Status ' + res.status + '</p>';
+    }
   });
 
-  // ==================== TAB 7: PRE-VALIDATE ====================
+  // ==================== TAB 7: PRE-VALIDATE (with parsed view) ====================
   document.getElementById('pre-validate-btn').addEventListener('click', async function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
     var h = await getHeaders();
@@ -1277,7 +1721,15 @@ document.addEventListener('DOMContentLoaded', function() {
       headers: Object.assign({}, h, { 'Content-Type': 'application/json' }),
       body: JSON.stringify(requestBody)
     });
-    document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+    var text = await res.text();
+    document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+    
+    try {
+      var data = JSON.parse(text);
+      document.getElementById('pv-parsed').innerHTML = renderPrevalidateParsed(data);
+    } catch(e) {
+      document.getElementById('pv-parsed').innerHTML = '<p style="color:#d4351c;">Could not parse response.</p>';
+    }
   });
 
   // ==================== TAB 8: SUBSCRIBE ====================
