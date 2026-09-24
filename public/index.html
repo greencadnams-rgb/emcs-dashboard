@@ -17,7 +17,6 @@ button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #005ea5; 
 button:hover { background: #003d6b; }
 .btn-green { background: #00703c; } .btn-green:hover { background: #005a30; }
 .btn-red { background: #d4351c; } .btn-red:hover { background: #aa2a16; }
-.btn-orange { background: #ff9800; } .btn-orange:hover { background: #e68900; }
 .btn-small { padding: 4px 10px; font-size: 12px; margin: 2px; }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
 input, select { padding: 8px 12px; border: 2px solid #b1b4b6; border-radius: 4px; font-size: 14px; width: 100%; }
@@ -57,7 +56,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .section-optional { background: #f9f9f9; border-left: 3px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 .section-filter { background: #f0f4f8; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 .section-profile { background: #f3e5f5; border-left: 3px solid #9c27b0; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-.section-ie818 { background: #e8f5e9; border-left: 3px solid #4caf50; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 
 .monitor-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
 .monitor-table th { background: #005ea5; color: white; padding: 10px; text-align: left; position: sticky; top: 0; }
@@ -73,14 +71,13 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .item-actions { display: flex; gap: 5px; }
 
-/* IE818 Receipt Table */
+/* IE818 Receipt Table - matches rest of design */
 .receipt-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-.receipt-table th { background: #4caf50; color: white; padding: 8px; text-align: left; }
-.receipt-table td { padding: 8px; border-bottom: 1px solid #eee; }
+.receipt-table th { background: #005ea5; color: white; padding: 8px; text-align: left; }
+.receipt-table td { padding: 8px; border-bottom: 1px solid #ddd; }
 .receipt-table input, .receipt-table select { padding: 4px 6px; font-size: 12px; }
-.receipt-table .shortage { background: #ffebee; }
-.receipt-table .excess { background: #e8f5e9; }
-.receipt-table .ok { background: #f1f8e9; }
+.receipt-table .shortage { background: #fff5f5; }
+.receipt-table .excess { background: #f0f9ff; }
 
 /* Profile chips */
 .profile-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
@@ -88,21 +85,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .profile-chip:hover { background: #9c27b0; color: white; }
 .profile-chip.active { background: #9c27b0; color: white; }
 .profile-chip .del-prof { color: #ffeb3b; font-weight: bold; cursor: pointer; margin-left: 4px; }
-
-/* Fallback document */
-.fallback-doc { background: white; padding: 40px; font-family: 'Courier New', monospace; border: 2px solid #333; }
-.fallback-doc h1 { font-size: 1.5em; text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
-.fallback-doc .doc-section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
-.fallback-doc .doc-section h3 { font-size: 1em; margin-bottom: 8px; background: #eee; padding: 5px; }
-.fallback-doc table { width: 100%; border-collapse: collapse; }
-.fallback-doc td { padding: 4px; border: 1px solid #ccc; font-size: 12px; }
-.fallback-doc .label { font-weight: bold; background: #f5f5f5; width: 30%; }
-
-@media print {
-  .no-print { display: none !important; }
-  body { background: white; }
-  .container { max-width: 100%; padding: 0; }
-}
 </style>
 </head>
 <body>
@@ -164,11 +146,10 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
             <div class="field"><label>Dispatched From</label><input type="date" id="mon-disp-from"></div>
             <div class="field"><label>Dispatched To</label><input type="date" id="mon-disp-to"></div>
           </div>
-          <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+          <div style="margin-top: 15px; display: flex; gap: 10px;">
             <button id="mon-apply-filters" class="btn-green">Apply filters</button>
             <button id="mon-clear-filters" class="btn-red">Clear filters</button>
             <button id="mon-refresh" style="margin-left: auto;">🔄 Refresh Data</button>
-            <button id="mon-fallback-btn" class="btn-orange">📄 Generate Fallback Document</button>
           </div>
         </div>
         <div id="mon-loading" style="text-align: center; padding: 20px; display: none;">Loading movements...</div>
@@ -309,7 +290,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
       </div>
     </div>
 
-    <!-- TAB 4: SUBMIT MESSAGE (Enhanced with IE818 item-level) -->
+    <!-- TAB 4: SUBMIT MESSAGE -->
     <div id="tab-submit-msg" class="tab">
       <div class="card">
         <h2>Submit Message</h2>
@@ -330,9 +311,9 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <div class="field"><label>Message Identifier</label><input type="text" id="sm-msgid" value="GB100000000302249"></div>
         </div>
 
-        <!-- IE818 Item-Level Section -->
-        <div id="ie818-section" class="section-ie818" style="display:none;">
-          <h3 style="margin-top:0; border:none; font-size:1em;">📦 Item-Level Report of Receipt</h3>
+        <!-- IE818 Item-Level Section (neutral styling) -->
+        <div id="ie818-section" style="display:none; margin-top:20px;">
+          <h3>Item-Level Report of Receipt</h3>
           <p style="font-size:13px; color:#666; margin-bottom:10px;">Load the original movement's goods items to report per-item receipts, shortages, or excesses.</p>
           <button type="button" id="load-818-items-btn" class="btn-green">🔄 Load Movement Items</button>
           <div id="ie818-items-container" style="margin-top:15px;"></div>
@@ -436,20 +417,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
   </div>
 </div>
 
-<!-- FALLBACK DOCUMENT MODAL -->
-<div id="fallback-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:2000; justify-content:center; align-items:center; overflow-y:auto;">
-  <div style="background:white; padding:20px; max-width:900px; width:95%; margin:20px auto; border-radius:8px;">
-    <div class="no-print" style="display:flex; justify-content:space-between; margin-bottom:15px;">
-      <h2>📄 Fallback Document</h2>
-      <div>
-        <button id="print-fallback-btn" class="btn-green">🖨️ Print</button>
-        <button id="close-fallback-btn" class="btn-red">Close</button>
-      </div>
-    </div>
-    <div id="fallback-content"></div>
-  </div>
-</div>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   var today = new Date().toISOString().slice(0, 10);
@@ -458,9 +425,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var TMS_NS = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.23';
   window.monitorData = [];
-  window.ie818Items = []; // Store loaded items for IE818
+  window.ie818Items = [];
 
-  // CN Code auto-fill mapping
   var CN_CODES = {
     'B000': '22030001', 'W200': '22042142', 'W300': '22041011',
     'I000': '22042999', 'S200': '22089091', 'S300': '22071000',
@@ -620,10 +586,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var profiles = getProfiles();
     var newId = profiles.length > 0 ? Math.max.apply(null, profiles.map(function(p) { return p.id; })) + 1 : 1;
     profiles.push({
-      id: newId,
-      name: name,
-      type: document.getElementById('prof-type').value,
-      ern: ern,
+      id: newId, name: name, type: document.getElementById('prof-type').value, ern: ern,
       traderName: document.getElementById('prof-trader-name').value,
       street: document.getElementById('prof-street').value,
       postcode: document.getElementById('prof-postcode').value,
@@ -831,14 +794,8 @@ document.addEventListener('DOMContentLoaded', function() {
       var isOut = m.consignorId === myErn;
       if (direction === 'in' && isOut) return false;
       if (direction === 'out' && !isOut) return false;
-      if (dispFrom) {
-        var d = m.lastUpdated ? m.lastUpdated.split('T')[0] : '';
-        if (d < dispFrom) return false;
-      }
-      if (dispTo) {
-        var d = m.lastUpdated ? m.lastUpdated.split('T')[0] : '';
-        if (d > dispTo) return false;
-      }
+      if (dispFrom) { var d = m.lastUpdated ? m.lastUpdated.split('T')[0] : ''; if (d < dispFrom) return false; }
+      if (dispTo) { var d = m.lastUpdated ? m.lastUpdated.split('T')[0] : ''; if (d > dispTo) return false; }
       return true;
     });
 
@@ -908,50 +865,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   document.getElementById('mon-refresh').addEventListener('click', fetchMonitorData);
 
-  // ==================== FALLBACK DOCUMENT ====================
-  document.getElementById('mon-fallback-btn').addEventListener('click', function() {
-    if (window.monitorData.length === 0) {
-      alert('No movements loaded. Click Refresh Data first.');
-      return;
-    }
-    var p = getActiveProfile();
-    var html = '<div class="fallback-doc">' +
-      '<h1>EXCISE MOVEMENT CONTROL SYSTEM - FALLBACK DOCUMENT</h1>' +
-      '<p style="text-align:center; font-weight:bold;">Generated: ' + new Date().toLocaleString() + '</p>' +
-      '<p style="text-align:center; color:#d4351c; font-weight:bold;">⚠️ USE ONLY IF EMCS SYSTEM IS UNAVAILABLE</p>' +
-      '<div class="doc-section"><h3>Trader Details</h3><table>' +
-      '<tr><td class="label">Profile Name:</td><td>' + (p ? p.name : 'N/A') + '</td></tr>' +
-      '<tr><td class="label">ERN:</td><td>' + (p ? p.ern : 'N/A') + '</td></tr>' +
-      '<tr><td class="label">Type:</td><td>' + (p ? p.type : 'N/A') + '</td></tr>' +
-      '</table></div>' +
-      '<div class="doc-section"><h3>Open Movements (' + window.monitorData.length + ')</h3>' +
-      '<table><thead><tr><th>LRN</th><th>ARC</th><th>Direction</th><th>Counterparty</th><th>Date</th><th>Status</th></tr></thead><tbody>';
-    window.monitorData.forEach(function(m) {
-      var myErn = p ? p.ern : '';
-      var isOut = m.consignorId === myErn;
-      html += '<tr><td>' + (m.localReferenceNumber || '') + '</td>' +
-        '<td>' + (m.administrativeReferenceCode || 'Pending') + '</td>' +
-        '<td>' + (isOut ? 'OUT' : 'IN') + '</td>' +
-        '<td>' + (isOut ? m.consigneeId : m.consignorId) + '</td>' +
-        '<td>' + (m.lastUpdated ? m.lastUpdated.split('T')[0] : '-') + '</td>' +
-        '<td>Open</td></tr>';
-    });
-    html += '</tbody></table></div>' +
-      '<div class="doc-section"><h3>Authorisation Signature</h3>' +
-      '<p>___________________________ &nbsp;&nbsp;&nbsp; Date: ___________</p>' +
-      '<p style="font-size:11px; margin-top:20px;">This document must be presented to the competent authority if EMCS is unavailable. Submit corresponding IE815 messages via fallback procedures per Excise Notice 197 Section 3.</p>' +
-      '</div></div>';
-    document.getElementById('fallback-content').innerHTML = html;
-    document.getElementById('fallback-modal').style.display = 'flex';
-  });
-
-  document.getElementById('close-fallback-btn').addEventListener('click', function() {
-    document.getElementById('fallback-modal').style.display = 'none';
-  });
-  document.getElementById('print-fallback-btn').addEventListener('click', function() {
-    window.print();
-  });
-
   // ==================== IE818 ITEM-LEVEL ====================
   function showHideIE818Section() {
     var msgType = document.getElementById('sm-type').value;
@@ -966,19 +879,14 @@ document.addEventListener('DOMContentLoaded', function() {
       var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId), { headers: h });
       var text = await res.text();
       var data = JSON.parse(text);
-      
-      // Try to extract items from the movement. The API may return different structures.
-      // We'll build a default set if the API doesn't return item details.
       var items = [];
       if (data.bodyEadEsad && Array.isArray(data.bodyEadEsad)) {
         items = data.bodyEadEsad;
       } else if (data.items && Array.isArray(data.items)) {
         items = data.items;
       } else {
-        // Fallback: create a placeholder item
         items = [{ bodyRecordUniqueReference: 1, exciseProductCode: 'B000', quantity: 0, description: 'Item (details unavailable - please fill manually)' }];
       }
-      
       window.ie818Items = items;
       renderIE818Items(items);
     } catch(e) {
@@ -1028,7 +936,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var expected = parseFloat(row.querySelector('.ie818-expected').value) || 0;
     var received = parseFloat(input.value) || 0;
     var statusCell = row.querySelector('.ie818-status');
-    row.classList.remove('shortage', 'excess', 'ok');
+    row.classList.remove('shortage', 'excess');
     if (received < expected) {
       statusCell.textContent = 'SHORT (' + (expected - received).toFixed(3) + ')';
       row.classList.add('shortage');
@@ -1037,7 +945,6 @@ document.addEventListener('DOMContentLoaded', function() {
       row.classList.add('excess');
     } else {
       statusCell.textContent = 'OK';
-      row.classList.add('ok');
     }
   };
 
@@ -1154,15 +1061,12 @@ document.addEventListener('DOMContentLoaded', function() {
           localStorage.setItem('last_ern', document.getElementById('s-consignor-ern').value);
           localStorage.setItem('last_arc', parsed.administrativeReferenceCode || '');
           localStorage.setItem('last_lrn', parsed.localReferenceNumber || uniqueLrn);
-
           localStorage.setItem('emcs_last_submission', JSON.stringify({
-            movementId: parsed.movementId,
-            arc: parsed.administrativeReferenceCode || '',
+            movementId: parsed.movementId, arc: parsed.administrativeReferenceCode || '',
             lrn: parsed.localReferenceNumber || uniqueLrn,
             consignorErn: document.getElementById('s-consignor-ern').value,
             consigneeErn: document.getElementById('s-consignee-ern').value,
-            date: submitDate,
-            items: itemSummary
+            date: submitDate, items: itemSummary
           }));
           document.getElementById('export-last-csv-btn').style.display = 'inline-block';
         }
@@ -1180,26 +1084,22 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
-  // ==================== TAB 4: SUBMIT MESSAGE (with IE818 item-level) ====================
+  // ==================== TAB 4: SUBMIT MESSAGE ====================
   document.getElementById('sm-type').addEventListener('change', function() {
     showHideIE818Section();
     var container = document.getElementById('msg-specific-fields');
     var msgType = this.value;
     
-    // For IE818, we don't show the old global fields - the item-level section handles it
     if (msgType === 'IE818') {
-      container.innerHTML = '<div class="section-ie818"><h3 style="margin-top:0; border:none; font-size:1em;">IE818 Global Fields</h3>' +
-        '<div class="form-grid">' +
+      container.innerHTML = '<h3 style="margin-top:20px;">IE818 Global Fields</h3><div class="form-grid">' +
         '<div class="field"><label>Date of Arrival</label><input type="date" id="msg-arrival-date" value="' + today + '"></div>' +
         '<div class="field"><label>Global Conclusion</label>' +
         '<select id="msg-receipt-conclusion">' +
         '<option value="1">1 - Acceptable (all items OK)</option>' +
         '<option value="2" selected>2 - Unacceptable with reservations (some items short/damaged)</option>' +
         '<option value="3">3 - Refusal (entire shipment rejected)</option>' +
-        '</select></div>' +
-        '</div>' +
-        '<p style="font-size:12px; color:#666; margin-top:10px;">💡 Use the item-level table above to report per-item shortages/excesses. The global conclusion should match: if any item has a shortage, use option 2.</p>' +
-        '</div>';
+        '</select></div></div>' +
+        '<p style="font-size:12px; color:#666; margin-top:10px;">Use the item-level table above to report per-item shortages/excesses. The global conclusion should match: if any item has a shortage, use option 2.</p>';
       return;
     }
 
@@ -1252,8 +1152,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (msgType === 'IE818') {
       var arrivalDate = document.getElementById('msg-arrival-date').value;
       var conclusion = document.getElementById('msg-receipt-conclusion').value;
-      
-      // Build per-item BodyReportOfReceiptExport entries
       var bodyReportXml = '';
       var hasShortage = false;
       window.ie818Items.forEach(function(it, idx) {
@@ -1264,13 +1162,12 @@ document.addEventListener('DOMContentLoaded', function() {
         var reason = row.querySelector('.ie818-reason').value;
         var notes = row.querySelector('.ie818-notes').value;
         var ref = it.bodyRecordUniqueReference || (idx + 1);
-        
         if (received !== expected || reason) {
           hasShortage = true;
           bodyReportXml += '<urn:BodyReportOfReceiptExport>' +
             '<urn:BodyRecordUniqueReference>' + ref + '</urn:BodyRecordUniqueReference>';
           if (received !== expected) {
-            var diffCode = received < expected ? 'S' : 'E'; // Shortage or Excess
+            var diffCode = received < expected ? 'S' : 'E';
             bodyReportXml += '<urn:ObservedShortageOrExcess>' +
               '<urn:ObservedQuantity>' + received + '</urn:ObservedQuantity>' +
               '<urn:ObservedShortageOrExcessCode>' + diffCode + '</urn:ObservedShortageOrExcessCode>' +
@@ -1285,12 +1182,7 @@ document.addEventListener('DOMContentLoaded', function() {
           bodyReportXml += '</urn:BodyReportOfReceiptExport>';
         }
       });
-
-      // Auto-adjust global conclusion if there are shortages
-      if (hasShortage && conclusion === '1') {
-        conclusion = '2'; // Upgrade to "unacceptable with reservations"
-      }
-
+      if (hasShortage && conclusion === '1') conclusion = '2';
       bodyXml = '<urn:AcceptedOrRejectedReportOfReceiptExport>' +
         '<urn:Attributes><urn:DateAndTimeOfValidationOfReportOfReceiptExport>' + prepareTime + '</urn:DateAndTimeOfValidationOfReportOfReceiptExport></urn:Attributes>' +
         '<urn:ConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName></urn:ConsigneeTrader>' +
@@ -1371,15 +1263,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
     var h = await getHeaders();
     h['x-correlation-id'] = crypto.randomUUID();
-    var ern = document.getElementById('pv-ern').value;
-    var group = document.getElementById('pv-group').value;
-    var p1 = document.getElementById('pv-p1').value;
     var requestBody = {
       exciseTraderValidationRequest: {
         exciseTraderRequest: {
-          exciseRegistrationNumber: ern,
-          entityGroup: group,
-          validateProductAuthorisationRequest: [{ product: { exciseProductCode: p1 } }]
+          exciseRegistrationNumber: document.getElementById('pv-ern').value,
+          entityGroup: document.getElementById('pv-group').value,
+          validateProductAuthorisationRequest: [{ product: { exciseProductCode: document.getElementById('pv-p1').value } }]
         }
       }
     };
