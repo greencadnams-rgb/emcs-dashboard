@@ -17,6 +17,7 @@ button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #005ea5; 
 button:hover { background: #003d6b; }
 .btn-green { background: #00703c; } .btn-green:hover { background: #005a30; }
 .btn-red { background: #d4351c; } .btn-red:hover { background: #aa2a16; }
+.btn-orange { background: #ff9800; } .btn-orange:hover { background: #e68900; }
 .btn-small { padding: 4px 10px; font-size: 12px; margin: 2px; }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
 input, select { padding: 8px 12px; border: 2px solid #b1b4b6; border-radius: 4px; font-size: 14px; width: 100%; }
@@ -38,12 +39,14 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .format-badge { display: inline-block; background: #e8f4fd; color: #005ea5; padding: 2px 6px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace; }
 #login-screen { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
 .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 450px; width: 100%; text-align: center; }
-.status-bar { background: #005ea5; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.status-bar { background: #005ea5; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
 .status-bar a { color: #ffdd57; text-decoration: none; margin-left: 15px; }
 .status-bar a:hover { text-decoration: underline; }
 .token-status { padding: 5px 10px; border-radius: 3px; font-size: 12px; }
 .token-ok { background: #00703c; }
 .token-missing { background: #d4351c; }
+.profile-selector { display: flex; align-items: center; gap: 8px; }
+.profile-selector select { padding: 4px 8px; border-radius: 3px; border: 1px solid #ffdd57; background: white; color: #333; font-size: 12px; width: auto; max-width: 200px; }
 .item-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 15px; background: #fafafa; }
 .item-field.collapsed .form-grid { display: none; }
 .transport-unit-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 15px; background: #f0f9ff; }
@@ -53,6 +56,8 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .required-asterisk { color: #d4351c; font-weight: bold; }
 .section-optional { background: #f9f9f9; border-left: 3px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 .section-filter { background: #f0f4f8; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+.section-profile { background: #f3e5f5; border-left: 3px solid #9c27b0; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+.section-ie818 { background: #e8f5e9; border-left: 3px solid #4caf50; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 
 .monitor-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
 .monitor-table th { background: #005ea5; color: white; padding: 10px; text-align: left; position: sticky; top: 0; }
@@ -67,6 +72,37 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 
 .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .item-actions { display: flex; gap: 5px; }
+
+/* IE818 Receipt Table */
+.receipt-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+.receipt-table th { background: #4caf50; color: white; padding: 8px; text-align: left; }
+.receipt-table td { padding: 8px; border-bottom: 1px solid #eee; }
+.receipt-table input, .receipt-table select { padding: 4px 6px; font-size: 12px; }
+.receipt-table .shortage { background: #ffebee; }
+.receipt-table .excess { background: #e8f5e9; }
+.receipt-table .ok { background: #f1f8e9; }
+
+/* Profile chips */
+.profile-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.profile-chip { background: white; border: 1px solid #9c27b0; color: #9c27b0; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.profile-chip:hover { background: #9c27b0; color: white; }
+.profile-chip.active { background: #9c27b0; color: white; }
+.profile-chip .del-prof { color: #ffeb3b; font-weight: bold; cursor: pointer; margin-left: 4px; }
+
+/* Fallback document */
+.fallback-doc { background: white; padding: 40px; font-family: 'Courier New', monospace; border: 2px solid #333; }
+.fallback-doc h1 { font-size: 1.5em; text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
+.fallback-doc .doc-section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+.fallback-doc .doc-section h3 { font-size: 1em; margin-bottom: 8px; background: #eee; padding: 5px; }
+.fallback-doc table { width: 100%; border-collapse: collapse; }
+.fallback-doc td { padding: 4px; border: 1px solid #ccc; font-size: 12px; }
+.fallback-doc .label { font-weight: bold; background: #f5f5f5; width: 30%; }
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
+  .container { max-width: 100%; padding: 0; }
+}
 </style>
 </head>
 <body>
@@ -84,6 +120,10 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 <div id="dashboard" style="display:none;">
   <div class="status-bar">
     <span>🇬🇧 HMRC EMCS Dashboard <span id="mode-indicator" class="mode-indicator mode-test">TEST MODE</span></span>
+    <div class="profile-selector">
+      <label style="font-size:12px;">Active Profile:</label>
+      <select id="active-profile-select"></select>
+    </div>
     <div>
       <span id="hmrc-status" class="token-status token-missing">HMRC: Not Logged In</span>
       <a href="/api/auth">Login to HMRC</a>
@@ -102,6 +142,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
       <button class="nav-btn" data-tab="tab-validate">7. Pre-Validate Trader</button>
       <button class="nav-btn" data-tab="tab-subscribe">8. Subscribe ERN</button>
       <button class="nav-btn" data-tab="tab-unsubscribe">9. Unsubscribe ERN</button>
+      <button class="nav-btn" data-tab="tab-profiles">10. Profiles</button>
     </div>
 
     <!-- TAB 1: MONITOR -->
@@ -123,10 +164,11 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
             <div class="field"><label>Dispatched From</label><input type="date" id="mon-disp-from"></div>
             <div class="field"><label>Dispatched To</label><input type="date" id="mon-disp-to"></div>
           </div>
-          <div style="margin-top: 15px; display: flex; gap: 10px;">
+          <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
             <button id="mon-apply-filters" class="btn-green">Apply filters</button>
             <button id="mon-clear-filters" class="btn-red">Clear filters</button>
             <button id="mon-refresh" style="margin-left: auto;">🔄 Refresh Data</button>
+            <button id="mon-fallback-btn" class="btn-orange">📄 Generate Fallback Document</button>
           </div>
         </div>
         <div id="mon-loading" style="text-align: center; padding: 20px; display: none;">Loading movements...</div>
@@ -267,7 +309,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
       </div>
     </div>
 
-    <!-- TAB 4: SUBMIT MESSAGE -->
+    <!-- TAB 4: SUBMIT MESSAGE (Enhanced with IE818 item-level) -->
     <div id="tab-submit-msg" class="tab">
       <div class="card">
         <h2>Submit Message</h2>
@@ -278,15 +320,24 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <div class="field"><label>Message Type <span class="required-asterisk">*</span></label>
             <select id="sm-type">
               <option value="IE810">IE810 - Cancellation</option>
-              <option value="IE818">IE818 - Report of Receipt</option>
+              <option value="IE818" selected>IE818 - Report of Receipt (Item-Level)</option>
               <option value="IE813">IE813 - Change of Destination</option>
               <option value="IE819">IE819 - Alert or Rejection</option>
-              <option value="IE837" selected>IE837 - Explain Delay</option>
+              <option value="IE837">IE837 - Explain Delay</option>
               <option value="IE871">IE871 - Reason for Shortage</option>
             </select>
           </div>
           <div class="field"><label>Message Identifier</label><input type="text" id="sm-msgid" value="GB100000000302249"></div>
         </div>
+
+        <!-- IE818 Item-Level Section -->
+        <div id="ie818-section" class="section-ie818" style="display:none;">
+          <h3 style="margin-top:0; border:none; font-size:1em;">📦 Item-Level Report of Receipt</h3>
+          <p style="font-size:13px; color:#666; margin-bottom:10px;">Load the original movement's goods items to report per-item receipts, shortages, or excesses.</p>
+          <button type="button" id="load-818-items-btn" class="btn-green">🔄 Load Movement Items</button>
+          <div id="ie818-items-container" style="margin-top:15px;"></div>
+        </div>
+
         <div id="msg-specific-fields"></div>
         <button id="submit-message-btn" style="margin-top:20px;">Submit Message</button>
         <pre id="sm-output">Waiting...</pre>
@@ -351,6 +402,51 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
         <pre id="unsub-output">Waiting...</pre>
       </div>
     </div>
+
+    <!-- TAB 10: PROFILES -->
+    <div id="tab-profiles" class="tab">
+      <div class="card">
+        <h2>Manage Profiles</h2>
+        <p style="color:#666; font-size:13px; margin-bottom:15px;">Create multiple trader profiles (e.g., one for your warehouse role, one for your consignee role). Switch between them using the dropdown in the status bar.</p>
+        
+        <div class="section-profile">
+          <h3 style="margin-top:0; border:none; font-size:1em;">Create New Profile</h3>
+          <div class="form-grid">
+            <div class="field"><label>Profile Name <span class="required-asterisk">*</span></label><input type="text" id="prof-name" placeholder="e.g., My Warehouse"></div>
+            <div class="field"><label>Profile Type</label>
+              <select id="prof-type">
+                <option value="consignor">Registered Consignor / Authorised Warehouse Keeper</option>
+                <option value="consignee">Registered Consignee</option>
+              </select>
+            </div>
+            <div class="field"><label>ERN <span class="required-asterisk">*</span></label><input type="text" id="prof-ern" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13"></div>
+            <div class="field"><label>Trader Name</label><input type="text" id="prof-trader-name"></div>
+            <div class="field"><label>Street</label><input type="text" id="prof-street"></div>
+            <div class="field"><label>Postcode</label><input type="text" id="prof-postcode"></div>
+            <div class="field"><label>City</label><input type="text" id="prof-city"></div>
+            <div class="field"><label>Dispatch Office Ref</label><input type="text" id="prof-office" value="GB004098" maxlength="8"></div>
+          </div>
+          <button id="create-profile-btn" class="btn-green" style="margin-top:15px;">+ Create Profile</button>
+        </div>
+
+        <h3 style="margin-top:20px;">Saved Profiles</h3>
+        <div id="profile-chips" class="profile-chips"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FALLBACK DOCUMENT MODAL -->
+<div id="fallback-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:2000; justify-content:center; align-items:center; overflow-y:auto;">
+  <div style="background:white; padding:20px; max-width:900px; width:95%; margin:20px auto; border-radius:8px;">
+    <div class="no-print" style="display:flex; justify-content:space-between; margin-bottom:15px;">
+      <h2>📄 Fallback Document</h2>
+      <div>
+        <button id="print-fallback-btn" class="btn-green">🖨️ Print</button>
+        <button id="close-fallback-btn" class="btn-red">Close</button>
+      </div>
+    </div>
+    <div id="fallback-content"></div>
   </div>
 </div>
 
@@ -362,6 +458,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var TMS_NS = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.23';
   window.monitorData = [];
+  window.ie818Items = []; // Store loaded items for IE818
 
   // CN Code auto-fill mapping
   var CN_CODES = {
@@ -371,76 +468,30 @@ document.addEventListener('DOMContentLoaded', function() {
     'E420': '27101211'
   };
 
-  // Full UN/CEFACT Kind of Packages list for excise (includes CK - Cask)
   var PACKAGE_CODES = [
-    { code: 'BA', name: 'Barrel' },
-    { code: 'BB', name: 'Bobbin' },
-    { code: 'BD', name: 'Board' },
-    { code: 'BE', name: 'Bundle' },
-    { code: 'BG', name: 'Bag' },
-    { code: 'BI', name: 'Bin' },
-    { code: 'BJ', name: 'Bucket' },
-    { code: 'BK', name: 'Basket' },
-    { code: 'BL', name: 'Bale' },
-    { code: 'BO', name: 'Bottle' },
-    { code: 'BX', name: 'Box' },
-    { code: 'CA', name: 'Can' },
-    { code: 'CB', name: 'Crate' },
-    { code: 'CC', name: 'Carrying case' },
-    { code: 'CF', name: 'Coffer' },
-    { code: 'CI', name: 'Canister' },
-    { code: 'CK', name: 'Cask' },
-    { code: 'CL', name: 'Coil' },
-    { code: 'CM', name: 'Card' },
-    { code: 'CN', name: 'Container' },
-    { code: 'CO', name: 'Carboy' },
-    { code: 'CS', name: 'Case' },
-    { code: 'CT', name: 'Carton' },
-    { code: 'CU', name: 'Cup' },
-    { code: 'CV', name: 'Cover' },
-    { code: 'CX', name: 'Chest' },
-    { code: 'CY', name: 'Cylinder' },
-    { code: 'DR', name: 'Drum' },
-    { code: 'DS', name: 'Display' },
-    { code: 'EN', name: 'Envelope' },
-    { code: 'FB', name: 'Flexible bag' },
-    { code: 'FI', name: 'Firkin' },
-    { code: 'FL', name: 'Flask' },
-    { code: 'GI', name: 'Girder' },
-    { code: 'KG', name: 'Keg (large)' },
-    { code: 'KE', name: 'Keg' },
-    { code: 'NE', name: 'Unpacked or unpackaged' },
-    { code: 'NS', name: 'Nest' },
-    { code: 'OT', name: 'Other' },
-    { code: 'OU', name: 'Container, outer' },
-    { code: 'PK', name: 'Package' },
-    { code: 'PL', name: 'Pail' },
-    { code: 'PU', name: 'Tray pack' },
-    { code: 'PX', name: 'Pallet' },
-    { code: 'PZ', name: 'Pallet box' },
-    { code: 'RL', name: 'Reel' },
-    { code: 'RO', name: 'Roll' },
-    { code: 'SC', name: 'Sachet' },
-    { code: 'SK', name: 'Skein' },
-    { code: 'SL', name: 'Slab' },
-    { code: 'SM', name: 'Sheet' },
-    { code: 'ST', name: 'Sheet' },
-    { code: 'SU', name: 'Suitcase' },
-    { code: 'TB', name: 'Tub' },
-    { code: 'TC', name: 'Tube container' },
-    { code: 'TD', name: 'Tube' },
-    { code: 'TG', name: 'Tank container' },
-    { code: 'TK', name: 'Tank' },
-    { code: 'TN', name: 'Tin' },
-    { code: 'TR', name: 'Trunk' },
-    { code: 'TS', name: 'Tins' },
-    { code: 'TU', name: 'Tube' },
-    { code: 'UN', name: 'Unit' },
-    { code: 'VG', name: 'Bulk, gas' },
-    { code: 'VI', name: 'Vial' },
-    { code: 'VR', name: 'Bulk, liquid' },
-    { code: 'VO', name: 'Bulk, solid' },
-    { code: 'XE', name: 'Bin pallet' }
+    { code: 'BA', name: 'Barrel' }, { code: 'BB', name: 'Bobbin' }, { code: 'BD', name: 'Board' },
+    { code: 'BE', name: 'Bundle' }, { code: 'BG', name: 'Bag' }, { code: 'BI', name: 'Bin' },
+    { code: 'BJ', name: 'Bucket' }, { code: 'BK', name: 'Basket' }, { code: 'BL', name: 'Bale' },
+    { code: 'BO', name: 'Bottle' }, { code: 'BX', name: 'Box' }, { code: 'CA', name: 'Can' },
+    { code: 'CB', name: 'Crate' }, { code: 'CC', name: 'Carrying case' }, { code: 'CF', name: 'Coffer' },
+    { code: 'CI', name: 'Canister' }, { code: 'CK', name: 'Cask' }, { code: 'CL', name: 'Coil' },
+    { code: 'CM', name: 'Card' }, { code: 'CN', name: 'Container' }, { code: 'CO', name: 'Carboy' },
+    { code: 'CS', name: 'Case' }, { code: 'CT', name: 'Carton' }, { code: 'CU', name: 'Cup' },
+    { code: 'CV', name: 'Cover' }, { code: 'CX', name: 'Chest' }, { code: 'CY', name: 'Cylinder' },
+    { code: 'DR', name: 'Drum' }, { code: 'DS', name: 'Display' }, { code: 'EN', name: 'Envelope' },
+    { code: 'FB', name: 'Flexible bag' }, { code: 'FI', name: 'Firkin' }, { code: 'FL', name: 'Flask' },
+    { code: 'GI', name: 'Girder' }, { code: 'KG', name: 'Keg (large)' }, { code: 'KE', name: 'Keg' },
+    { code: 'NE', name: 'Unpacked' }, { code: 'NS', name: 'Nest' }, { code: 'OT', name: 'Other' },
+    { code: 'OU', name: 'Container, outer' }, { code: 'PK', name: 'Package' }, { code: 'PL', name: 'Pail' },
+    { code: 'PU', name: 'Tray pack' }, { code: 'PX', name: 'Pallet' }, { code: 'PZ', name: 'Pallet box' },
+    { code: 'RL', name: 'Reel' }, { code: 'RO', name: 'Roll' }, { code: 'SC', name: 'Sachet' },
+    { code: 'SK', name: 'Skein' }, { code: 'SL', name: 'Slab' }, { code: 'SM', name: 'Sheet' },
+    { code: 'ST', name: 'Sheet' }, { code: 'SU', name: 'Suitcase' }, { code: 'TB', name: 'Tub' },
+    { code: 'TC', name: 'Tube container' }, { code: 'TD', name: 'Tube' }, { code: 'TG', name: 'Tank container' },
+    { code: 'TK', name: 'Tank' }, { code: 'TN', name: 'Tin' }, { code: 'TR', name: 'Trunk' },
+    { code: 'TS', name: 'Tins' }, { code: 'TU', name: 'Tube' }, { code: 'UN', name: 'Unit' },
+    { code: 'VG', name: 'Bulk, gas' }, { code: 'VI', name: 'Vial' }, { code: 'VR', name: 'Bulk, liquid' },
+    { code: 'VO', name: 'Bulk, solid' }, { code: 'XE', name: 'Bin pallet' }
   ];
 
   function buildPackageOptions(selected) {
@@ -449,6 +500,148 @@ document.addEventListener('DOMContentLoaded', function() {
       return '<option value="' + p.code + '"' + sel + '>' + p.code + ' - ' + p.name + '</option>';
     }).join('');
   }
+
+  // ==================== PROFILES ====================
+  function getProfiles() {
+    try { return JSON.parse(localStorage.getItem('emcs_profiles') || '[]'); } catch(e) { return []; }
+  }
+  function saveProfiles(profiles) {
+    localStorage.setItem('emcs_profiles', JSON.stringify(profiles));
+  }
+  function getActiveProfileId() {
+    return parseInt(localStorage.getItem('emcs_active_profile') || '0');
+  }
+  function setActiveProfileId(id) {
+    localStorage.setItem('emcs_active_profile', id.toString());
+  }
+  function getActiveProfile() {
+    var profiles = getProfiles();
+    var id = getActiveProfileId();
+    return profiles.find(function(p) { return p.id === id; }) || profiles[0] || null;
+  }
+
+  function initDefaultProfiles() {
+    if (localStorage.getItem('emcs_profiles_initialized')) return;
+    var defaults = [
+      { id: 1, name: 'Default Consignor', type: 'consignor', ern: 'GBWK002281023', traderName: 'Test Consignor Ltd', street: 'Test Street', postcode: 'E1 8QS', city: 'London', office: 'GB004098' },
+      { id: 2, name: 'Default Consignee', type: 'consignee', ern: 'GBWKQOZ8OVLYR', traderName: 'Test Consignee Ltd', street: 'Delivery Road', postcode: 'M1 1AA', city: 'Manchester', office: 'GB004098' }
+    ];
+    saveProfiles(defaults);
+    setActiveProfileId(1);
+    localStorage.setItem('emcs_profiles_initialized', '1');
+  }
+  initDefaultProfiles();
+
+  function renderProfileDropdown() {
+    var profiles = getProfiles();
+    var activeId = getActiveProfileId();
+    var sel = document.getElementById('active-profile-select');
+    sel.innerHTML = profiles.map(function(p) {
+      var selected = (p.id === activeId) ? ' selected' : '';
+      return '<option value="' + p.id + '"' + selected + '>' + p.name + ' (' + p.ern + ')</option>';
+    }).join('');
+  }
+
+  function renderProfileChips() {
+    var profiles = getProfiles();
+    var activeId = getActiveProfileId();
+    var container = document.getElementById('profile-chips');
+    if (profiles.length === 0) {
+      container.innerHTML = '<p style="color:#666;">No profiles yet. Create one above.</p>';
+      return;
+    }
+    container.innerHTML = profiles.map(function(p) {
+      var activeClass = (p.id === activeId) ? ' active' : '';
+      return '<div class="profile-chip' + activeClass + '" data-id="' + p.id + '">' +
+        '<span class="load-prof">' + p.name + ' (' + p.ern + ') - ' + p.type + '</span>' +
+        '<span class="del-prof" data-id="' + p.id + '" title="Delete">✕</span>' +
+        '</div>';
+    }).join('');
+
+    container.querySelectorAll('.load-prof').forEach(function(el) {
+      el.addEventListener('click', function() {
+        var id = parseInt(this.parentElement.getAttribute('data-id'));
+        setActiveProfileId(id);
+        applyProfileToForms();
+        renderProfileDropdown();
+        renderProfileChips();
+        alert('Switched to profile: ' + getActiveProfile().name);
+      });
+    });
+    container.querySelectorAll('.del-prof').forEach(function(el) {
+      el.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var id = parseInt(this.getAttribute('data-id'));
+        var profiles = getProfiles();
+        if (profiles.length <= 1) { alert('You must have at least one profile.'); return; }
+        if (confirm('Delete this profile?')) {
+          profiles = profiles.filter(function(p) { return p.id !== id; });
+          saveProfiles(profiles);
+          if (getActiveProfileId() === id) setActiveProfileId(profiles[0].id);
+          renderProfileDropdown();
+          renderProfileChips();
+          applyProfileToForms();
+        }
+      });
+    });
+  }
+
+  function applyProfileToForms() {
+    var p = getActiveProfile();
+    if (!p) return;
+    if (p.type === 'consignor') {
+      document.getElementById('s-consignor-ern').value = p.ern || '';
+      document.getElementById('s-consignor-name').value = p.traderName || '';
+      document.getElementById('s-consignor-street').value = p.street || '';
+      document.getElementById('s-consignor-postcode').value = p.postcode || '';
+      document.getElementById('s-consignor-city').value = p.city || '';
+      document.getElementById('s-dispatch-office').value = p.office || 'GB004098';
+    } else {
+      document.getElementById('s-consignee-ern').value = p.ern || '';
+      document.getElementById('s-consignee-name').value = p.traderName || '';
+      document.getElementById('s-consignee-street').value = p.street || '';
+      document.getElementById('s-consignee-postcode').value = p.postcode || '';
+      document.getElementById('s-consignee-city').value = p.city || '';
+    }
+    localStorage.setItem('last_ern', p.ern);
+  }
+
+  document.getElementById('active-profile-select').addEventListener('change', function() {
+    setActiveProfileId(parseInt(this.value));
+    applyProfileToForms();
+    renderProfileChips();
+  });
+
+  document.getElementById('create-profile-btn').addEventListener('click', function() {
+    var name = document.getElementById('prof-name').value.trim();
+    var ern = document.getElementById('prof-ern').value.trim();
+    if (!name || !ern) { alert('Name and ERN are required.'); return; }
+    if (!/^[A-Z]{2}[A-Z0-9]{11}$/.test(ern)) { alert('Invalid ERN format.'); return; }
+    var profiles = getProfiles();
+    var newId = profiles.length > 0 ? Math.max.apply(null, profiles.map(function(p) { return p.id; })) + 1 : 1;
+    profiles.push({
+      id: newId,
+      name: name,
+      type: document.getElementById('prof-type').value,
+      ern: ern,
+      traderName: document.getElementById('prof-trader-name').value,
+      street: document.getElementById('prof-street').value,
+      postcode: document.getElementById('prof-postcode').value,
+      city: document.getElementById('prof-city').value,
+      office: document.getElementById('prof-office').value
+    });
+    saveProfiles(profiles);
+    renderProfileDropdown();
+    renderProfileChips();
+    ['prof-name', 'prof-ern', 'prof-trader-name', 'prof-street', 'prof-postcode', 'prof-city'].forEach(function(id) {
+      document.getElementById(id).value = '';
+    });
+    alert('Profile created!');
+  });
+
+  renderProfileDropdown();
+  renderProfileChips();
+  applyProfileToForms();
 
   // ==================== AUTH ====================
   function checkAuth() {
@@ -491,7 +684,6 @@ document.addEventListener('DOMContentLoaded', function() {
   async function getHeaders() {
     return { 'Authorization': 'Bearer ' + localStorage.getItem('hmrc_token'), 'x-client-ip': '127.0.0.1' };
   }
-
   function xmlField(tag, value) {
     if (!value || value.trim() === '') return '';
     return '<urn:' + tag + '>' + value + '</urn:' + tag + '>';
@@ -504,12 +696,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var alcoholCodes = ['B000', 'W200', 'W300', 'I000', 'S200', 'S300', 'S400', 'S500'];
     abvField.style.display = alcoholCodes.includes(pc) ? 'block' : 'none';
   }
-
   function autoFillCNCode(item) {
     var pc = item.querySelector('.s-product-code').value.toUpperCase();
     if (CN_CODES[pc]) item.querySelector('.s-cn-code').value = CN_CODES[pc];
   }
-
   function bindItemEvents(item) {
     item.querySelector('.s-product-code').addEventListener('change', function() {
       autoFillCNCode(this.closest('.item-field'));
@@ -518,12 +708,8 @@ document.addEventListener('DOMContentLoaded', function() {
     item.querySelector('.s-bulk').addEventListener('change', function() {
       var p = this.closest('.item-field');
       var netField = p.querySelector('.s-net-weight');
-      if (this.checked) {
-        netField.value = p.querySelector('.s-weight').value;
-        netField.disabled = true;
-      } else {
-        netField.disabled = false;
-      }
+      if (this.checked) { netField.value = p.querySelector('.s-weight').value; netField.disabled = true; }
+      else { netField.disabled = false; }
     });
     item.querySelector('.s-weight').addEventListener('input', function() {
       var p = this.closest('.item-field');
@@ -540,17 +726,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     updateItemFieldVisibility(item);
   }
-
   function renumberItems() {
     var items = document.querySelectorAll('#goods-items-container .item-field');
-    document.getElementById('s-item-count').value = items.length;
     items.forEach(function(it, idx) {
       it.setAttribute('data-item', idx + 1);
       var h4 = it.querySelector('h4');
       if (h4) h4.textContent = 'Item ' + (idx + 1);
     });
   }
-
   function createItemElement(idx, data) {
     var it = data || {};
     var div = document.createElement('div');
@@ -574,9 +757,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '<div class="field"><label>Commercial Description <span class="required-asterisk">*</span></label><input type="text" class="s-comm-desc" value="' + (it.commDesc || '') + '" required></div>' +
         '<div class="field"><label>Brand Name</label><input type="text" class="s-brand" value="' + (it.brand || '') + '"></div>' +
         '<div class="field"><label>ABV %</label><input type="number" class="s-abv" value="' + (it.abv !== undefined ? it.abv : 5.0) + '" step="0.01"></div>' +
-        '<div class="field"><label>Kind of Packages <span class="required-asterisk">*</span></label>' +
-          '<select class="s-package-kind" required>' + buildPackageOptions(it.pkgKind || 'BA') + '</select>' +
-        '</div>' +
+        '<div class="field"><label>Kind of Packages <span class="required-asterisk">*</span></label><select class="s-package-kind" required>' + buildPackageOptions(it.pkgKind || 'BA') + '</select></div>' +
         '<div class="field"><label>Number of Packages <span class="required-asterisk">*</span></label><input type="number" class="s-package-count" value="' + (it.pkgCount !== undefined ? it.pkgCount : 2) + '" min="0" required></div>' +
         '<div class="field"><label>Shipping Mark</label><input type="text" class="s-ship-mark" value="' + (it.shipMark || '') + '" placeholder="Optional"></div>' +
         '<div class="field"><label>Commercial Seal ID</label><input type="text" class="s-seal" value="' + (it.seal || '') + '" placeholder="Optional"></div>' +
@@ -584,7 +765,6 @@ document.addEventListener('DOMContentLoaded', function() {
       '</div>';
     return div;
   }
-
   function renderGoodsItems(count, existingItems) {
     var container = document.getElementById('goods-items-container');
     container.innerHTML = '';
@@ -595,11 +775,6 @@ document.addEventListener('DOMContentLoaded', function() {
       bindItemEvents(div);
     }
   }
-
-  window.generateItemFields = function() {
-    var count = parseInt(document.getElementById('s-item-count').value) || 1;
-    renderGoodsItems(count);
-  };
   renderGoodsItems(1);
 
   document.getElementById('add-goods-item-btn').addEventListener('click', function() {
@@ -608,7 +783,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var div = createItemElement(newIdx, {});
     container.appendChild(div);
     bindItemEvents(div);
-    document.getElementById('s-item-count').value = newIdx;
   });
 
   // ==================== CSV EXPORT ====================
@@ -633,7 +807,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('mon-loading').style.display = 'block';
     document.getElementById('mon-table').style.display = 'none';
     var h = await getHeaders();
-    var ern = localStorage.getItem('last_ern') || 'GBWK002281023';
+    var p = getActiveProfile();
+    var ern = (p && p.ern) || localStorage.getItem('last_ern') || 'GBWK002281023';
     try {
       var res = await fetch('/api/emcs?endpoint=/customs/excise/movements?ern=' + encodeURIComponent(ern), { headers: h });
       var text = await res.text();
@@ -646,7 +821,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function applyMonitorFilters() {
     var direction = document.getElementById('mon-direction').value;
-    var myErn = localStorage.getItem('last_ern') || 'GBWK002281023';
+    var p = getActiveProfile();
+    var myErn = (p && p.ern) || localStorage.getItem('last_ern') || 'GBWK002281023';
     var today = new Date();
     var dispFrom = document.getElementById('mon-disp-from').value;
     var dispTo = document.getElementById('mon-disp-to').value;
@@ -697,6 +873,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '<td style="text-align:center;">' +
           '<button class="btn-small" onclick="viewMovement(\'' + m.movementId + '\')">View</button>' +
           (isOut ? '<button class="btn-small btn-red" onclick="cancelMovement(\'' + m.movementId + '\', \'' + (m.administrativeReferenceCode || '') + '\')">Cancel</button>' : '') +
+          (!isOut ? '<button class="btn-small btn-green" onclick="receiptMovement(\'' + m.movementId + '\', \'' + (m.administrativeReferenceCode || '') + '\')">Receipt</button>' : '') +
         '</td>';
       tbody.appendChild(tr);
     });
@@ -707,11 +884,17 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('[data-tab="tab-get-movement"]').click();
     document.getElementById('get-single-movement-btn').click();
   };
-
   window.cancelMovement = function(movId, arc) {
     document.getElementById('sm-mov-id').value = movId;
     document.getElementById('sm-arc').value = arc;
     document.getElementById('sm-type').value = 'IE810';
+    document.getElementById('sm-type').dispatchEvent(new Event('change'));
+    document.querySelector('[data-tab="tab-submit-msg"]').click();
+  };
+  window.receiptMovement = function(movId, arc) {
+    document.getElementById('sm-mov-id').value = movId;
+    document.getElementById('sm-arc').value = arc;
+    document.getElementById('sm-type').value = 'IE818';
     document.getElementById('sm-type').dispatchEvent(new Event('change'));
     document.querySelector('[data-tab="tab-submit-msg"]').click();
   };
@@ -724,6 +907,139 @@ document.addEventListener('DOMContentLoaded', function() {
     applyMonitorFilters();
   });
   document.getElementById('mon-refresh').addEventListener('click', fetchMonitorData);
+
+  // ==================== FALLBACK DOCUMENT ====================
+  document.getElementById('mon-fallback-btn').addEventListener('click', function() {
+    if (window.monitorData.length === 0) {
+      alert('No movements loaded. Click Refresh Data first.');
+      return;
+    }
+    var p = getActiveProfile();
+    var html = '<div class="fallback-doc">' +
+      '<h1>EXCISE MOVEMENT CONTROL SYSTEM - FALLBACK DOCUMENT</h1>' +
+      '<p style="text-align:center; font-weight:bold;">Generated: ' + new Date().toLocaleString() + '</p>' +
+      '<p style="text-align:center; color:#d4351c; font-weight:bold;">⚠️ USE ONLY IF EMCS SYSTEM IS UNAVAILABLE</p>' +
+      '<div class="doc-section"><h3>Trader Details</h3><table>' +
+      '<tr><td class="label">Profile Name:</td><td>' + (p ? p.name : 'N/A') + '</td></tr>' +
+      '<tr><td class="label">ERN:</td><td>' + (p ? p.ern : 'N/A') + '</td></tr>' +
+      '<tr><td class="label">Type:</td><td>' + (p ? p.type : 'N/A') + '</td></tr>' +
+      '</table></div>' +
+      '<div class="doc-section"><h3>Open Movements (' + window.monitorData.length + ')</h3>' +
+      '<table><thead><tr><th>LRN</th><th>ARC</th><th>Direction</th><th>Counterparty</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+    window.monitorData.forEach(function(m) {
+      var myErn = p ? p.ern : '';
+      var isOut = m.consignorId === myErn;
+      html += '<tr><td>' + (m.localReferenceNumber || '') + '</td>' +
+        '<td>' + (m.administrativeReferenceCode || 'Pending') + '</td>' +
+        '<td>' + (isOut ? 'OUT' : 'IN') + '</td>' +
+        '<td>' + (isOut ? m.consigneeId : m.consignorId) + '</td>' +
+        '<td>' + (m.lastUpdated ? m.lastUpdated.split('T')[0] : '-') + '</td>' +
+        '<td>Open</td></tr>';
+    });
+    html += '</tbody></table></div>' +
+      '<div class="doc-section"><h3>Authorisation Signature</h3>' +
+      '<p>___________________________ &nbsp;&nbsp;&nbsp; Date: ___________</p>' +
+      '<p style="font-size:11px; margin-top:20px;">This document must be presented to the competent authority if EMCS is unavailable. Submit corresponding IE815 messages via fallback procedures per Excise Notice 197 Section 3.</p>' +
+      '</div></div>';
+    document.getElementById('fallback-content').innerHTML = html;
+    document.getElementById('fallback-modal').style.display = 'flex';
+  });
+
+  document.getElementById('close-fallback-btn').addEventListener('click', function() {
+    document.getElementById('fallback-modal').style.display = 'none';
+  });
+  document.getElementById('print-fallback-btn').addEventListener('click', function() {
+    window.print();
+  });
+
+  // ==================== IE818 ITEM-LEVEL ====================
+  function showHideIE818Section() {
+    var msgType = document.getElementById('sm-type').value;
+    document.getElementById('ie818-section').style.display = (msgType === 'IE818') ? 'block' : 'none';
+  }
+
+  document.getElementById('load-818-items-btn').addEventListener('click', async function() {
+    var movId = document.getElementById('sm-mov-id').value || localStorage.getItem('last_movement_id');
+    if (!movId) { alert('Movement ID required.'); return; }
+    var h = await getHeaders();
+    try {
+      var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId), { headers: h });
+      var text = await res.text();
+      var data = JSON.parse(text);
+      
+      // Try to extract items from the movement. The API may return different structures.
+      // We'll build a default set if the API doesn't return item details.
+      var items = [];
+      if (data.bodyEadEsad && Array.isArray(data.bodyEadEsad)) {
+        items = data.bodyEadEsad;
+      } else if (data.items && Array.isArray(data.items)) {
+        items = data.items;
+      } else {
+        // Fallback: create a placeholder item
+        items = [{ bodyRecordUniqueReference: 1, exciseProductCode: 'B000', quantity: 0, description: 'Item (details unavailable - please fill manually)' }];
+      }
+      
+      window.ie818Items = items;
+      renderIE818Items(items);
+    } catch(e) {
+      alert('Failed to load movement: ' + e.message);
+    }
+  });
+
+  function renderIE818Items(items) {
+    var container = document.getElementById('ie818-items-container');
+    if (items.length === 0) {
+      container.innerHTML = '<p>No items found in this movement.</p>';
+      return;
+    }
+    var html = '<table class="receipt-table"><thead><tr>' +
+      '<th>#</th><th>Product Code</th><th>Description</th><th>Expected Qty</th>' +
+      '<th>Received Qty</th><th>Status</th><th>Reason Code</th><th>Notes</th>' +
+      '</tr></thead><tbody>';
+    items.forEach(function(it, idx) {
+      var ref = it.bodyRecordUniqueReference || (idx + 1);
+      var pc = it.exciseProductCode || '';
+      var desc = it.commercialDescription || it.description || '';
+      var expQty = it.quantity || 0;
+      html += '<tr data-idx="' + idx + '">' +
+        '<td>' + ref + '</td>' +
+        '<td>' + pc + '</td>' +
+        '<td>' + desc + '</td>' +
+        '<td><input type="number" class="ie818-expected" value="' + expQty + '" step="0.001" readonly style="background:#eee;"></td>' +
+        '<td><input type="number" class="ie818-received" value="' + expQty + '" step="0.001" onchange="updateIE818Row(this)"></td>' +
+        '<td class="ie818-status">OK</td>' +
+        '<td><select class="ie818-reason">' +
+          '<option value="">-- None --</option>' +
+          '<option value="1">1 - Breakage</option>' +
+          '<option value="2">2 - Leakage</option>' +
+          '<option value="3">3 - Quantity discrepancy</option>' +
+          '<option value="4">4 - Product type discrepancy</option>' +
+          '<option value="5">5 - Other</option>' +
+        '</select></td>' +
+        '<td><input type="text" class="ie818-notes" placeholder="Optional notes"></td>' +
+        '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  window.updateIE818Row = function(input) {
+    var row = input.closest('tr');
+    var expected = parseFloat(row.querySelector('.ie818-expected').value) || 0;
+    var received = parseFloat(input.value) || 0;
+    var statusCell = row.querySelector('.ie818-status');
+    row.classList.remove('shortage', 'excess', 'ok');
+    if (received < expected) {
+      statusCell.textContent = 'SHORT (' + (expected - received).toFixed(3) + ')';
+      row.classList.add('shortage');
+    } else if (received > expected) {
+      statusCell.textContent = 'EXCESS (+' + (received - expected).toFixed(3) + ')';
+      row.classList.add('excess');
+    } else {
+      statusCell.textContent = 'OK';
+      row.classList.add('ok');
+    }
+  };
 
   // ==================== SUBMIT MOVEMENT ====================
   document.getElementById('submit-movement-btn').addEventListener('click', async function() {
@@ -744,7 +1060,6 @@ document.addEventListener('DOMContentLoaded', function() {
       var commDesc = item.querySelector('.s-comm-desc').value;
       var brand = item.querySelector('.s-brand').value;
       var shipMark = item.querySelector('.s-ship-mark').value;
-      var seal = item.querySelector('.s-seal').value;
 
       bodyEadEsadXml += '<urn:BodyEadEsad>' +
         '<urn:BodyRecordUniqueReference>' + (idx + 1) + '</urn:BodyRecordUniqueReference>' +
@@ -865,16 +1180,32 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
   });
 
-  // ==================== TAB 4: SUBMIT MESSAGE ====================
+  // ==================== TAB 4: SUBMIT MESSAGE (with IE818 item-level) ====================
   document.getElementById('sm-type').addEventListener('change', function() {
+    showHideIE818Section();
     var container = document.getElementById('msg-specific-fields');
     var msgType = this.value;
+    
+    // For IE818, we don't show the old global fields - the item-level section handles it
+    if (msgType === 'IE818') {
+      container.innerHTML = '<div class="section-ie818"><h3 style="margin-top:0; border:none; font-size:1em;">IE818 Global Fields</h3>' +
+        '<div class="form-grid">' +
+        '<div class="field"><label>Date of Arrival</label><input type="date" id="msg-arrival-date" value="' + today + '"></div>' +
+        '<div class="field"><label>Global Conclusion</label>' +
+        '<select id="msg-receipt-conclusion">' +
+        '<option value="1">1 - Acceptable (all items OK)</option>' +
+        '<option value="2" selected>2 - Unacceptable with reservations (some items short/damaged)</option>' +
+        '<option value="3">3 - Refusal (entire shipment rejected)</option>' +
+        '</select></div>' +
+        '</div>' +
+        '<p style="font-size:12px; color:#666; margin-top:10px;">💡 Use the item-level table above to report per-item shortages/excesses. The global conclusion should match: if any item has a shortage, use option 2.</p>' +
+        '</div>';
+      return;
+    }
+
     var html = '<h3 style="margin-top:20px;">Message-Specific Fields</h3><div class="form-grid">';
     if (msgType === 'IE810') {
       html += '<div class="field"><label>Cancellation Reason</label><select id="msg-cancel-reason"><option value="1">1 - Duplicate</option><option value="2">2 - Erroneous</option><option value="3" selected>3 - Before dispatch</option><option value="4">4 - During transit</option></select></div>';
-    } else if (msgType === 'IE818') {
-      html += '<div class="field"><label>Date of Arrival</label><input type="date" id="msg-arrival-date" value="' + today + '"></div>';
-      html += '<div class="field"><label>Global Conclusion</label><select id="msg-receipt-conclusion"><option value="1">1 - Acceptable</option><option value="2">2 - Unacceptable with reservations</option><option value="3">3 - Refusal</option></select></div>';
     } else if (msgType === 'IE813') {
       html += '<div class="field"><label>New Destination Type</label><select id="msg-dest-type"><option value="1">1 - Tax warehouse</option><option value="2">2 - Registered consignee</option></select></div>';
       html += '<div class="field"><label>New Consignee ERN</label><input type="text" id="msg-new-consignee" value="GBWK240176600"></div>';
@@ -921,11 +1252,55 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (msgType === 'IE818') {
       var arrivalDate = document.getElementById('msg-arrival-date').value;
       var conclusion = document.getElementById('msg-receipt-conclusion').value;
-      bodyXml = '<urn:AcceptedOrRejectedReportOfReceiptExport><urn:Attributes><urn:DateAndTimeOfValidationOfReportOfReceiptExport>' + prepareTime + '</urn:DateAndTimeOfValidationOfReportOfReceiptExport></urn:Attributes>' +
+      
+      // Build per-item BodyReportOfReceiptExport entries
+      var bodyReportXml = '';
+      var hasShortage = false;
+      window.ie818Items.forEach(function(it, idx) {
+        var row = document.querySelector('#ie818-items-container tr[data-idx="' + idx + '"]');
+        if (!row) return;
+        var expected = parseFloat(row.querySelector('.ie818-expected').value) || 0;
+        var received = parseFloat(row.querySelector('.ie818-received').value) || 0;
+        var reason = row.querySelector('.ie818-reason').value;
+        var notes = row.querySelector('.ie818-notes').value;
+        var ref = it.bodyRecordUniqueReference || (idx + 1);
+        
+        if (received !== expected || reason) {
+          hasShortage = true;
+          bodyReportXml += '<urn:BodyReportOfReceiptExport>' +
+            '<urn:BodyRecordUniqueReference>' + ref + '</urn:BodyRecordUniqueReference>';
+          if (received !== expected) {
+            var diffCode = received < expected ? 'S' : 'E'; // Shortage or Excess
+            bodyReportXml += '<urn:ObservedShortageOrExcess>' +
+              '<urn:ObservedQuantity>' + received + '</urn:ObservedQuantity>' +
+              '<urn:ObservedShortageOrExcessCode>' + diffCode + '</urn:ObservedShortageOrExcessCode>' +
+              '</urn:ObservedShortageOrExcess>';
+          }
+          if (reason) {
+            bodyReportXml += '<urn:UnsatisfactoryReason>' +
+              '<urn:UnsatisfactoryReasonCode>' + reason + '</urn:UnsatisfactoryReasonCode>' +
+              (notes ? '<urn:ComplementaryInformation language="en">' + notes + '</urn:ComplementaryInformation>' : '') +
+              '</urn:UnsatisfactoryReason>';
+          }
+          bodyReportXml += '</urn:BodyReportOfReceiptExport>';
+        }
+      });
+
+      // Auto-adjust global conclusion if there are shortages
+      if (hasShortage && conclusion === '1') {
+        conclusion = '2'; // Upgrade to "unacceptable with reservations"
+      }
+
+      bodyXml = '<urn:AcceptedOrRejectedReportOfReceiptExport>' +
+        '<urn:Attributes><urn:DateAndTimeOfValidationOfReportOfReceiptExport>' + prepareTime + '</urn:DateAndTimeOfValidationOfReportOfReceiptExport></urn:Attributes>' +
         '<urn:ConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName></urn:ConsigneeTrader>' +
         '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
         '<urn:DestinationOffice><urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber></urn:DestinationOffice>' +
-        '<urn:ReportOfReceiptExport><urn:DateOfArrivalOfExciseProducts>' + arrivalDate + '</urn:DateOfArrivalOfExciseProducts><urn:GlobalConclusionOfReceipt>' + conclusion + '</urn:GlobalConclusionOfReceipt></urn:ReportOfReceiptExport>' +
+        '<urn:ReportOfReceiptExport>' +
+        '<urn:DateOfArrivalOfExciseProducts>' + arrivalDate + '</urn:DateOfArrivalOfExciseProducts>' +
+        '<urn:GlobalConclusionOfReceipt>' + conclusion + '</urn:GlobalConclusionOfReceipt>' +
+        '</urn:ReportOfReceiptExport>' +
+        bodyReportXml +
         '</urn:AcceptedOrRejectedReportOfReceiptExport>';
     } else if (msgType === 'IE837') {
       var submitterType = document.getElementById('msg-submitter-type').value;
