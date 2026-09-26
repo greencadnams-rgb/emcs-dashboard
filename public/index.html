@@ -62,6 +62,8 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .status-receipted { background: #00703c; }
 .status-cancelled { background: #d4351c; }
 .status-pending { background: #ff9800; }
+.status-interrupted { background: #ff5722; }
+.status-changed { background: #2196f3; }
 .warning-row { background-color: #fff5f5 !important; }
 .warning-text { color: #d4351c; font-weight: bold; }
 .arc-cell { font-family: monospace; font-size: 11px; }
@@ -105,6 +107,11 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .parsed-card .type-badge.ie813 { background: #6f42c1; }
 .parsed-card .type-badge.ie819 { background: #e91e63; }
 .parsed-card .type-badge.ie871 { background: #795548; }
+.parsed-card .type-badge.ie839 { background: #c2185b; }
+.parsed-card .type-badge.ie881 { background: #607d8b; }
+.parsed-card .type-badge.ie905 { background: #455a64; }
+.parsed-card .type-badge.ie807 { background: #ff5722; }
+.parsed-card .type-badge.ie803 { background: #0097a7; }
 .parsed-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
 .parsed-field { padding: 8px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #005ea5; }
 .parsed-field .label { font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
@@ -202,7 +209,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
         <div style="overflow-x: auto;">
           <table id="mon-table" class="monitor-table" style="display: none;">
             <thead><tr>
-              <th>ARC / LRN</th><th>Direction</th><th>Counterparty</th><th>Dispatch Date</th><th>Status</th><th style="text-align:center;">Days Open</th><th style="text-align:center;">Actions</th>
+              <th>ARC / LRN</th><th>Direction</th><th>Counterparty</th><th>Dispatch Date</th><th>Status</th><th>Last Message</th><th style="text-align:center;">Days Open</th><th style="text-align:center;">Actions</th>
             </tr></thead>
             <tbody id="mon-tbody"></tbody>
           </table>
@@ -516,12 +523,20 @@ document.addEventListener('DOMContentLoaded', function() {
   window.ie818Items = [];
 
   var MESSAGE_TYPE_NAMES = {
-    'IE801': 'Acceptance (ARC Issued)', 'IE802': 'Acceptance Rejected',
-    'IE803': 'Change of Destination', 'IE807': 'Movement Interrupted',
-    'IE810': 'Cancellation', 'IE813': 'Change of Destination Accepted',
-    'IE818': 'Report of Receipt', 'IE819': 'Alert or Rejection',
-    'IE837': 'Explanation of Delay', 'IE838': 'Delay Explanation Accepted',
-    'IE871': 'Reason for Shortage', 'IE881': 'Manual Closure', 'IE905': 'Control Report'
+    'IE801': 'Acceptance (ARC Issued)',
+    'IE802': 'Acceptance Rejected',
+    'IE803': 'Change of Destination (Alternative)',
+    'IE807': 'Movement Interrupted',
+    'IE810': 'Cancellation',
+    'IE813': 'Change of Destination',
+    'IE818': 'Report of Receipt',
+    'IE819': 'Alert or Rejection',
+    'IE837': 'Explanation of Delay',
+    'IE838': 'Delay Explanation Accepted',
+    'IE839': 'Customs Rejection',
+    'IE871': 'Reason for Shortage',
+    'IE881': 'Manual Closure',
+    'IE905': 'Status Response'
   };
 
   var CN_CODES = {
@@ -867,26 +882,44 @@ document.addEventListener('DOMContentLoaded', function() {
     return match ? match[1] : null;
   }
 
-  async function fetchArcForMovement(movId, h) {
+  // Fetch full movement details (ARC + latest status + latest date)
+  async function fetchMovementDetails(movId, h) {
     try {
       var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages', { headers: h });
-      if (!res.ok) return null;
+      if (!res.ok) return { arc: null, latestStatus: null, latestDate: null };
       var text = await res.text();
       var msgs = JSON.parse(text);
-      if (!Array.isArray(msgs)) return null;
+      if (!Array.isArray(msgs) || msgs.length === 0) return { arc: null, latestStatus: null, latestDate: null };
+      
+      // Decode all messages
+      msgs.forEach(function(m) {
+        if (m.encodedMessage && !m.decodedXml) {
+          try { m.decodedXml = atob(m.encodedMessage); } catch(e) {}
+        }
+      });
+      
+      // Find ARC from first IE801
+      var arc = null;
       for (var i = 0; i < msgs.length; i++) {
-        var m = msgs[i];
-        if (m.messageType === 'IE801') {
-          var xml = m.decodedXml;
-          if (!xml && m.encodedMessage) {
-            try { xml = atob(m.encodedMessage); } catch(e) {}
-          }
-          var arc = extractArcFromXml(xml);
-          if (arc) return arc;
+        if (msgs[i].messageType === 'IE801') {
+          arc = extractArcFromXml(msgs[i].decodedXml);
+          if (arc) break;
         }
       }
-      return null;
-    } catch(e) { return null; }
+      
+      // Find latest message by createdOn timestamp
+      var latest = msgs.reduce(function(prev, current) {
+        return (prev.createdOn > current.createdOn) ? prev : current;
+      });
+      
+      return {
+        arc: arc,
+        latestStatus: latest.messageType,
+        latestDate: latest.createdOn
+      };
+    } catch(e) {
+      return { arc: null, latestStatus: null, latestDate: null };
+    }
   }
 
   // ==================== PROFILES ====================
@@ -1147,15 +1180,17 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!Array.isArray(window.monitorData)) window.monitorData = [];
     } catch(e) { window.monitorData = []; }
 
-    var movementsNeedingArc = window.monitorData.filter(function(m) { return !m.administrativeReferenceCode; });
-    if (movementsNeedingArc.length > 0) {
-      document.getElementById('mon-loading').innerHTML = '<span class="loading-spinner"></span>Fetching ARCs for ' + movementsNeedingArc.length + ' movement(s)...';
+    // Fetch details (ARC + latest status) for ALL movements
+    if (window.monitorData.length > 0) {
+      document.getElementById('mon-loading').innerHTML = '<span class="loading-spinner"></span>Fetching movement details for ' + window.monitorData.length + ' movement(s)...';
       var batchSize = 5;
-      for (var i = 0; i < movementsNeedingArc.length; i += batchSize) {
-        var batch = movementsNeedingArc.slice(i, i + batchSize);
+      for (var i = 0; i < window.monitorData.length; i += batchSize) {
+        var batch = window.monitorData.slice(i, i + batchSize);
         var promises = batch.map(function(m) {
-          return fetchArcForMovement(m.movementId, h).then(function(arc) {
-            if (arc) m.administrativeReferenceCode = arc;
+          return fetchMovementDetails(m.movementId, h).then(function(details) {
+            if (details.arc) m.administrativeReferenceCode = details.arc;
+            if (details.latestStatus) m._latestStatus = details.latestStatus;
+            if (details.latestDate) m._latestStatusDate = details.latestDate;
           });
         });
         await Promise.all(promises);
@@ -1164,6 +1199,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('mon-loading').style.display = 'none';
     applyMonitorFilters();
+  }
+
+  function getMovementStatusBadge(m) {
+    var arc = m.administrativeReferenceCode;
+    var latestStatus = m._latestStatus;
+    
+    // No ARC yet = Pending
+    if (!arc) {
+      return '<span class="status-badge status-pending">Pending</span>';
+    }
+    
+    // Map latest message type to status
+    var statusMap = {
+      'IE801': { label: 'Accepted', cls: 'status-receipted' },
+      'IE810': { label: 'Cancelled', cls: 'status-cancelled' },
+      'IE818': { label: 'Receipted', cls: 'status-receipted' },
+      'IE819': { label: 'Rejected', cls: 'status-cancelled' },
+      'IE807': { label: 'Interrupted', cls: 'status-interrupted' },
+      'IE813': { label: 'Dest. Changed', cls: 'status-changed' },
+      'IE803': { label: 'Dest. Changed', cls: 'status-changed' },
+      'IE839': { label: 'Customs Rejected', cls: 'status-cancelled' },
+      'IE881': { label: 'Manually Closed', cls: 'status-receipted' },
+      'IE837': { label: 'Delay Explained', cls: 'status-pending' },
+      'IE871': { label: 'Shortage Explained', cls: 'status-pending' },
+      'IE905': { label: 'Status Update', cls: 'status-open' }
+    };
+    
+    if (latestStatus && statusMap[latestStatus]) {
+      var s = statusMap[latestStatus];
+      return '<span class="status-badge ' + s.cls + '">' + s.label + '</span>';
+    }
+    
+    // Fallback: has ARC but no known status message
+    return '<span class="status-badge status-receipted">Accepted</span>';
   }
 
   function applyMonitorFilters() {
@@ -1213,9 +1282,8 @@ document.addEventListener('DOMContentLoaded', function() {
           '<span class="lrn">LRN: ' + (m.localReferenceNumber || '') + '</span></div>';
       }
 
-      var statusBadge = arc 
-        ? '<span class="status-badge status-receipted">Accepted</span>' 
-        : '<span class="status-badge status-pending">Pending</span>';
+      var statusBadge = getMovementStatusBadge(m);
+      var lastMessage = m._latestStatus || '-';
 
       var tr = document.createElement('tr');
       tr.className = rowClass;
@@ -1224,6 +1292,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '<td>' + counterparty + '</td>' +
         '<td>' + (m.lastUpdated ? m.lastUpdated.split('T')[0] : '-') + '</td>' +
         '<td>' + statusBadge + '</td>' +
+        '<td style="font-size:11px; font-family:monospace;">' + lastMessage + '</td>' +
         '<td style="text-align:center;" class="' + daysClass + '">' + daysOpen + ' days</td>' +
         '<td style="text-align:center;">' +
           '<button class="btn-small" onclick="viewMovement(\'' + m.movementId + '\')">View</button>' +
