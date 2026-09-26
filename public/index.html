@@ -53,22 +53,45 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .section-filter { background: #f0f4f8; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 .section-profile { background: #f3e5f5; border-left: 3px solid #9c27b0; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 
+/* Monitor Table - Professional Styling */
 .monitor-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
 .monitor-table th { background: #005ea5; color: white; padding: 10px; text-align: left; position: sticky; top: 0; }
-.monitor-table td { padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; }
+.monitor-table td { padding: 10px; border-bottom: 1px solid #e0e0e0; vertical-align: middle; }
 .monitor-table tr:hover { background: #f9f9f9; }
-.status-badge { padding: 3px 8px; border-radius: 12px; color: white; font-size: 11px; font-weight: bold; display: inline-block; }
-.status-open { background: #005ea5; }
-.status-receipted { background: #00703c; }
-.status-cancelled { background: #d4351c; }
-.status-pending { background: #ff9800; }
-.status-interrupted { background: #ff5722; }
-.status-changed { background: #2196f3; }
-.warning-row { background-color: #fff5f5 !important; }
-.warning-text { color: #d4351c; font-weight: bold; }
-.arc-cell { font-family: monospace; font-size: 11px; }
-.arc-cell .arc-value { font-weight: bold; color: #00703c; }
-.arc-cell .pending { color: #ff9800; font-style: italic; }
+
+/* Professional Status Indicator - subtle dot + text */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: #f5f5f5;
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #333;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.dot-green { background: #2e7d32; }
+.dot-red { background: #c62828; }
+.dot-amber { background: #ef6c00; }
+.dot-blue { background: #1565c0; }
+.dot-grey { background: #757575; }
+.dot-purple { background: #6a1b9a; }
+
+.warning-row { background-color: #fff8f0 !important; }
+.warning-text { color: #c62828; font-weight: 500; }
+.arc-cell { font-family: 'SF Mono', Monaco, monospace; font-size: 11px; }
+.arc-cell .arc-value { font-weight: 600; color: #2e7d32; }
+.arc-cell .pending { color: #757575; font-style: italic; }
 .arc-cell .lrn { color: #666; font-size: 10px; display: block; margin-top: 2px; }
 
 .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -99,25 +122,23 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .parsed-container { margin-top: 15px; }
 .parsed-card { background: white; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 .parsed-card h4 { color: #005ea5; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
-.parsed-card .type-badge { background: #005ea5; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
-.parsed-card .type-badge.ie801 { background: #00703c; }
-.parsed-card .type-badge.ie810 { background: #d4351c; }
-.parsed-card .type-badge.ie818 { background: #1976d2; }
-.parsed-card .type-badge.ie837 { background: #ff9800; }
-.parsed-card .type-badge.ie813 { background: #6f42c1; }
-.parsed-card .type-badge.ie819 { background: #e91e63; }
-.parsed-card .type-badge.ie871 { background: #795548; }
-.parsed-card .type-badge.ie839 { background: #c2185b; }
-.parsed-card .type-badge.ie881 { background: #607d8b; }
+.parsed-card .type-badge { background: #505a5f; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+.parsed-card .type-badge.ie801 { background: #2e7d32; }
+.parsed-card .type-badge.ie810 { background: #c62828; }
+.parsed-card .type-badge.ie818 { background: #1565c0; }
+.parsed-card .type-badge.ie837 { background: #ef6c00; }
+.parsed-card .type-badge.ie813, .parsed-card .type-badge.ie803 { background: #6a1b9a; }
+.parsed-card .type-badge.ie819, .parsed-card .type-badge.ie839 { background: #ad1457; }
+.parsed-card .type-badge.ie871 { background: #4e342e; }
+.parsed-card .type-badge.ie881 { background: #37474f; }
 .parsed-card .type-badge.ie905 { background: #455a64; }
-.parsed-card .type-badge.ie807 { background: #ff5722; }
-.parsed-card .type-badge.ie803 { background: #0097a7; }
+.parsed-card .type-badge.ie807 { background: #d84315; }
 .parsed-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
 .parsed-field { padding: 8px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #005ea5; }
 .parsed-field .label { font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
 .parsed-field .value { font-size: 14px; color: #333; margin-top: 3px; word-break: break-word; font-family: monospace; }
-.parsed-field .value.arc { color: #00703c; font-weight: bold; }
-.parsed-field .value.warn { color: #d4351c; }
+.parsed-field .value.arc { color: #2e7d32; font-weight: bold; }
+.parsed-field .value.warn { color: #c62828; }
 
 .raw-toggle { margin-top: 10px; }
 .raw-toggle summary { cursor: pointer; color: #005ea5; font-size: 12px; padding: 5px 0; }
@@ -187,10 +208,26 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <h3 style="margin-top:0; border:none; font-size:1em;">Apply Filters</h3>
           <div class="form-grid">
             <div class="field"><label>Direction</label>
-              <select id="mon-direction"><option value="">All</option><option value="in">Goods in</option><option value="out">Goods out</option></select>
+              <select id="mon-direction">
+                <option value="">All</option>
+                <option value="in">Goods in</option>
+                <option value="out">Goods out</option>
+              </select>
             </div>
             <div class="field"><label>Status</label>
-              <select id="mon-status"><option value="">All</option><option value="open">Open</option><option value="receipted">Receipted</option><option value="cancelled">Cancelled</option></select>
+              <select id="mon-status">
+                <option value="">All statuses</option>
+                <option value="pending">Pending</option>
+                <option value="accepted">Accepted</option>
+                <option value="receipted">Receipted</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="rejected">Rejected</option>
+                <option value="interrupted">Interrupted</option>
+                <option value="changed">Destination Changed</option>
+                <option value="closed">Manually Closed</option>
+                <option value="delay">Delay Explained</option>
+                <option value="shortage">Shortage Explained</option>
+              </select>
             </div>
             <div class="field"><label>Product Code</label>
               <select id="mon-epc"><option value="">All</option><option value="B000">B000 - Beer</option><option value="W200">W200 - Still Wine</option><option value="W300">W300 - Sparkling Wine</option><option value="S200">S200 - Spirits</option><option value="E410">E410 - Leaded Petrol</option><option value="E420">E420 - Unleaded Petrol</option></select>
@@ -344,9 +381,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
             <tr><td><code>lrnie8155755325</code></td><td>Success + IE803 Change Destination</td></tr>
             <tr><td><code>lrnie8155755329</code></td><td>Success + IE839 Custom Rejection</td></tr>
             <tr><td><code>lrnie8155755330</code></td><td>Success + IE881 Manual Closure</td></tr>
-            <tr><td><code>SendA400</code></td><td>400 Bad Request</td></tr>
-            <tr><td><code>SendA404</code></td><td>404 Not Found</td></tr>
-            <tr><td><code>SendA500</code></td><td>500 Server Error</td></tr>
           </table>
         </div>
       </div>
@@ -538,6 +572,9 @@ document.addEventListener('DOMContentLoaded', function() {
     'IE881': 'Manual Closure',
     'IE905': 'Status Response'
   };
+
+  // Terminal states - movement cannot be cancelled or receipted
+  var TERMINAL_STATES = ['IE810', 'IE818', 'IE819', 'IE839', 'IE881'];
 
   var CN_CODES = {
     'B000': '22030001', 'W200': '22042142', 'W300': '22041011',
@@ -772,7 +809,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // 🔑 CAPTURE HMRC TOKEN FROM OAUTH REDIRECT URL
   var urlParams = new URLSearchParams(window.location.search);
   var hmrcTokenFromUrl = urlParams.get('hmrc_token');
   if (hmrcTokenFromUrl) {
@@ -882,7 +918,6 @@ document.addEventListener('DOMContentLoaded', function() {
     return match ? match[1] : null;
   }
 
-  // Fetch full movement details (ARC + latest status + latest date)
   async function fetchMovementDetails(movId, h) {
     try {
       var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages', { headers: h });
@@ -891,14 +926,12 @@ document.addEventListener('DOMContentLoaded', function() {
       var msgs = JSON.parse(text);
       if (!Array.isArray(msgs) || msgs.length === 0) return { arc: null, latestStatus: null, latestDate: null };
       
-      // Decode all messages
       msgs.forEach(function(m) {
         if (m.encodedMessage && !m.decodedXml) {
           try { m.decodedXml = atob(m.encodedMessage); } catch(e) {}
         }
       });
       
-      // Find ARC from first IE801
       var arc = null;
       for (var i = 0; i < msgs.length; i++) {
         if (msgs[i].messageType === 'IE801') {
@@ -907,7 +940,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
       
-      // Find latest message by createdOn timestamp
       var latest = msgs.reduce(function(prev, current) {
         return (prev.createdOn > current.createdOn) ? prev : current;
       });
@@ -1180,7 +1212,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!Array.isArray(window.monitorData)) window.monitorData = [];
     } catch(e) { window.monitorData = []; }
 
-    // Fetch details (ARC + latest status) for ALL movements
     if (window.monitorData.length > 0) {
       document.getElementById('mon-loading').innerHTML = '<span class="loading-spinner"></span>Fetching movement details for ' + window.monitorData.length + ' movement(s)...';
       var batchSize = 5;
@@ -1201,42 +1232,61 @@ document.addEventListener('DOMContentLoaded', function() {
     applyMonitorFilters();
   }
 
-  function getMovementStatusBadge(m) {
+  // Map message type to status category for filtering
+  function getStatusCategory(latestStatus) {
+    if (!latestStatus) return 'pending';
+    var map = {
+      'IE801': 'accepted',
+      'IE810': 'cancelled',
+      'IE818': 'receipted',
+      'IE819': 'rejected',
+      'IE807': 'interrupted',
+      'IE813': 'changed',
+      'IE803': 'changed',
+      'IE839': 'rejected',
+      'IE881': 'closed',
+      'IE837': 'delay',
+      'IE871': 'shortage',
+      'IE905': 'accepted'
+    };
+    return map[latestStatus] || 'accepted';
+  }
+
+  // Professional status indicator - subtle dot + text
+  function getMovementStatusIndicator(m) {
     var arc = m.administrativeReferenceCode;
     var latestStatus = m._latestStatus;
     
-    // No ARC yet = Pending
     if (!arc) {
-      return '<span class="status-badge status-pending">Pending</span>';
+      return '<span class="status-indicator"><span class="status-dot dot-grey"></span>Pending</span>';
     }
     
-    // Map latest message type to status
     var statusMap = {
-      'IE801': { label: 'Accepted', cls: 'status-receipted' },
-      'IE810': { label: 'Cancelled', cls: 'status-cancelled' },
-      'IE818': { label: 'Receipted', cls: 'status-receipted' },
-      'IE819': { label: 'Rejected', cls: 'status-cancelled' },
-      'IE807': { label: 'Interrupted', cls: 'status-interrupted' },
-      'IE813': { label: 'Dest. Changed', cls: 'status-changed' },
-      'IE803': { label: 'Dest. Changed', cls: 'status-changed' },
-      'IE839': { label: 'Customs Rejected', cls: 'status-cancelled' },
-      'IE881': { label: 'Manually Closed', cls: 'status-receipted' },
-      'IE837': { label: 'Delay Explained', cls: 'status-pending' },
-      'IE871': { label: 'Shortage Explained', cls: 'status-pending' },
-      'IE905': { label: 'Status Update', cls: 'status-open' }
+      'IE801': { label: 'Accepted', dot: 'dot-green' },
+      'IE810': { label: 'Cancelled', dot: 'dot-red' },
+      'IE818': { label: 'Receipted', dot: 'dot-green' },
+      'IE819': { label: 'Rejected', dot: 'dot-red' },
+      'IE807': { label: 'Interrupted', dot: 'dot-amber' },
+      'IE813': { label: 'Dest. Changed', dot: 'dot-blue' },
+      'IE803': { label: 'Dest. Changed', dot: 'dot-blue' },
+      'IE839': { label: 'Customs Rejected', dot: 'dot-red' },
+      'IE881': { label: 'Manually Closed', dot: 'dot-green' },
+      'IE837': { label: 'Delay Explained', dot: 'dot-amber' },
+      'IE871': { label: 'Shortage Explained', dot: 'dot-amber' },
+      'IE905': { label: 'Status Update', dot: 'dot-blue' }
     };
     
     if (latestStatus && statusMap[latestStatus]) {
       var s = statusMap[latestStatus];
-      return '<span class="status-badge ' + s.cls + '">' + s.label + '</span>';
+      return '<span class="status-indicator"><span class="status-dot ' + s.dot + '"></span>' + s.label + '</span>';
     }
     
-    // Fallback: has ARC but no known status message
-    return '<span class="status-badge status-receipted">Accepted</span>';
+    return '<span class="status-indicator"><span class="status-dot dot-green"></span>Accepted</span>';
   }
 
   function applyMonitorFilters() {
     var direction = document.getElementById('mon-direction').value;
+    var statusFilter = document.getElementById('mon-status').value;
     var p = getActiveProfile();
     var myErn = (p && p.ern) || localStorage.getItem('last_ern') || 'GBWK002281023';
     var today = new Date();
@@ -1247,6 +1297,13 @@ document.addEventListener('DOMContentLoaded', function() {
       var isOut = m.consignorId === myErn;
       if (direction === 'in' && isOut) return false;
       if (direction === 'out' && !isOut) return false;
+      
+      // Status filter
+      if (statusFilter) {
+        var category = m.administrativeReferenceCode ? getStatusCategory(m._latestStatus) : 'pending';
+        if (statusFilter !== category) return false;
+      }
+      
       if (dispFrom) { var d = m.lastUpdated ? m.lastUpdated.split('T')[0] : ''; if (d < dispFrom) return false; }
       if (dispTo) { var d = m.lastUpdated ? m.lastUpdated.split('T')[0] : ''; if (d > dispTo) return false; }
       return true;
@@ -1282,23 +1339,33 @@ document.addEventListener('DOMContentLoaded', function() {
           '<span class="lrn">LRN: ' + (m.localReferenceNumber || '') + '</span></div>';
       }
 
-      var statusBadge = getMovementStatusBadge(m);
-      var lastMessage = m._latestStatus || '-';
+      var statusIndicator = getMovementStatusIndicator(m);
+      var lastMessage = m._latestStatus || '—';
+      
+      // Smart action buttons
+      var isTerminal = m._latestStatus && TERMINAL_STATES.indexOf(m._latestStatus) !== -1;
+      var actions = '<button class="btn-small" onclick="viewMovement(\'' + m.movementId + '\')">View</button>';
+      
+      // Cancel: only for outbound, has ARC, not in terminal state
+      if (isOut && arc && !isTerminal) {
+        actions += ' <button class="btn-small btn-red" onclick="cancelMovement(\'' + m.movementId + '\', \'' + arc + '\')">Cancel</button>';
+      }
+      
+      // Receipt: only for inbound, has ARC, not in terminal state
+      if (!isOut && arc && !isTerminal) {
+        actions += ' <button class="btn-small btn-green" onclick="receiptMovement(\'' + m.movementId + '\', \'' + arc + '\')">Receipt</button>';
+      }
 
       var tr = document.createElement('tr');
       tr.className = rowClass;
       tr.innerHTML = '<td>' + arcCell + '</td>' +
         '<td>' + directionText + '</td>' +
         '<td>' + counterparty + '</td>' +
-        '<td>' + (m.lastUpdated ? m.lastUpdated.split('T')[0] : '-') + '</td>' +
-        '<td>' + statusBadge + '</td>' +
-        '<td style="font-size:11px; font-family:monospace;">' + lastMessage + '</td>' +
-        '<td style="text-align:center;" class="' + daysClass + '">' + daysOpen + ' days</td>' +
-        '<td style="text-align:center;">' +
-          '<button class="btn-small" onclick="viewMovement(\'' + m.movementId + '\')">View</button>' +
-          (isOut ? '<button class="btn-small btn-red" onclick="cancelMovement(\'' + m.movementId + '\', \'' + (arc || '') + '\')">Cancel</button>' : '') +
-          (!isOut && arc ? '<button class="btn-small btn-green" onclick="receiptMovement(\'' + m.movementId + '\', \'' + arc + '\')">Receipt</button>' : '') +
-        '</td>';
+        '<td>' + (m.lastUpdated ? m.lastUpdated.split('T')[0] : '—') + '</td>' +
+        '<td>' + statusIndicator + '</td>' +
+        '<td style="font-size:11px; font-family:\'SF Mono\', Monaco, monospace; color:#505a5f;">' + lastMessage + '</td>' +
+        '<td style="text-align:center;" class="' + daysClass + '">' + daysOpen + '</td>' +
+        '<td style="text-align:center; white-space:nowrap;">' + actions + '</td>';
       tbody.appendChild(tr);
     });
   }
