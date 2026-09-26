@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
+    "@libsql/client": "^0.14.0"
     "otplib": "^12.0.1",
     "qrcode": "^1.5.4"
   }
