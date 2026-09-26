@@ -17,10 +17,13 @@ button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #005ea5; 
 button:hover { background: #003d6b; }
 .btn-green { background: #00703c; } .btn-green:hover { background: #005a30; }
 .btn-red { background: #d4351c; } .btn-red:hover { background: #aa2a16; }
+.btn-orange { background: #ef6c00; } .btn-orange:hover { background: #d84315; }
+.btn-grey { background: #505a5f; } .btn-grey:hover { background: #3d444b; }
 .btn-small { padding: 4px 10px; font-size: 12px; margin: 2px; }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-input, select { padding: 8px 12px; border: 2px solid #b1b4b6; border-radius: 4px; font-size: 14px; width: 100%; }
-input:focus, select:focus { border-color: #005ea5; outline: none; }
+input, select, textarea { padding: 8px 12px; border: 2px solid #b1b4b6; border-radius: 4px; font-size: 14px; width: 100%; font-family: inherit; }
+input:focus, select:focus, textarea:focus { border-color: #005ea5; outline: none; }
+textarea { resize: vertical; min-height: 60px; }
 pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; overflow-x: auto; max-height: 400px; font-size: 13px; white-space: pre-wrap; word-wrap: break-word; margin-top: 15px; }
 .success { color: #00703c; font-weight: bold; }
 .error { color: #d4351c; font-weight: bold; }
@@ -52,14 +55,13 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .section-optional { background: #f9f9f9; border-left: 3px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 .section-filter { background: #f0f4f8; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 .section-profile { background: #f3e5f5; border-left: 3px solid #9c27b0; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+.section-drafts { background: #fff8e1; border-left: 3px solid #ef6c00; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 
-/* Monitor Table - Professional Styling */
 .monitor-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
 .monitor-table th { background: #005ea5; color: white; padding: 10px; text-align: left; position: sticky; top: 0; }
 .monitor-table td { padding: 10px; border-bottom: 1px solid #e0e0e0; vertical-align: middle; }
 .monitor-table tr:hover { background: #f9f9f9; }
 
-/* Professional Status Indicator - subtle dot + text */
 .status-indicator {
   display: inline-flex;
   align-items: center;
@@ -85,7 +87,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .dot-amber { background: #ef6c00; }
 .dot-blue { background: #1565c0; }
 .dot-grey { background: #757575; }
-.dot-purple { background: #6a1b9a; }
 
 .warning-row { background-color: #fff8f0 !important; }
 .warning-text { color: #c62828; font-weight: 500; }
@@ -96,6 +97,19 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 
 .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .item-actions { display: flex; gap: 5px; }
+
+/* Tidy action buttons in monitor */
+.actions-cell {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+.actions-cell .btn-small {
+  min-width: 60px;
+  text-align: center;
+  white-space: nowrap;
+}
 
 .receipt-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
 .receipt-table th { background: #005ea5; color: white; padding: 8px; text-align: left; }
@@ -109,6 +123,27 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .profile-chip:hover { background: #9c27b0; color: white; }
 .profile-chip.active { background: #9c27b0; color: white; }
 .profile-chip .del-prof { color: #ffeb3b; font-weight: bold; cursor: pointer; margin-left: 4px; }
+
+/* Draft cards */
+.draft-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.draft-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid #ef6c00;
+  border-radius: 4px;
+  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+.draft-card:hover { border-left-color: #d84315; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.draft-info { flex: 1; min-width: 200px; }
+.draft-name { font-weight: 600; color: #333; font-size: 14px; }
+.draft-meta { font-size: 11px; color: #666; margin-top: 3px; }
+.draft-meta span { margin-right: 12px; }
+.draft-actions { display: flex; gap: 5px; flex-wrap: nowrap; }
 
 .loading-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #ccc; border-top-color: #005ea5; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 5px; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -246,7 +281,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
         <div style="overflow-x: auto;">
           <table id="mon-table" class="monitor-table" style="display: none;">
             <thead><tr>
-              <th>ARC / LRN</th><th>Direction</th><th>Counterparty</th><th>Dispatch Date</th><th>Status</th><th>Last Message</th><th style="text-align:center;">Days Open</th><th style="text-align:center;">Actions</th>
+              <th>ARC / LRN</th><th>Direction</th><th>Counterparty</th><th>Dispatch Date</th><th>Status</th><th>Last Message</th><th style="text-align:center;">Days Open</th><th style="text-align:right;">Actions</th>
             </tr></thead>
             <tbody id="mon-tbody"></tbody>
           </table>
@@ -254,10 +289,21 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
       </div>
     </div>
 
-    <!-- TAB 2: SUBMIT MOVEMENT -->
+    <!-- TAB 2: SUBMIT MOVEMENT (with Drafts) -->
     <div id="tab-submit" class="tab">
       <div class="card">
         <h2>Submit Draft Movement (IE815) - EMCS Phase 4 V3.23</h2>
+
+        <!-- DRAFTS SECTION -->
+        <div class="section-drafts">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <h3 style="margin:0; border:none; font-size:1em;">📝 Saved Drafts</h3>
+            <span id="draft-count" style="color:#666; font-size:12px;"></span>
+          </div>
+          <div id="draft-list" class="draft-list">
+            <p style="color:#666; font-size:13px;">No drafts saved yet. Fill in the form below and click "Save as Draft".</p>
+          </div>
+        </div>
 
         <h3>Box 1: eAD Header <span class="format-badge">Required</span></h3>
         <div class="form-grid">
@@ -356,6 +402,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
             </div>
           </div>
         </div>
+        <button type="button" id="add-transport-unit-btn" class="btn-green btn-small">+ Add Transport Unit</button>
 
         <h3>Box 17: e-AD Body (Goods Items) <span class="format-badge">Required</span></h3>
         <div style="margin-bottom: 10px;">
@@ -363,8 +410,11 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
         </div>
         <div id="goods-items-container"></div>
 
-        <button id="submit-movement-btn" style="margin-top:20px;">Submit Movement</button>
-        <button id="export-last-csv-btn" class="btn-green" style="display:none;">📤 Export Last Submission to CSV</button>
+        <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <button id="submit-movement-btn">Submit Movement</button>
+          <button id="save-draft-btn" class="btn-orange">💾 Save as Draft</button>
+          <button id="export-last-csv-btn" class="btn-green" style="display:none;">📤 Export Last Submission to CSV</button>
+        </div>
         <pre id="submit-output">Waiting...</pre>
 
         <div class="cheat-sheet">
@@ -555,6 +605,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var TMS_NS = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.23';
   window.monitorData = [];
   window.ie818Items = [];
+  window.currentDraftId = null; // Track which draft is currently loaded
 
   var MESSAGE_TYPE_NAMES = {
     'IE801': 'Acceptance (ARC Issued)',
@@ -573,7 +624,6 @@ document.addEventListener('DOMContentLoaded', function() {
     'IE905': 'Status Response'
   };
 
-  // Terminal states - movement cannot be cancelled or receipted
   var TERMINAL_STATES = ['IE810', 'IE818', 'IE819', 'IE839', 'IE881'];
 
   var CN_CODES = {
@@ -814,7 +864,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if (hmrcTokenFromUrl) {
     localStorage.setItem('hmrc_token', hmrcTokenFromUrl);
     window.history.replaceState({}, document.title, window.location.pathname);
-    console.log('HMRC Token saved from URL');
   }
 
   checkAuth();
@@ -867,10 +916,7 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         alert('Please login first or check server configuration.');
       }
-    } catch (err) {
-      console.error(err);
-      alert('Network error during 2FA setup.');
-    }
+    } catch (err) { alert('Network error during 2FA setup.'); }
   });
 
   document.getElementById('verify-2fa-btn').addEventListener('click', async function() {
@@ -887,7 +933,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('2fa-result').innerHTML = '<span class="error">❌ ' + (data.error || 'Verification failed') + '</span>';
       }
     } catch (err) {
-      console.error(err);
       document.getElementById('2fa-result').innerHTML = '<span class="error">Network error.</span>';
     }
   });
@@ -944,14 +989,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return (prev.createdOn > current.createdOn) ? prev : current;
       });
       
-      return {
-        arc: arc,
-        latestStatus: latest.messageType,
-        latestDate: latest.createdOn
-      };
-    } catch(e) {
-      return { arc: null, latestStatus: null, latestDate: null };
-    }
+      return { arc: arc, latestStatus: latest.messageType, latestDate: latest.createdOn };
+    } catch(e) { return { arc: null, latestStatus: null, latestDate: null }; }
   }
 
   // ==================== PROFILES ====================
@@ -1086,6 +1125,244 @@ document.addEventListener('DOMContentLoaded', function() {
   renderProfileChips();
   applyProfileToForms();
 
+  // ==================== DRAFTS ====================
+  function getDrafts() {
+    try { return JSON.parse(localStorage.getItem('emcs_drafts') || '[]'); } catch(e) { return []; }
+  }
+  function saveDrafts(drafts) { localStorage.setItem('emcs_drafts', JSON.stringify(drafts)); }
+
+  function captureFormData() {
+    // Capture all simple fields
+    var fieldIds = [
+      's-dest-type', 's-journey-time', 's-transport-arrangement',
+      's-consignor-ern', 's-consignor-name', 's-consignor-street', 's-consignor-street-num',
+      's-consignor-postcode', 's-consignor-city',
+      's-dispatch-warehouse', 's-dispatch-name', 's-dispatch-street', 's-dispatch-street-num',
+      's-dispatch-postcode', 's-dispatch-city',
+      's-consignee-ern', 's-consignee-name', 's-consignee-street', 's-consignee-street-num',
+      's-consignee-postcode', 's-consignee-city',
+      's-delivery-trader-id', 's-delivery-name', 's-delivery-street', 's-delivery-street-num',
+      's-delivery-postcode', 's-delivery-city',
+      's-lrn', 's-invoice-number', 's-invoice-date', 's-origin-type', 's-date', 's-time',
+      's-dispatch-office', 's-guarantor-type', 's-transport-mode',
+      's-transporter-vat', 's-transporter-name', 's-transporter-city'
+    ];
+    var formData = {};
+    fieldIds.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) formData[id] = el.value;
+    });
+
+    // Capture transport units
+    var transportUnits = [];
+    document.querySelectorAll('#transport-units-container .transport-unit-field').forEach(function(unit) {
+      transportUnits.push({
+        unitCode: unit.querySelector('.s-transport-unit-code').value,
+        identity: unit.querySelector('.s-identity-transport').value
+      });
+    });
+
+    // Capture goods items
+    var goodsItems = [];
+    document.querySelectorAll('#goods-items-container .item-field').forEach(function(item) {
+      goodsItems.push({
+        productCode: item.querySelector('.s-product-code').value,
+        cnCode: item.querySelector('.s-cn-code').value,
+        qty: item.querySelector('.s-qty').value,
+        gross: item.querySelector('.s-weight').value,
+        net: item.querySelector('.s-net-weight').value,
+        abv: item.querySelector('.s-abv').value,
+        commDesc: item.querySelector('.s-comm-desc').value,
+        brand: item.querySelector('.s-brand').value,
+        pkgKind: item.querySelector('.s-package-kind').value,
+        pkgCount: item.querySelector('.s-package-count').value,
+        bulk: item.querySelector('.s-bulk').checked,
+        shipMark: item.querySelector('.s-ship-mark').value,
+        seal: item.querySelector('.s-seal').value,
+        smallProducer: item.querySelector('.s-small-producer').checked
+      });
+    });
+
+    return { formData: formData, transportUnits: transportUnits, goodsItems: goodsItems };
+  }
+
+  function applyDraftData(draft) {
+    // Apply simple fields
+    Object.keys(draft.formData).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.value = draft.formData[id];
+    });
+
+    // Apply transport units
+    var tuContainer = document.getElementById('transport-units-container');
+    tuContainer.innerHTML = '';
+    if (draft.transportUnits && draft.transportUnits.length > 0) {
+      draft.transportUnits.forEach(function(tu, idx) {
+        addTransportUnit(tu.unitCode, tu.identity, idx + 1);
+      });
+    } else {
+      addTransportUnit('1', '', 1);
+    }
+
+    // Apply goods items
+    if (draft.goodsItems && draft.goodsItems.length > 0) {
+      renderGoodsItems(draft.goodsItems.length, draft.goodsItems);
+    } else {
+      renderGoodsItems(1);
+    }
+  }
+
+  function addTransportUnit(unitCode, identity, idx) {
+    var container = document.getElementById('transport-units-container');
+    var newUnit = document.createElement('div');
+    newUnit.className = 'transport-unit-field';
+    newUnit.setAttribute('data-unit', idx);
+    newUnit.innerHTML = '<h4>Transport Unit ' + idx + ' <button type="button" class="btn-red btn-small remove-unit-btn" style="float:right;">Remove</button></h4>' +
+      '<div class="form-grid">' +
+      '<div class="field"><label>Transport Unit Code <span class="required-asterisk">*</span></label>' +
+      '<select class="s-transport-unit-code" required>' +
+      '<option value="1"' + (unitCode === '1' ? ' selected' : '') + '>1 - Container</option>' +
+      '<option value="2"' + (unitCode === '2' ? ' selected' : '') + '>2 - Vehicle</option>' +
+      '<option value="3"' + (unitCode === '3' ? ' selected' : '') + '>3 - Trailer</option>' +
+      '<option value="4"' + (unitCode === '4' ? ' selected' : '') + '>4 - Tractor</option>' +
+      '</select></div>' +
+      '<div class="field"><label>Identity of Transport Units <span class="required-asterisk">*</span></label>' +
+      '<input type="text" class="s-identity-transport" value="' + escapeHtml(identity || '') + '" maxlength="35" required></div>' +
+      '</div>';
+    container.appendChild(newUnit);
+    newUnit.querySelector('.remove-unit-btn').addEventListener('click', function() {
+      newUnit.remove();
+      renumberTransportUnits();
+    });
+  }
+
+  function renumberTransportUnits() {
+    var units = document.querySelectorAll('#transport-units-container .transport-unit-field');
+    units.forEach(function(u, idx) {
+      u.setAttribute('data-unit', idx + 1);
+      var h4 = u.querySelector('h4');
+      if (h4) {
+        var btn = h4.querySelector('.remove-unit-btn');
+        h4.textContent = 'Transport Unit ' + (idx + 1) + ' ';
+        if (btn) h4.appendChild(btn);
+      }
+    });
+  }
+
+  document.getElementById('add-transport-unit-btn').addEventListener('click', function() {
+    var container = document.getElementById('transport-units-container');
+    var newIdx = container.children.length + 1;
+    addTransportUnit('1', '', newIdx);
+  });
+
+  function renderDrafts() {
+    var drafts = getDrafts();
+    var container = document.getElementById('draft-list');
+    var countEl = document.getElementById('draft-count');
+    countEl.textContent = drafts.length + ' draft' + (drafts.length !== 1 ? 's' : '') + ' saved';
+
+    if (drafts.length === 0) {
+      container.innerHTML = '<p style="color:#666; font-size:13px;">No drafts saved yet. Fill in the form below and click "Save as Draft".</p>';
+      return;
+    }
+
+    container.innerHTML = drafts.map(function(d) {
+      var isActive = window.currentDraftId === d.id;
+      var borderStyle = isActive ? 'border-left-color:#2e7d32;' : '';
+      var itemsCount = (d.goodsItems || []).length;
+      return '<div class="draft-card" style="' + borderStyle + '">' +
+        '<div class="draft-info">' +
+          '<div class="draft-name">' + escapeHtml(d.name) + (isActive ? ' <span style="color:#2e7d32; font-size:11px;">(loaded)</span>' : '') + '</div>' +
+          '<div class="draft-meta">' +
+            '<span>📅 ' + new Date(d.created).toLocaleString() + '</span>' +
+            '<span>🏭 ' + escapeHtml(d.formData['s-consignor-ern'] || '—') + '</span>' +
+            '<span>→ ' + escapeHtml(d.formData['s-consignee-ern'] || '—') + '</span>' +
+            '<span>📦 ' + itemsCount + ' item' + (itemsCount !== 1 ? 's' : '') + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="draft-actions">' +
+          '<button class="btn-small btn-green" onclick="loadDraft(' + d.id + ')">Load</button>' +
+          '<button class="btn-small btn-orange" onclick="submitDraft(' + d.id + ')">Submit</button>' +
+          '<button class="btn-small btn-red" onclick="deleteDraft(' + d.id + ')">Delete</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.loadDraft = function(id) {
+    var drafts = getDrafts();
+    var draft = drafts.find(function(d) { return d.id === id; });
+    if (!draft) { alert('Draft not found.'); return; }
+    if (window.currentDraftId !== null) {
+      if (!confirm('You have another draft loaded. Loading this one will replace it. Continue?')) return;
+    }
+    applyDraftData(draft);
+    window.currentDraftId = id;
+    renderDrafts();
+    alert('Draft "' + draft.name + '" loaded into the form. You can now edit and submit, or save as a new draft.');
+  };
+
+  window.deleteDraft = function(id) {
+    if (!confirm('Delete this draft? This cannot be undone.')) return;
+    var drafts = getDrafts();
+    drafts = drafts.filter(function(d) { return d.id !== id; });
+    saveDrafts(drafts);
+    if (window.currentDraftId === id) window.currentDraftId = null;
+    renderDrafts();
+  };
+
+  window.submitDraft = function(id) {
+    if (!confirm('Load this draft and submit it to HMRC?')) return;
+    window.loadDraft(id);
+    // Auto-trigger submission after a brief delay to let form populate
+    setTimeout(function() {
+      document.getElementById('submit-movement-btn').click();
+    }, 300);
+  };
+
+  document.getElementById('save-draft-btn').addEventListener('click', function() {
+    var name = prompt('Enter a name for this draft:', 'Draft ' + new Date().toLocaleDateString());
+    if (!name) return;
+    name = name.trim();
+    if (!name) { alert('Draft name cannot be empty.'); return; }
+
+    var draftData = captureFormData();
+    var drafts = getDrafts();
+
+    if (window.currentDraftId !== null) {
+      // Update existing draft
+      var existingIdx = drafts.findIndex(function(d) { return d.id === window.currentDraftId; });
+      if (existingIdx !== -1) {
+        drafts[existingIdx].name = name;
+        drafts[existingIdx].formData = draftData.formData;
+        drafts[existingIdx].transportUnits = draftData.transportUnits;
+        drafts[existingIdx].goodsItems = draftData.goodsItems;
+        drafts[existingIdx].modified = new Date().toISOString();
+        saveDrafts(drafts);
+        renderDrafts();
+        alert('Draft "' + name + '" updated.');
+        return;
+      }
+    }
+
+    // Create new draft
+    var newDraft = {
+      id: Date.now(),
+      name: name,
+      created: new Date().toISOString(),
+      formData: draftData.formData,
+      transportUnits: draftData.transportUnits,
+      goodsItems: draftData.goodsItems
+    };
+    drafts.unshift(newDraft);
+    saveDrafts(drafts);
+    window.currentDraftId = newDraft.id;
+    renderDrafts();
+    alert('Draft "' + name + '" saved.');
+  });
+
+  renderDrafts();
+
   // ==================== GOODS ITEMS ====================
   function updateItemFieldVisibility(item) {
     var pc = item.querySelector('.s-product-code').value.toUpperCase();
@@ -1128,7 +1405,10 @@ document.addEventListener('DOMContentLoaded', function() {
     items.forEach(function(it, idx) {
       it.setAttribute('data-item', idx + 1);
       var h4 = it.querySelector('h4');
-      if (h4) h4.textContent = 'Item ' + (idx + 1);
+      if (h4) {
+        var btns = h4.parentElement.querySelector('.item-actions');
+        h4.textContent = 'Item ' + (idx + 1) + ' ';
+      }
     });
   }
   function createItemElement(idx, data) {
@@ -1146,17 +1426,17 @@ document.addEventListener('DOMContentLoaded', function() {
         '<div class="field"><label>Excise Product Code <span class="required-asterisk">*</span></label><input type="text" class="s-product-code" value="' + (it.productCode || 'B000') + '" pattern="^[A-Z][0-9]{3}$" maxlength="4" required></div>' +
         '<div class="field"><label>CN Code <span class="required-asterisk">*</span></label><input type="text" class="s-cn-code" value="' + (it.cnCode || '22030001') + '" pattern="^\\d{8}$" maxlength="8" required></div>' +
         '<div class="field"><label>Quantity <span class="required-asterisk">*</span></label><input type="number" class="s-qty" value="' + (it.qty || 2000) + '" step="0.001" required></div>' +
-        '<div class="field"><label>Bulk Movement</label><input type="checkbox" class="s-bulk" style="width:auto; margin-top:10px;"></div>' +
+        '<div class="field"><label>Bulk Movement</label><input type="checkbox" class="s-bulk" style="width:auto; margin-top:10px;"' + (it.bulk ? ' checked' : '') + '></div>' +
         '<div class="field"><label>Gross Mass (kg) <span class="required-asterisk">*</span></label><input type="number" class="s-weight" value="' + (it.gross || 20000) + '" step="0.000001" required></div>' +
         '<div class="field"><label>Net Mass (kg) <span class="required-asterisk">*</span></label><input type="number" class="s-net-weight" value="' + (it.net || 19999) + '" step="0.000001" required></div>' +
-        '<div class="field"><label>Commercial Description <span class="required-asterisk">*</span></label><input type="text" class="s-comm-desc" value="' + (it.commDesc || '') + '" required></div>' +
-        '<div class="field"><label>Brand Name</label><input type="text" class="s-brand" value="' + (it.brand || '') + '"></div>' +
+        '<div class="field"><label>Commercial Description <span class="required-asterisk">*</span></label><input type="text" class="s-comm-desc" value="' + escapeHtml(it.commDesc || '') + '" required></div>' +
+        '<div class="field"><label>Brand Name</label><input type="text" class="s-brand" value="' + escapeHtml(it.brand || '') + '"></div>' +
         '<div class="field"><label>ABV %</label><input type="number" class="s-abv" value="' + (it.abv !== undefined ? it.abv : 5.0) + '" step="0.01"></div>' +
         '<div class="field"><label>Kind of Packages <span class="required-asterisk">*</span></label><select class="s-package-kind" required>' + buildPackageOptions(it.pkgKind || 'BA') + '</select></div>' +
         '<div class="field"><label>Number of Packages <span class="required-asterisk">*</span></label><input type="number" class="s-package-count" value="' + (it.pkgCount !== undefined ? it.pkgCount : 2) + '" min="0" required></div>' +
-        '<div class="field"><label>Shipping Mark</label><input type="text" class="s-ship-mark" value="' + (it.shipMark || '') + '" placeholder="Optional"></div>' +
-        '<div class="field"><label>Commercial Seal ID</label><input type="text" class="s-seal" value="' + (it.seal || '') + '" placeholder="Optional"></div>' +
-        '<div class="field" style="grid-column: 1 / -1;"><label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="s-small-producer" style="width:auto;"> Independent Small Producer Declaration</label></div>' +
+        '<div class="field"><label>Shipping Mark</label><input type="text" class="s-ship-mark" value="' + escapeHtml(it.shipMark || '') + '" placeholder="Optional"></div>' +
+        '<div class="field"><label>Commercial Seal ID</label><input type="text" class="s-seal" value="' + escapeHtml(it.seal || '') + '" placeholder="Optional"></div>' +
+        '<div class="field" style="grid-column: 1 / -1;"><label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="s-small-producer" style="width:auto;"' + (it.smallProducer ? ' checked' : '') + '> Independent Small Producer Declaration</label></div>' +
       '</div>';
     return div;
   }
@@ -1168,6 +1448,21 @@ document.addEventListener('DOMContentLoaded', function() {
       var div = createItemElement(i, it);
       container.appendChild(div);
       bindItemEvents(div);
+    }
+    // Apply bulk state after rendering
+    if (existingItems) {
+      existingItems.forEach(function(it, idx) {
+        if (it.bulk) {
+          var item = container.children[idx];
+          if (item) {
+            var netField = item.querySelector('.s-net-weight');
+            if (netField) {
+              netField.value = item.querySelector('.s-weight').value;
+              netField.disabled = true;
+            }
+          }
+        }
+      });
     }
   }
   renderGoodsItems(1);
@@ -1232,27 +1527,17 @@ document.addEventListener('DOMContentLoaded', function() {
     applyMonitorFilters();
   }
 
-  // Map message type to status category for filtering
   function getStatusCategory(latestStatus) {
     if (!latestStatus) return 'pending';
     var map = {
-      'IE801': 'accepted',
-      'IE810': 'cancelled',
-      'IE818': 'receipted',
-      'IE819': 'rejected',
-      'IE807': 'interrupted',
-      'IE813': 'changed',
-      'IE803': 'changed',
-      'IE839': 'rejected',
-      'IE881': 'closed',
-      'IE837': 'delay',
-      'IE871': 'shortage',
-      'IE905': 'accepted'
+      'IE801': 'accepted', 'IE810': 'cancelled', 'IE818': 'receipted',
+      'IE819': 'rejected', 'IE807': 'interrupted', 'IE813': 'changed',
+      'IE803': 'changed', 'IE839': 'rejected', 'IE881': 'closed',
+      'IE837': 'delay', 'IE871': 'shortage', 'IE905': 'accepted'
     };
     return map[latestStatus] || 'accepted';
   }
 
-  // Professional status indicator - subtle dot + text
   function getMovementStatusIndicator(m) {
     var arc = m.administrativeReferenceCode;
     var latestStatus = m._latestStatus;
@@ -1298,7 +1583,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (direction === 'in' && isOut) return false;
       if (direction === 'out' && !isOut) return false;
       
-      // Status filter
       if (statusFilter) {
         var category = m.administrativeReferenceCode ? getStatusCategory(m._latestStatus) : 'pending';
         if (statusFilter !== category) return false;
@@ -1342,19 +1626,18 @@ document.addEventListener('DOMContentLoaded', function() {
       var statusIndicator = getMovementStatusIndicator(m);
       var lastMessage = m._latestStatus || '—';
       
-      // Smart action buttons
       var isTerminal = m._latestStatus && TERMINAL_STATES.indexOf(m._latestStatus) !== -1;
-      var actions = '<button class="btn-small" onclick="viewMovement(\'' + m.movementId + '\')">View</button>';
+      var actions = '<div class="actions-cell">';
+      actions += '<button class="btn-small btn-grey" onclick="viewMovement(\'' + m.movementId + '\')">View</button>';
       
-      // Cancel: only for outbound, has ARC, not in terminal state
       if (isOut && arc && !isTerminal) {
-        actions += ' <button class="btn-small btn-red" onclick="cancelMovement(\'' + m.movementId + '\', \'' + arc + '\')">Cancel</button>';
+        actions += '<button class="btn-small btn-red" onclick="cancelMovement(\'' + m.movementId + '\', \'' + arc + '\')">Cancel</button>';
       }
       
-      // Receipt: only for inbound, has ARC, not in terminal state
       if (!isOut && arc && !isTerminal) {
-        actions += ' <button class="btn-small btn-green" onclick="receiptMovement(\'' + m.movementId + '\', \'' + arc + '\')">Receipt</button>';
+        actions += '<button class="btn-small btn-green" onclick="receiptMovement(\'' + m.movementId + '\', \'' + arc + '\')">Receipt</button>';
       }
+      actions += '</div>';
 
       var tr = document.createElement('tr');
       tr.className = rowClass;
@@ -1365,7 +1648,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '<td>' + statusIndicator + '</td>' +
         '<td style="font-size:11px; font-family:\'SF Mono\', Monaco, monospace; color:#505a5f;">' + lastMessage + '</td>' +
         '<td style="text-align:center;" class="' + daysClass + '">' + daysOpen + '</td>' +
-        '<td style="text-align:center; white-space:nowrap;">' + actions + '</td>';
+        '<td style="text-align:right;">' + actions + '</td>';
       tbody.appendChild(tr);
     });
   }
@@ -1593,6 +1876,15 @@ document.addEventListener('DOMContentLoaded', function() {
             date: submitDate, items: itemSummary
           }));
           document.getElementById('export-last-csv-btn').style.display = 'inline-block';
+          
+          // Delete the loaded draft after successful submission
+          if (window.currentDraftId !== null) {
+            var drafts = getDrafts();
+            drafts = drafts.filter(function(d) { return d.id !== window.currentDraftId; });
+            saveDrafts(drafts);
+            window.currentDraftId = null;
+            renderDrafts();
+          }
         }
       } catch(e) { console.error(e); }
     }
