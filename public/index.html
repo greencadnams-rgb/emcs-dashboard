@@ -54,8 +54,8 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .required-asterisk { color: #d4351c; font-weight: bold; }
 .section-optional { background: #f9f9f9; border-left: 3px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
 .section-filter { background: #f0f4f8; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-.section-profile { background: #f3e5f5; border-left: 3px solid #9c27b0; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-.section-drafts { background: #fff8e1; border-left: 3px solid #ef6c00; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+.section-profile { background: #f0f4f8; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+.section-drafts { background: #f5f5f5; border-left: 3px solid #505a5f; padding: 15px; margin-top: 20px; border-radius: 4px; }
 
 .monitor-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
 .monitor-table th { background: #005ea5; color: white; padding: 10px; text-align: left; position: sticky; top: 0; }
@@ -98,7 +98,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .item-actions { display: flex; gap: 5px; }
 
-/* Tidy action buttons in monitor */
 .actions-cell {
   display: flex;
   gap: 4px;
@@ -118,18 +117,20 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
 .receipt-table .shortage { background: #fff5f5; }
 .receipt-table .excess { background: #f0f9ff; }
 
+/* Profile chips - neutral blue/grey */
 .profile-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.profile-chip { background: white; border: 1px solid #9c27b0; color: #9c27b0; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-.profile-chip:hover { background: #9c27b0; color: white; }
-.profile-chip.active { background: #9c27b0; color: white; }
-.profile-chip .del-prof { color: #ffeb3b; font-weight: bold; cursor: pointer; margin-left: 4px; }
+.profile-chip { background: white; border: 1px solid #005ea5; color: #005ea5; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.profile-chip:hover { background: #005ea5; color: white; }
+.profile-chip.active { background: #005ea5; color: white; }
+.profile-chip .del-prof { color: #ffdd57; font-weight: bold; cursor: pointer; margin-left: 4px; }
+.profile-chip.active .del-prof { color: #ffdd57; }
 
-/* Draft cards */
+/* Draft cards - neutral styling */
 .draft-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 .draft-card {
   background: white;
-  border: 1px solid #e0e0e0;
-  border-left: 4px solid #ef6c00;
+  border: 1px solid #d0d0d0;
+  border-left: 4px solid #505a5f;
   border-radius: 4px;
   padding: 12px 15px;
   display: flex;
@@ -138,7 +139,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
   gap: 15px;
   flex-wrap: wrap;
 }
-.draft-card:hover { border-left-color: #d84315; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.draft-card:hover { border-left-color: #005ea5; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 .draft-info { flex: 1; min-width: 200px; }
 .draft-name { font-weight: 600; color: #333; font-size: 14px; }
 .draft-meta { font-size: 11px; color: #666; margin-top: 3px; }
@@ -289,21 +290,10 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
       </div>
     </div>
 
-    <!-- TAB 2: SUBMIT MOVEMENT (with Drafts) -->
+    <!-- TAB 2: SUBMIT MOVEMENT (Drafts now at bottom, only shown when exist) -->
     <div id="tab-submit" class="tab">
       <div class="card">
         <h2>Submit Draft Movement (IE815) - EMCS Phase 4 V3.23</h2>
-
-        <!-- DRAFTS SECTION -->
-        <div class="section-drafts">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-            <h3 style="margin:0; border:none; font-size:1em;">📝 Saved Drafts</h3>
-            <span id="draft-count" style="color:#666; font-size:12px;"></span>
-          </div>
-          <div id="draft-list" class="draft-list">
-            <p style="color:#666; font-size:13px;">No drafts saved yet. Fill in the form below and click "Save as Draft".</p>
-          </div>
-        </div>
 
         <h3>Box 1: eAD Header <span class="format-badge">Required</span></h3>
         <div class="form-grid">
@@ -416,6 +406,15 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <button id="export-last-csv-btn" class="btn-green" style="display:none;">📤 Export Last Submission to CSV</button>
         </div>
         <pre id="submit-output">Waiting...</pre>
+
+        <!-- Drafts section - only shown when drafts exist -->
+        <div id="drafts-section" class="section-drafts" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <h3 style="margin:0; border:none; font-size:1em;">📝 Saved Drafts</h3>
+            <span id="draft-count" style="color:#666; font-size:12px;"></span>
+          </div>
+          <div id="draft-list" class="draft-list"></div>
+        </div>
 
         <div class="cheat-sheet">
           <h3>🎯 Sandbox Magic LRNs (for testing specific scenarios)</h3>
@@ -565,7 +564,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
       </div>
     </div>
 
-    <!-- TAB 10: PROFILES -->
+    <!-- TAB 10: PROFILES (neutral colors) -->
     <div id="tab-profiles" class="tab">
       <div class="card">
         <h2>Manage Profiles</h2>
@@ -605,7 +604,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var TMS_NS = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.23';
   window.monitorData = [];
   window.ie818Items = [];
-  window.currentDraftId = null; // Track which draft is currently loaded
+  window.currentDraftId = null;
 
   var MESSAGE_TYPE_NAMES = {
     'IE801': 'Acceptance (ARC Issued)',
@@ -1132,7 +1131,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function saveDrafts(drafts) { localStorage.setItem('emcs_drafts', JSON.stringify(drafts)); }
 
   function captureFormData() {
-    // Capture all simple fields
     var fieldIds = [
       's-dest-type', 's-journey-time', 's-transport-arrangement',
       's-consignor-ern', 's-consignor-name', 's-consignor-street', 's-consignor-street-num',
@@ -1153,7 +1151,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (el) formData[id] = el.value;
     });
 
-    // Capture transport units
     var transportUnits = [];
     document.querySelectorAll('#transport-units-container .transport-unit-field').forEach(function(unit) {
       transportUnits.push({
@@ -1162,7 +1159,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
 
-    // Capture goods items
     var goodsItems = [];
     document.querySelectorAll('#goods-items-container .item-field').forEach(function(item) {
       goodsItems.push({
@@ -1187,13 +1183,11 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function applyDraftData(draft) {
-    // Apply simple fields
     Object.keys(draft.formData).forEach(function(id) {
       var el = document.getElementById(id);
       if (el) el.value = draft.formData[id];
     });
 
-    // Apply transport units
     var tuContainer = document.getElementById('transport-units-container');
     tuContainer.innerHTML = '';
     if (draft.transportUnits && draft.transportUnits.length > 0) {
@@ -1204,7 +1198,6 @@ document.addEventListener('DOMContentLoaded', function() {
       addTransportUnit('1', '', 1);
     }
 
-    // Apply goods items
     if (draft.goodsItems && draft.goodsItems.length > 0) {
       renderGoodsItems(draft.goodsItems.length, draft.goodsItems);
     } else {
@@ -1257,22 +1250,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function renderDrafts() {
     var drafts = getDrafts();
+    var section = document.getElementById('drafts-section');
     var container = document.getElementById('draft-list');
     var countEl = document.getElementById('draft-count');
-    countEl.textContent = drafts.length + ' draft' + (drafts.length !== 1 ? 's' : '') + ' saved';
 
     if (drafts.length === 0) {
-      container.innerHTML = '<p style="color:#666; font-size:13px;">No drafts saved yet. Fill in the form below and click "Save as Draft".</p>';
+      section.style.display = 'none';
       return;
     }
 
+    section.style.display = 'block';
+    countEl.textContent = drafts.length + ' draft' + (drafts.length !== 1 ? 's' : '') + ' saved';
+
     container.innerHTML = drafts.map(function(d) {
       var isActive = window.currentDraftId === d.id;
-      var borderStyle = isActive ? 'border-left-color:#2e7d32;' : '';
+      var borderStyle = isActive ? 'border-left-color:#005ea5;' : '';
       var itemsCount = (d.goodsItems || []).length;
       return '<div class="draft-card" style="' + borderStyle + '">' +
         '<div class="draft-info">' +
-          '<div class="draft-name">' + escapeHtml(d.name) + (isActive ? ' <span style="color:#2e7d32; font-size:11px;">(loaded)</span>' : '') + '</div>' +
+          '<div class="draft-name">' + escapeHtml(d.name) + (isActive ? ' <span style="color:#00703c; font-size:11px;">(loaded)</span>' : '') + '</div>' +
           '<div class="draft-meta">' +
             '<span>📅 ' + new Date(d.created).toLocaleString() + '</span>' +
             '<span>🏭 ' + escapeHtml(d.formData['s-consignor-ern'] || '—') + '</span>' +
@@ -1293,13 +1289,14 @@ document.addEventListener('DOMContentLoaded', function() {
     var drafts = getDrafts();
     var draft = drafts.find(function(d) { return d.id === id; });
     if (!draft) { alert('Draft not found.'); return; }
-    if (window.currentDraftId !== null) {
+    if (window.currentDraftId !== null && window.currentDraftId !== id) {
       if (!confirm('You have another draft loaded. Loading this one will replace it. Continue?')) return;
     }
     applyDraftData(draft);
     window.currentDraftId = id;
     renderDrafts();
-    alert('Draft "' + draft.name + '" loaded into the form. You can now edit and submit, or save as a new draft.');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    alert('Draft "' + draft.name + '" loaded into the form.');
   };
 
   window.deleteDraft = function(id) {
@@ -1314,7 +1311,6 @@ document.addEventListener('DOMContentLoaded', function() {
   window.submitDraft = function(id) {
     if (!confirm('Load this draft and submit it to HMRC?')) return;
     window.loadDraft(id);
-    // Auto-trigger submission after a brief delay to let form populate
     setTimeout(function() {
       document.getElementById('submit-movement-btn').click();
     }, 300);
@@ -1330,22 +1326,22 @@ document.addEventListener('DOMContentLoaded', function() {
     var drafts = getDrafts();
 
     if (window.currentDraftId !== null) {
-      // Update existing draft
       var existingIdx = drafts.findIndex(function(d) { return d.id === window.currentDraftId; });
       if (existingIdx !== -1) {
-        drafts[existingIdx].name = name;
-        drafts[existingIdx].formData = draftData.formData;
-        drafts[existingIdx].transportUnits = draftData.transportUnits;
-        drafts[existingIdx].goodsItems = draftData.goodsItems;
-        drafts[existingIdx].modified = new Date().toISOString();
-        saveDrafts(drafts);
-        renderDrafts();
-        alert('Draft "' + name + '" updated.');
-        return;
+        if (confirm('A draft is already loaded. Update "' + drafts[existingIdx].name + '" instead of creating a new one?')) {
+          drafts[existingIdx].name = name;
+          drafts[existingIdx].formData = draftData.formData;
+          drafts[existingIdx].transportUnits = draftData.transportUnits;
+          drafts[existingIdx].goodsItems = draftData.goodsItems;
+          drafts[existingIdx].modified = new Date().toISOString();
+          saveDrafts(drafts);
+          renderDrafts();
+          alert('Draft "' + name + '" updated.');
+          return;
+        }
       }
     }
 
-    // Create new draft
     var newDraft = {
       id: Date.now(),
       name: name,
@@ -1406,8 +1402,9 @@ document.addEventListener('DOMContentLoaded', function() {
       it.setAttribute('data-item', idx + 1);
       var h4 = it.querySelector('h4');
       if (h4) {
-        var btns = h4.parentElement.querySelector('.item-actions');
         h4.textContent = 'Item ' + (idx + 1) + ' ';
+        var actions = it.querySelector('.item-actions');
+        if (actions) h4.appendChild(actions);
       }
     });
   }
@@ -1449,7 +1446,6 @@ document.addEventListener('DOMContentLoaded', function() {
       container.appendChild(div);
       bindItemEvents(div);
     }
-    // Apply bulk state after rendering
     if (existingItems) {
       existingItems.forEach(function(it, idx) {
         if (it.bulk) {
@@ -1877,7 +1873,6 @@ document.addEventListener('DOMContentLoaded', function() {
           }));
           document.getElementById('export-last-csv-btn').style.display = 'inline-block';
           
-          // Delete the loaded draft after successful submission
           if (window.currentDraftId !== null) {
             var drafts = getDrafts();
             drafts = drafts.filter(function(d) { return d.id !== window.currentDraftId; });
