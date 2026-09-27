@@ -75,7 +75,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         const data = await res.json();
 
-        // Smart 2FA handling: if backend says 2FA is required, show the field and stop
         if (data.requires2FA) {
           if (errorEl) { errorEl.textContent = '2FA is enabled. Please enter your 6-digit code.'; errorEl.style.display = 'block'; }
           document.getElementById('totp-code').style.display = 'block';
@@ -193,7 +192,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             profileSelect.appendChild(opt);
           });
           
-          // Auto-fill form when profile changes
           profileSelect.addEventListener('change', function() {
             const selected = profiles.find(p => p.id == this.value);
             if (selected) {
@@ -319,7 +317,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     container.appendChild(div);
     div.querySelector('.remove-item').addEventListener('click', () => div.remove());
     
-    // Auto-fill CN code based on EPC (simple mapping)
     div.querySelector('.s-product-code').addEventListener('change', function() {
       const epc = this.value.toUpperCase();
       const cnMap = { 'B000': '22030001', 'W200': '22042100', 'S200': '22089000' };
@@ -329,7 +326,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   });
 
-  // --- 5. SUBMIT MOVEMENT (IE815) ---
+  // --- 5. SUBMIT MOVEMENT (IE815) - CORRECTED TO MATCH HMRC SPEC ---
   function xmlField(tag, value) {
     return value ? `<urn:${tag}>${value}</urn:${tag}>` : '';
   }
@@ -346,6 +343,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const submitDate = document.getElementById('s-date').value || new Date().toISOString().slice(0, 10);
     const prepareTime = new Date().toISOString().slice(11, 19);
 
+    // Build BodyEadEsad XML
     let bodyEadEsadXml = '';
     const itemSummary = [];
     document.querySelectorAll('#goods-items-container .item-field').forEach(function(item, idx) {
@@ -366,37 +364,52 @@ document.addEventListener('DOMContentLoaded', async function() {
         '<urn:NetMass>' + netW + '</urn:NetMass>' +
         (abv ? '<urn:AlcoholicStrengthByVolumeInPercentage>' + abv + '</urn:AlcoholicStrengthByVolumeInPercentage>' : '') +
         '<urn:FiscalMarkUsedFlag>0</urn:FiscalMarkUsedFlag>' +
-        (commDesc ? '<urn:CommercialDescription>' + commDesc + '</urn:CommercialDescription>' : '') +
-        (brand ? '<urn:BrandName>' + brand + '</urn:BrandName>' : '') +
-        '<urn:Package><urn:KindOfPackages>' + item.querySelector('.s-package-kind').value + '</urn:KindOfPackages>' +
+        '<urn:Package>' +
+        '<urn:KindOfPackages>' + item.querySelector('.s-package-kind').value + '</urn:KindOfPackages>' +
         '<urn:NumberOfPackages>' + item.querySelector('.s-package-count').value + '</urn:NumberOfPackages>' +
         (shipMark ? '<urn:ShippingMarks>' + shipMark + '</urn:ShippingMarks>' : '') +
-        '</urn:Package></urn:BodyEadEsad>';
+        '</urn:Package>' +
+        '</urn:BodyEadEsad>';
       itemSummary.push({ productCode: pc, qty: qty });
     });
 
-    // V3.13 Namespace as per HMRC spec
-    let xml = '<urn:IE815 xmlns:urn="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:IE815:V3.13" xmlns:urn1="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.13">' +
-      '<urn:Header><urn1:MessageSender>NDEA.GB</urn1:MessageSender><urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>' +
-      '<urn1:DateOfPreparation>' + submitDate + '</urn1:DateOfPreparation><urn1:TimeOfPreparation>' + prepareTime + '</urn1:TimeOfPreparation>' +
-      '<urn1:MessageIdentifier>' + uniqueLrn + '</urn1:MessageIdentifier><urn1:CorrelationIdentifier>PORTAL' + uniqueLrn + '</urn1:CorrelationIdentifier></urn:Header>' +
-      '<urn:Body><urn:SubmittedDraftOfEADESAD><urn:Attributes><urn:SubmissionMessageType>1</urn:SubmissionMessageType></urn:Attributes>' +
-      '<urn:ConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid>' +
+    // CORRECTED: Exact field order matching IE815.xml example from HMRC spec
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>' +
+      '<urn:IE815 xmlns:urn="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:IE815:V3.13" xmlns:urn1="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.13">' +
+      '<urn:Header>' +
+      '<urn1:MessageSender>NDEA.GB</urn1:MessageSender>' +
+      '<urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>' +
+      '<urn1:DateOfPreparation>' + submitDate + '</urn1:DateOfPreparation>' +
+      '<urn1:TimeOfPreparation>' + prepareTime + '</urn1:TimeOfPreparation>' +
+      '<urn1:MessageIdentifier>' + uniqueLrn + '</urn1:MessageIdentifier>' +
+      '<urn1:CorrelationIdentifier>PORTAL' + uniqueLrn + '</urn1:CorrelationIdentifier>' +
+      '</urn:Header>' +
+      '<urn:Body><urn:SubmittedDraftOfEADESAD>' +
+      '<urn:Attributes><urn:SubmissionMessageType>1</urn:SubmissionMessageType></urn:Attributes>' +
+      // Consignee FIRST (matching IE815.xml example)
+      '<urn:ConsigneeTrader language="en">' +
+      '<urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid>' +
       '<urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName>' +
       '<urn:StreetName>' + document.getElementById('s-consignee-street').value + '</urn:StreetName>' +
       xmlField('StreetNumber', document.getElementById('s-consignee-street-num').value) +
       '<urn:Postcode>' + document.getElementById('s-consignee-postcode').value + '</urn:Postcode>' +
-      '<urn:City>' + document.getElementById('s-consignee-city').value + '</urn:City></urn:ConsigneeTrader>' +
-      '<urn:ConsignorTrader language="en"><urn:TraderExciseNumber>' + document.getElementById('s-consignor-ern').value + '</urn:TraderExciseNumber>' +
+      '<urn:City>' + document.getElementById('s-consignee-city').value + '</urn:City>' +
+      '</urn:ConsigneeTrader>' +
+      // Consignor SECOND
+      '<urn:ConsignorTrader language="en">' +
+      '<urn:TraderExciseNumber>' + document.getElementById('s-consignor-ern').value + '</urn:TraderExciseNumber>' +
       '<urn:TraderName>' + document.getElementById('s-consignor-name').value + '</urn:TraderName>' +
       '<urn:StreetName>' + document.getElementById('s-consignor-street').value + '</urn:StreetName>' +
       xmlField('StreetNumber', document.getElementById('s-consignor-street-num').value) +
       '<urn:Postcode>' + document.getElementById('s-consignor-postcode').value + '</urn:Postcode>' +
-      '<urn:City>' + document.getElementById('s-consignor-city').value + '</urn:City></urn:ConsignorTrader>';
+      '<urn:City>' + document.getElementById('s-consignor-city').value + '</urn:City>' +
+      '</urn:ConsignorTrader>';
 
+    // Place of Dispatch (optional)
     const dw = document.getElementById('s-dispatch-warehouse').value.trim();
     if (dw) {
-      xml += '<urn:PlaceOfDispatchTrader language="en"><urn:ReferenceOfTaxWarehouse>' + dw + '</urn:ReferenceOfTaxWarehouse>' +
+      xml += '<urn:PlaceOfDispatchTrader language="en">' +
+        '<urn:ReferenceOfTaxWarehouse>' + dw + '</urn:ReferenceOfTaxWarehouse>' +
         xmlField('TraderName', document.getElementById('s-dispatch-name').value) +
         xmlField('StreetName', document.getElementById('s-dispatch-street').value) +
         xmlField('StreetNumber', document.getElementById('s-dispatch-street-num').value) +
@@ -405,36 +418,61 @@ document.addEventListener('DOMContentLoaded', async function() {
         '</urn:PlaceOfDispatchTrader>';
     }
 
-    xml += '<urn:DeliveryPlaceTrader language="en"><urn:Traderid>' + document.getElementById('s-delivery-trader-id').value + '</urn:Traderid>' +
+    // Delivery Place
+    xml += '<urn:DeliveryPlaceTrader language="en">' +
+      '<urn:Traderid>' + document.getElementById('s-delivery-trader-id').value + '</urn:Traderid>' +
       '<urn:TraderName>' + document.getElementById('s-delivery-name').value + '</urn:TraderName>' +
       '<urn:StreetName>' + document.getElementById('s-delivery-street').value + '</urn:StreetName>' +
       xmlField('StreetNumber', document.getElementById('s-delivery-street-num').value) +
       '<urn:Postcode>' + document.getElementById('s-delivery-postcode').value + '</urn:Postcode>' +
-      '<urn:City>' + document.getElementById('s-delivery-city').value + '</urn:City></urn:DeliveryPlaceTrader>' +
-      '<urn:CompetentAuthorityDispatchOffice><urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber></urn:CompetentAuthorityDispatchOffice>' +
-      '<urn:FirstTransporterTrader language="en"><urn:VatNumber>' + document.getElementById('s-transporter-vat').value + '</urn:VatNumber>' +
+      '<urn:City>' + document.getElementById('s-delivery-city').value + '</urn:City>' +
+      '</urn:DeliveryPlaceTrader>' +
+      // Competent Authority
+      '<urn:CompetentAuthorityDispatchOffice>' +
+      '<urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber>' +
+      '</urn:CompetentAuthorityDispatchOffice>' +
+      // First Transporter
+      '<urn:FirstTransporterTrader language="en">' +
+      '<urn:VatNumber>' + document.getElementById('s-transporter-vat').value + '</urn:VatNumber>' +
       '<urn:TraderName>' + document.getElementById('s-transporter-name').value + '</urn:TraderName>' +
-      '<urn:StreetName>Logistics Way</urn:StreetName><urn:StreetNumber>5</urn:StreetNumber>' +
+      '<urn:StreetName>Logistics Way</urn:StreetName>' +
+      '<urn:StreetNumber>5</urn:StreetNumber>' +
       '<urn:Postcode>FR5 4RN</urn:Postcode>' +
-      '<urn:City>' + document.getElementById('s-transporter-city').value + '</urn:City></urn:FirstTransporterTrader>' +
-      '<urn:HeaderEadEsad><urn:DestinationTypeCode>' + document.getElementById('s-dest-type').value + '</urn:DestinationTypeCode>' +
+      '<urn:City>' + document.getElementById('s-transporter-city').value + '</urn:City>' +
+      '</urn:FirstTransporterTrader>' +
+      // Header EadEsad
+      '<urn:HeaderEadEsad>' +
+      '<urn:DestinationTypeCode>' + document.getElementById('s-dest-type').value + '</urn:DestinationTypeCode>' +
       '<urn:JourneyTime>' + document.getElementById('s-journey-time').value + '</urn:JourneyTime>' +
-      '<urn:TransportArrangement>' + document.getElementById('s-transport-arrangement').value + '</urn:TransportArrangement></urn:HeaderEadEsad>' +
-      '<urn:TransportMode><urn:TransportModeCode>' + document.getElementById('s-transport-mode').value + '</urn:TransportModeCode></urn:TransportMode>' +
-      '<urn:MovementGuarantee><urn:GuarantorTypeCode>' + document.getElementById('s-guarantor-type').value + '</urn:GuarantorTypeCode></urn:MovementGuarantee>' +
+      '<urn:TransportArrangement>' + document.getElementById('s-transport-arrangement').value + '</urn:TransportArrangement>' +
+      '</urn:HeaderEadEsad>' +
+      // Transport Mode
+      '<urn:TransportMode>' +
+      '<urn:TransportModeCode>' + document.getElementById('s-transport-mode').value + '</urn:TransportModeCode>' +
+      '</urn:TransportMode>' +
+      // Movement Guarantee
+      '<urn:MovementGuarantee>' +
+      '<urn:GuarantorTypeCode>' + document.getElementById('s-guarantor-type').value + '</urn:GuarantorTypeCode>' +
+      '</urn:MovementGuarantee>' +
+      // Body EadEsad (goods items)
       bodyEadEsadXml +
-      '<urn:EadEsadDraft><urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>' +
+      // EadEsad Draft
+      '<urn:EadEsadDraft>' +
+      '<urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>' +
       '<urn:InvoiceNumber>' + document.getElementById('s-invoice-number').value + '</urn:InvoiceNumber>' +
       '<urn:InvoiceDate>' + document.getElementById('s-invoice-date').value + '</urn:InvoiceDate>' +
       '<urn:OriginTypeCode>' + document.getElementById('s-origin-type').value + '</urn:OriginTypeCode>' +
       '<urn:DateOfDispatch>' + submitDate + '</urn:DateOfDispatch>' +
-      '<urn:TimeOfDispatch>' + (document.getElementById('s-time').value || '12:00') + ':00</urn:TimeOfDispatch></urn:EadEsadDraft>';
+      '<urn:TimeOfDispatch>' + (document.getElementById('s-time').value || '12:00') + ':00</urn:TimeOfDispatch>' +
+      '</urn:EadEsadDraft>';
 
+    // Transport Details
     document.querySelectorAll('.transport-unit-field').forEach(function(unit) {
       const uc = unit.querySelector('.s-transport-unit-code').value;
       const ui = unit.querySelector('.s-identity-transport').value;
       if (uc && ui) xml += '<urn:TransportDetails><urn:TransportUnitCode>' + uc + '</urn:TransportUnitCode><urn:IdentityOfTransportUnits>' + ui + '</urn:IdentityOfTransportUnits></urn:TransportDetails>';
     });
+    
     xml += '</urn:SubmittedDraftOfEADESAD></urn:Body></urn:IE815>';
 
     document.getElementById('submit-output').innerText = 'Sending...';
