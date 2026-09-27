@@ -59,6 +59,21 @@ document.addEventListener('DOMContentLoaded', async function() {
   ];
 
   // ==================== API HELPERS ====================
+  // Robust response parser - handles both JSON and plain text errors
+  async function parseResponse(res) {
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      try {
+        return await res.json();
+      } catch (e) {
+        return { error: 'Failed to parse JSON response' };
+      }
+    } else {
+      const text = await res.text();
+      return { error: text || 'Unknown server error' };
+    }
+  }
+
   async function apiCall(method, path, body) {
     const options = { method, credentials: 'include', headers: {} };
     if (body !== undefined) {
@@ -86,7 +101,11 @@ document.addEventListener('DOMContentLoaded', async function() {
   async function checkSession() {
     try {
       const res = await fetch('/api/session', { credentials: 'include' });
-      return await res.json();
+      const data = await parseResponse(res);
+      if (data.error && !data.authenticated) {
+        return { authenticated: false, hmrcAuthenticated: false };
+      }
+      return data;
     } catch (e) {
       return { authenticated: false, hmrcAuthenticated: false };
     }
@@ -113,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
 
-  // Initial session check (non-blocking - FIX for network error)
+  // Initial session check (non-blocking)
   try {
     const sessionData = await checkSession();
     if (sessionData.authenticated) {
@@ -125,7 +144,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       showLoginScreen();
     }
   } catch (e) {
-    // If session check fails, just show login screen
     showLoginScreen();
   }
 
@@ -135,7 +153,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(async () => {
       alert('Session expired due to inactivity. Please log in again.');
-      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+      try {
+        await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+      } catch (e) {}
       window.location.reload();
     }, 30 * 60 * 1000);
   }
@@ -144,6 +164,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // ==================== LOGIN ====================
   document.getElementById('login-btn').addEventListener('click', async function() {
+    const loginBtn = document.getElementById('login-btn');
+    const errorEl = document.getElementById('login-error');
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Logging in...';
+    errorEl.innerText = '';
+
     try {
       const res = await fetch('/api/protect', {
         method: 'POST',
@@ -154,11 +180,15 @@ document.addEventListener('DOMContentLoaded', async function() {
           totpCode: document.getElementById('totp-code').value
         })
       });
-      const data = await res.json();
+
+      const data = await parseResponse(res);
+
       if (data.requires2FA) {
         document.getElementById('totp-code').style.display = 'block';
-        document.getElementById('login-error').innerText = 'Enter your 2FA code';
+        errorEl.innerText = 'Enter your 2FA code';
         document.getElementById('totp-code').focus();
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
         return;
       }
       if (res.ok && data.success) {
@@ -168,16 +198,26 @@ document.addEventListener('DOMContentLoaded', async function() {
         await loadProfiles();
         await loadDrafts();
       } else {
-        document.getElementById('login-error').innerText = data.error || 'Login failed';
+        // Show the error message from server, cleaned up
+        let errorMsg = data.error || 'Login failed';
+        if (typeof errorMsg === 'string' && errorMsg.length > 200) {
+          errorMsg = errorMsg.substring(0, 200) + '...';
+        }
+        errorEl.innerText = errorMsg;
       }
     } catch (err) {
-      document.getElementById('login-error').innerText = 'Network error: ' + err.message;
+      errorEl.innerText = 'Network error: ' + err.message;
+    } finally {
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Login';
     }
   });
 
   document.getElementById('logout-link').addEventListener('click', async function(e) {
     e.preventDefault();
-    await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+    try {
+      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+    } catch (err) {}
     window.location.reload();
   });
 
@@ -190,16 +230,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     try {
       const res = await fetch('/api/setup-2fa', { method: 'POST', credentials: 'include' });
       if (res.ok) {
-        const data = await res.json();
-        document.getElementById('2fa-setup').style.display = 'block';
-        document.getElementById('qr-code').src = data.qrCode;
-        document.getElementById('secret-text').innerText = data.secret;
-        window._tempSecret = data.secret;
+        const data = await parseResponse(res);
+        if (data.secret) {
+          document.getElementById('2fa-setup').style.display = 'block';
+          document.getElementById('qr-code').src = data.qrCode;
+          document.getElementById('secret-text').innerText = data.secret;
+          window._tempSecret = data.secret;
+        } else {
+          alert('Failed to get 2FA secret: ' + (data.error || 'Unknown error'));
+        }
       } else {
         alert('Please login first.');
       }
     } catch (err) {
-      alert('Network error during 2FA setup.');
+      alert('Network error during 2FA setup: ' + err.message);
     }
   });
 
@@ -210,14 +254,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ secret: window._tempSecret, token: document.getElementById('verify-code').value })
       });
-      const data = await res.json();
+      const data = await parseResponse(res);
       if (data.success) {
         document.getElementById('2fa-result').innerHTML = '<span class="success">✅ Verified! Add this to Vercel env var TOTP_SECRET: <code>' + data.secret + '</code></span>';
       } else {
         document.getElementById('2fa-result').innerHTML = '<span class="error">❌ ' + (data.error || 'Verification failed') + '</span>';
       }
     } catch (err) {
-      document.getElementById('2fa-result').innerHTML = '<span class="error">Network error.</span>';
+      document.getElementById('2fa-result').innerHTML = '<span class="error">Network error: ' + err.message + '</span>';
     }
   });
 
@@ -359,7 +403,12 @@ document.addEventListener('DOMContentLoaded', async function() {
   async function loadProfiles() {
     try {
       const res = await apiCall('GET', '/api/profiles');
-      window.profiles = await res.json();
+      const data = await parseResponse(res);
+      if (Array.isArray(data)) {
+        window.profiles = data;
+      } else {
+        window.profiles = [];
+      }
       renderProfileDropdown();
       renderProfileChips();
       applyProfileToForms();
@@ -404,7 +453,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         const id = parseInt(this.getAttribute('data-id'));
         if (window.profiles.length <= 1) { alert('You must have at least one profile.'); return; }
         if (!confirm('Delete this profile?')) return;
-        await apiCall('DELETE', '/api/profiles?id=' + id);
+        try {
+          await apiCall('DELETE', '/api/profiles?id=' + id);
+        } catch (e) {}
         if (window.activeProfileId === id) window.activeProfileId = null;
         await loadProfiles();
       });
@@ -444,26 +495,31 @@ document.addEventListener('DOMContentLoaded', async function() {
     const ern = document.getElementById('prof-ern').value.trim();
     if (!name || !ern) { alert('Name and ERN are required.'); return; }
     if (!/^[A-Z]{2}[A-Z0-9]{11}$/.test(ern)) { alert('Invalid ERN format (e.g., GBWK002281023).'); return; }
-    await apiCall('POST', '/api/profiles', {
-      name,
-      type: document.getElementById('prof-type').value,
-      ern,
-      traderName: document.getElementById('prof-trader-name').value,
-      street: document.getElementById('prof-street').value,
-      postcode: document.getElementById('prof-postcode').value,
-      city: document.getElementById('prof-city').value,
-      office: document.getElementById('prof-office').value
-    });
-    ['prof-name', 'prof-ern', 'prof-trader-name', 'prof-street', 'prof-postcode', 'prof-city'].forEach(id => document.getElementById(id).value = '');
-    await loadProfiles();
-    alert('Profile created!');
+    try {
+      await apiCall('POST', '/api/profiles', {
+        name,
+        type: document.getElementById('prof-type').value,
+        ern,
+        traderName: document.getElementById('prof-trader-name').value,
+        street: document.getElementById('prof-street').value,
+        postcode: document.getElementById('prof-postcode').value,
+        city: document.getElementById('prof-city').value,
+        office: document.getElementById('prof-office').value
+      });
+      ['prof-name', 'prof-ern', 'prof-trader-name', 'prof-street', 'prof-postcode', 'prof-city'].forEach(id => document.getElementById(id).value = '');
+      await loadProfiles();
+      alert('Profile created!');
+    } catch (e) {
+      alert('Failed to create profile: ' + e.message);
+    }
   });
 
   // ==================== DRAFTS ====================
   async function loadDrafts() {
     try {
       const res = await apiCall('GET', '/api/drafts');
-      const drafts = await res.json();
+      const data = await parseResponse(res);
+      const drafts = Array.isArray(data) ? data : [];
       renderDrafts(drafts);
     } catch (e) {
       console.error('Failed to load drafts:', e);
@@ -505,22 +561,28 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   window._loadDraft = async function(id) {
-    const res = await apiCall('GET', '/api/drafts');
-    const drafts = await res.json();
-    const draft = drafts.find(d => d.id === id);
-    if (!draft) { alert('Draft not found.'); return; }
-    if (window.currentDraftId && window.currentDraftId !== id) {
-      if (!confirm('Another draft is loaded. Replace it?')) return;
+    try {
+      const res = await apiCall('GET', '/api/drafts');
+      const drafts = await parseResponse(res);
+      const draft = (Array.isArray(drafts) ? drafts : []).find(d => d.id === id);
+      if (!draft) { alert('Draft not found.'); return; }
+      if (window.currentDraftId && window.currentDraftId !== id) {
+        if (!confirm('Another draft is loaded. Replace it?')) return;
+      }
+      applyDraftData(draft.data);
+      window.currentDraftId = id;
+      await loadDrafts();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+      alert('Failed to load draft: ' + e.message);
     }
-    applyDraftData(draft.data);
-    window.currentDraftId = id;
-    await loadDrafts();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   window._deleteDraft = async function(id) {
     if (!confirm('Delete this draft?')) return;
-    await apiCall('DELETE', '/api/drafts?id=' + id);
+    try {
+      await apiCall('DELETE', '/api/drafts?id=' + id);
+    } catch (e) {}
     if (window.currentDraftId === id) window.currentDraftId = null;
     await loadDrafts();
   };
@@ -606,13 +668,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     const name = prompt('Enter a name for this draft:', 'Draft ' + new Date().toLocaleDateString());
     if (!name) return;
     const data = captureFormData();
-    await apiCall('POST', '/api/drafts', {
-      name: name.trim(),
-      data,
-      id: window.currentDraftId
-    });
-    await loadDrafts();
-    alert('Draft saved.');
+    try {
+      await apiCall('POST', '/api/drafts', {
+        name: name.trim(),
+        data,
+        id: window.currentDraftId
+      });
+      await loadDrafts();
+      alert('Draft saved.');
+    } catch (e) {
+      alert('Failed to save draft: ' + e.message);
+    }
   });
 
   // ==================== GOODS ITEMS ====================
@@ -798,7 +864,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       const res = await hmrcCall('GET', '/customs/excise/movements/' + encodeURIComponent(movId) + '/messages');
       if (!res.ok) return { arc: null, latestStatus: null };
       const text = await res.text();
-      const msgs = JSON.parse(text);
+      let msgs;
+      try {
+        msgs = JSON.parse(text);
+      } catch (e) {
+        return { arc: null, latestStatus: null };
+      }
       if (!Array.isArray(msgs) || msgs.length === 0) return { arc: null, latestStatus: null };
       msgs.forEach(m => {
         if (m.encodedMessage && !m.decodedXml) {
@@ -836,8 +907,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     try {
       const res = await hmrcCall('GET', '/customs/excise/movements?ern=' + encodeURIComponent(ern));
       const text = await res.text();
-      window.monitorData = JSON.parse(text);
-      if (!Array.isArray(window.monitorData)) window.monitorData = [];
+      try {
+        window.monitorData = JSON.parse(text);
+        if (!Array.isArray(window.monitorData)) window.monitorData = [];
+      } catch (e) {
+        window.monitorData = [];
+      }
     } catch(e) { window.monitorData = []; }
 
     if (window.monitorData.length > 0) {
@@ -1003,7 +1078,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     try {
       const res = await hmrcCall('GET', '/customs/excise/movements/' + encodeURIComponent(movId));
       const text = await res.text();
-      const data = JSON.parse(text);
+      let data;
+      try { data = JSON.parse(text); } catch (e) { alert('Failed to parse movement data.'); return; }
       let items = [];
       if (data.bodyEadEsad && Array.isArray(data.bodyEadEsad)) items = data.bodyEadEsad;
       else if (data.items && Array.isArray(data.items)) items = data.items;
@@ -1182,7 +1258,9 @@ document.addEventListener('DOMContentLoaded', async function() {
           }));
           document.getElementById('export-last-csv-btn').style.display = 'inline-block';
           if (window.currentDraftId) {
-            await apiCall('DELETE', '/api/drafts?id=' + window.currentDraftId);
+            try {
+              await apiCall('DELETE', '/api/drafts?id=' + window.currentDraftId);
+            } catch (e) {}
             window.currentDraftId = null;
             await loadDrafts();
           }
@@ -1333,7 +1411,8 @@ document.addEventListener('DOMContentLoaded', async function() {
       '<urn:Body>' + bodyXml + '</urn:Body></urn:' + msgType + '>';
 
     const res = await hmrcCall('POST', '/customs/excise/movements/' + encodeURIComponent(movId) + '/messages', xml);
-    document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+    const responseText = await res.text();
+    document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
   });
 
   // ==================== TAB 5 ====================
@@ -1410,7 +1489,8 @@ document.addEventListener('DOMContentLoaded', async function() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ boxId: '42c75e22-7bba-44f2-a610-4b4c3b262e3e' })
     });
-    document.getElementById('sub-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
+    const text = await res.text();
+    document.getElementById('sub-output').innerText = 'Status: ' + res.status + '\n\n' + text;
   });
 
   // ==================== TAB 9 ====================
