@@ -4,185 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HMRC EMCS Dashboard</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
-.container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-h1 { color: #005ea5; margin-bottom: 10px; }
-h2 { color: #333; margin-bottom: 15px; font-size: 1.3em; }
-h3 { color: #005ea5; margin-top: 20px; margin-bottom: 10px; font-size: 1.1em; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px; }
-h4 { color: #505a5f; margin-bottom: 8px; }
-.card { background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #005ea5; color: white; border: none; border-radius: 5px; font-size: 14px; }
-button:hover { background: #003d6b; }
-.btn-green { background: #00703c; } .btn-green:hover { background: #005a30; }
-.btn-red { background: #d4351c; } .btn-red:hover { background: #aa2a16; }
-.btn-orange { background: #ef6c00; } .btn-orange:hover { background: #d84315; }
-.btn-grey { background: #505a5f; } .btn-grey:hover { background: #3d444b; }
-.btn-small { padding: 4px 10px; font-size: 12px; margin: 2px; }
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-input, select, textarea { padding: 8px 12px; border: 2px solid #b1b4b6; border-radius: 4px; font-size: 14px; width: 100%; font-family: inherit; }
-input:focus, select:focus, textarea:focus { border-color: #005ea5; outline: none; }
-textarea { resize: vertical; min-height: 60px; }
-pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; overflow-x: auto; max-height: 400px; font-size: 13px; white-space: pre-wrap; word-wrap: break-word; margin-top: 15px; }
-.success { color: #00703c; font-weight: bold; }
-.error { color: #d4351c; font-weight: bold; }
-.nav { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 20px; }
-.nav button { background: #505a5f; font-size: 13px; padding: 8px 14px; }
-.nav button.active { background: #005ea5; }
-.nav button:hover { background: #005ea5; }
-.tab { display: none; }
-.tab.active { display: block; }
-.field { position: relative; }
-.field label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 14px; }
-.format-badge { display: inline-block; background: #e8f4fd; color: #005ea5; padding: 2px 6px; border-radius: 3px; font-size: 11px; margin-left: 5px; font-family: monospace; }
-#login-screen { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
-.login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 450px; width: 100%; text-align: center; }
-.status-bar { background: #005ea5; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-.status-bar a { color: #ffdd57; text-decoration: none; margin-left: 15px; }
-.status-bar a:hover { text-decoration: underline; }
-.token-status { padding: 5px 10px; border-radius: 3px; font-size: 12px; }
-.token-ok { background: #00703c; }
-.token-missing { background: #d4351c; }
-.profile-selector { display: flex; align-items: center; gap: 8px; }
-.profile-selector select { padding: 4px 8px; border-radius: 3px; border: 1px solid #ffdd57; background: white; color: #333; font-size: 12px; width: auto; max-width: 200px; }
-.item-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 15px; background: #fafafa; }
-.item-field.collapsed .form-grid { display: none; }
-.transport-unit-field { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 15px; background: #f0f9ff; }
-.mode-indicator { padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; }
-.mode-test { background: #ff9800; color: white; }
-.required-asterisk { color: #d4351c; font-weight: bold; }
-.section-optional { background: #f9f9f9; border-left: 3px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-.section-filter { background: #f0f4f8; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-.section-profile { background: #f0f4f8; border-left: 3px solid #005ea5; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-.section-drafts { background: #f5f5f5; border-left: 3px solid #505a5f; padding: 15px; margin-top: 20px; border-radius: 4px; }
-
-.monitor-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
-.monitor-table th { background: #005ea5; color: white; padding: 10px; text-align: left; position: sticky; top: 0; }
-.monitor-table td { padding: 10px; border-bottom: 1px solid #e0e0e0; vertical-align: middle; }
-.monitor-table tr:hover { background: #f9f9f9; }
-
-.status-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  background: #f5f5f5;
-  border: 1px solid #d0d0d0;
-  border-radius: 3px;
-  font-size: 12px;
-  color: #333;
-  font-weight: 500;
-  white-space: nowrap;
-}
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  flex-shrink: 0;
-}
-.dot-green { background: #2e7d32; }
-.dot-red { background: #c62828; }
-.dot-amber { background: #ef6c00; }
-.dot-blue { background: #1565c0; }
-.dot-grey { background: #757575; }
-
-.warning-row { background-color: #fff8f0 !important; }
-.warning-text { color: #c62828; font-weight: 500; }
-.arc-cell { font-family: 'SF Mono', Monaco, monospace; font-size: 11px; }
-.arc-cell .arc-value { font-weight: 600; color: #2e7d32; }
-.arc-cell .pending { color: #757575; font-style: italic; }
-.arc-cell .lrn { color: #666; font-size: 10px; display: block; margin-top: 2px; }
-
-.item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.item-actions { display: flex; gap: 5px; }
-
-.actions-cell {
-  display: flex;
-  gap: 4px;
-  justify-content: flex-end;
-  flex-wrap: nowrap;
-}
-.actions-cell .btn-small {
-  min-width: 60px;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.receipt-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-.receipt-table th { background: #005ea5; color: white; padding: 8px; text-align: left; }
-.receipt-table td { padding: 8px; border-bottom: 1px solid #ddd; }
-.receipt-table input, .receipt-table select { padding: 4px 6px; font-size: 12px; }
-.receipt-table .shortage { background: #fff5f5; }
-.receipt-table .excess { background: #f0f9ff; }
-
-/* Profile chips - neutral blue/grey */
-.profile-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.profile-chip { background: white; border: 1px solid #005ea5; color: #005ea5; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-.profile-chip:hover { background: #005ea5; color: white; }
-.profile-chip.active { background: #005ea5; color: white; }
-.profile-chip .del-prof { color: #ffdd57; font-weight: bold; cursor: pointer; margin-left: 4px; }
-.profile-chip.active .del-prof { color: #ffdd57; }
-
-/* Draft cards - neutral styling */
-.draft-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-.draft-card {
-  background: white;
-  border: 1px solid #d0d0d0;
-  border-left: 4px solid #505a5f;
-  border-radius: 4px;
-  padding: 12px 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-.draft-card:hover { border-left-color: #005ea5; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-.draft-info { flex: 1; min-width: 200px; }
-.draft-name { font-weight: 600; color: #333; font-size: 14px; }
-.draft-meta { font-size: 11px; color: #666; margin-top: 3px; }
-.draft-meta span { margin-right: 12px; }
-.draft-actions { display: flex; gap: 5px; flex-wrap: nowrap; }
-
-.loading-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #ccc; border-top-color: #005ea5; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 5px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.cheat-sheet { background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin-top: 15px; font-size: 13px; }
-.cheat-sheet h3 { margin-bottom: 8px; margin-top: 0; border: none; color: #856404; }
-.cheat-sheet table { width: 100%; border-collapse: collapse; }
-.cheat-sheet th, .cheat-sheet td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
-.cheat-sheet th { background: #ffeeba; }
-
-.parsed-container { margin-top: 15px; }
-.parsed-card { background: white; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-.parsed-card h4 { color: #005ea5; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
-.parsed-card .type-badge { background: #505a5f; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
-.parsed-card .type-badge.ie801 { background: #2e7d32; }
-.parsed-card .type-badge.ie810 { background: #c62828; }
-.parsed-card .type-badge.ie818 { background: #1565c0; }
-.parsed-card .type-badge.ie837 { background: #ef6c00; }
-.parsed-card .type-badge.ie813, .parsed-card .type-badge.ie803 { background: #6a1b9a; }
-.parsed-card .type-badge.ie819, .parsed-card .type-badge.ie839 { background: #ad1457; }
-.parsed-card .type-badge.ie871 { background: #4e342e; }
-.parsed-card .type-badge.ie881 { background: #37474f; }
-.parsed-card .type-badge.ie905 { background: #455a64; }
-.parsed-card .type-badge.ie807 { background: #d84315; }
-.parsed-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
-.parsed-field { padding: 8px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #005ea5; }
-.parsed-field .label { font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
-.parsed-field .value { font-size: 14px; color: #333; margin-top: 3px; word-break: break-word; font-family: monospace; }
-.parsed-field .value.arc { color: #2e7d32; font-weight: bold; }
-.parsed-field .value.warn { color: #c62828; }
-
-.raw-toggle { margin-top: 10px; }
-.raw-toggle summary { cursor: pointer; color: #005ea5; font-size: 12px; padding: 5px 0; }
-.raw-toggle summary:hover { text-decoration: underline; }
-.raw-toggle pre { margin-top: 8px; }
-
-.section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-</style>
+<link rel="stylesheet" href="/styles.css">
 </head>
 <body>
 
@@ -217,22 +39,22 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
     </div>
     <div>
       <span id="hmrc-status" class="token-status token-missing">HMRC: Not Logged In</span>
-      <a href="/api/auth">Login to HMRC</a>
-      <a href="#" id="logout-btn">Logout</a>
+      <a id="hmrc-login-link">Login to HMRC</a>
+      <a id="logout-link">Logout</a>
     </div>
   </div>
 
   <div class="container">
     <div class="nav">
-      <button class="nav-btn active" data-tab="tab-monitor">1. Monitor Dashboard</button>
-      <button class="nav-btn" data-tab="tab-submit">2. Submit Movement</button>
-      <button class="nav-btn" data-tab="tab-get-movement">3. Get Single Movement</button>
-      <button class="nav-btn" data-tab="tab-submit-msg">4. Submit Message</button>
-      <button class="nav-btn" data-tab="tab-get-messages">5. Get Messages</button>
-      <button class="nav-btn" data-tab="tab-get-message">6. Get Single Message</button>
-      <button class="nav-btn" data-tab="tab-validate">7. Pre-Validate Trader</button>
-      <button class="nav-btn" data-tab="tab-subscribe">8. Subscribe ERN</button>
-      <button class="nav-btn" data-tab="tab-unsubscribe">9. Unsubscribe ERN</button>
+      <button class="nav-btn active" data-tab="tab-monitor">1. Monitor</button>
+      <button class="nav-btn" data-tab="tab-submit">2. Submit</button>
+      <button class="nav-btn" data-tab="tab-get-movement">3. Get Movement</button>
+      <button class="nav-btn" data-tab="tab-submit-msg">4. Submit Msg</button>
+      <button class="nav-btn" data-tab="tab-get-messages">5. Get Msgs</button>
+      <button class="nav-btn" data-tab="tab-get-message">6. Get Msg</button>
+      <button class="nav-btn" data-tab="tab-validate">7. Validate</button>
+      <button class="nav-btn" data-tab="tab-subscribe">8. Subscribe</button>
+      <button class="nav-btn" data-tab="tab-unsubscribe">9. Unsubscribe</button>
       <button class="nav-btn" data-tab="tab-profiles">10. Profiles</button>
     </div>
 
@@ -244,25 +66,16 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <h3 style="margin-top:0; border:none; font-size:1em;">Apply Filters</h3>
           <div class="form-grid">
             <div class="field"><label>Direction</label>
-              <select id="mon-direction">
-                <option value="">All</option>
-                <option value="in">Goods in</option>
-                <option value="out">Goods out</option>
-              </select>
+              <select id="mon-direction"><option value="">All</option><option value="in">Goods in</option><option value="out">Goods out</option></select>
             </div>
             <div class="field"><label>Status</label>
               <select id="mon-status">
                 <option value="">All statuses</option>
-                <option value="pending">Pending</option>
-                <option value="accepted">Accepted</option>
-                <option value="receipted">Receipted</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="rejected">Rejected</option>
-                <option value="interrupted">Interrupted</option>
-                <option value="changed">Destination Changed</option>
-                <option value="closed">Manually Closed</option>
-                <option value="delay">Delay Explained</option>
-                <option value="shortage">Shortage Explained</option>
+                <option value="pending">Pending</option><option value="accepted">Accepted</option>
+                <option value="receipted">Receipted</option><option value="cancelled">Cancelled</option>
+                <option value="rejected">Rejected</option><option value="interrupted">Interrupted</option>
+                <option value="changed">Destination Changed</option><option value="closed">Manually Closed</option>
+                <option value="delay">Delay Explained</option><option value="shortage">Shortage Explained</option>
               </select>
             </div>
             <div class="field"><label>Product Code</label>
@@ -290,111 +103,108 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
       </div>
     </div>
 
-    <!-- TAB 2: SUBMIT MOVEMENT (Drafts now at bottom, only shown when exist) -->
+    <!-- TAB 2: SUBMIT MOVEMENT -->
     <div id="tab-submit" class="tab">
       <div class="card">
-        <h2>Submit Draft Movement (IE815) - EMCS Phase 4 V3.23</h2>
+        <h2>Submit Draft Movement (IE815)</h2>
 
-        <h3>Box 1: eAD Header <span class="format-badge">Required</span></h3>
+        <h3>Box 1: eAD Header</h3>
         <div class="form-grid">
-          <div class="field"><label>Destination Type Code <span class="required-asterisk">*</span></label>
+          <div class="field"><label>Destination Type <span class="required-asterisk">*</span></label>
             <select id="s-dest-type" required>
-              <option value="1" selected>1 - Tax Warehouse</option><option value="2">2 - Registered Consignee</option><option value="3">3 - Temporary Registered Consignee</option><option value="4">4 - Direct Delivery</option><option value="5">5 - Exempted Organisation</option><option value="6">6 - Export</option><option value="8">8 - Unknown destination</option>
+              <option value="1" selected>1 - Tax Warehouse</option><option value="2">2 - Registered Consignee</option>
+              <option value="3">3 - Temporary Registered Consignee</option><option value="4">4 - Direct Delivery</option>
+              <option value="5">5 - Exempted Organisation</option><option value="6">6 - Export</option><option value="8">8 - Unknown</option>
             </select>
           </div>
           <div class="field"><label>Journey Time <span class="required-asterisk">*</span></label><input type="text" id="s-journey-time" value="D07" pattern="^[HD]\d{1,2}$" maxlength="3" required></div>
           <div class="field"><label>Transport Arrangement <span class="required-asterisk">*</span></label>
             <select id="s-transport-arrangement" required>
-              <option value="1" selected>1 - Consignor</option><option value="2">2 - Consignee</option><option value="3">3 - Owner of Goods</option><option value="4">4 - Other</option>
+              <option value="1" selected>1 - Consignor</option><option value="2">2 - Consignee</option>
+              <option value="3">3 - Owner</option><option value="4">4 - Other</option>
             </select>
           </div>
         </div>
 
-        <h3>Box 2: Consignor <span class="format-badge">Required</span></h3>
+        <h3>Box 2: Consignor</h3>
         <div class="form-grid">
-          <div class="field"><label>Trader Excise Number (ERN) <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-ern" value="GBWK002281023" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13" required></div>
-          <div class="field"><label>Trader Name <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-name" value="Test Consignor Ltd" maxlength="182" required></div>
-          <div class="field"><label>Street Name <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-street" value="Test Street" maxlength="65" required></div>
-          <div class="field"><label>Street Number</label><input type="text" id="s-consignor-street-num" value="123" maxlength="11"></div>
-          <div class="field"><label>Postcode <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-postcode" value="E1 8QS" maxlength="10" required></div>
-          <div class="field"><label>City <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-city" value="London" maxlength="50" required></div>
+          <div class="field"><label>ERN <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-ern" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13" required></div>
+          <div class="field"><label>Name <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-name" maxlength="182" required></div>
+          <div class="field"><label>Street <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-street" maxlength="65" required></div>
+          <div class="field"><label>Street Number</label><input type="text" id="s-consignor-street-num" maxlength="11"></div>
+          <div class="field"><label>Postcode <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-postcode" maxlength="10" required></div>
+          <div class="field"><label>City <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-city" maxlength="50" required></div>
         </div>
 
         <div class="section-optional">
-          <h3 style="margin-top:0;">Box 3: Place of Dispatch <span class="format-badge">Conditional</span></h3>
+          <h3 style="margin-top:0;">Box 3: Place of Dispatch (Optional)</h3>
           <div class="form-grid">
-            <div class="field"><label>Tax Warehouse Reference</label><input type="text" id="s-dispatch-warehouse" value="GB00DO459DMNX" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13"></div>
-            <div class="field"><label>Trader Name</label><input type="text" id="s-dispatch-name" value="Test Dispatch Warehouse" maxlength="182"></div>
-            <div class="field"><label>Street Name</label><input type="text" id="s-dispatch-street" value="Warehouse Lane" maxlength="65"></div>
-            <div class="field"><label>Street Number</label><input type="text" id="s-dispatch-street-num" value="1" maxlength="11"></div>
-            <div class="field"><label>Postcode</label><input type="text" id="s-dispatch-postcode" value="E2 9BB" maxlength="10"></div>
-            <div class="field"><label>City</label><input type="text" id="s-dispatch-city" value="London" maxlength="50"></div>
+            <div class="field"><label>Warehouse Reference</label><input type="text" id="s-dispatch-warehouse" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13"></div>
+            <div class="field"><label>Name</label><input type="text" id="s-dispatch-name" maxlength="182"></div>
+            <div class="field"><label>Street</label><input type="text" id="s-dispatch-street" maxlength="65"></div>
+            <div class="field"><label>Street Number</label><input type="text" id="s-dispatch-street-num" maxlength="11"></div>
+            <div class="field"><label>Postcode</label><input type="text" id="s-dispatch-postcode" maxlength="10"></div>
+            <div class="field"><label>City</label><input type="text" id="s-dispatch-city" maxlength="50"></div>
           </div>
         </div>
 
-        <h3>Box 5: Consignee <span class="format-badge">Required</span></h3>
+        <h3>Box 5: Consignee</h3>
         <div class="form-grid">
-          <div class="field"><label>Trader ID (ERN) <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-ern" value="GBWKQOZ8OVLYR" maxlength="16" required></div>
-          <div class="field"><label>Trader Name <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-name" value="Test Consignee Ltd" maxlength="182" required></div>
-          <div class="field"><label>Street Name <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-street" value="Delivery Road" maxlength="65" required></div>
-          <div class="field"><label>Street Number</label><input type="text" id="s-consignee-street-num" value="456" maxlength="11"></div>
-          <div class="field"><label>Postcode <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-postcode" value="M1 1AA" maxlength="10" required></div>
-          <div class="field"><label>City <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-city" value="Manchester" maxlength="50" required></div>
+          <div class="field"><label>ERN <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-ern" maxlength="16" required></div>
+          <div class="field"><label>Name <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-name" maxlength="182" required></div>
+          <div class="field"><label>Street <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-street" maxlength="65" required></div>
+          <div class="field"><label>Street Number</label><input type="text" id="s-consignee-street-num" maxlength="11"></div>
+          <div class="field"><label>Postcode <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-postcode" maxlength="10" required></div>
+          <div class="field"><label>City <span class="required-asterisk">*</span></label><input type="text" id="s-consignee-city" maxlength="50" required></div>
         </div>
 
-        <h3>Box 7: Place of Delivery <span class="format-badge">Required</span></h3>
+        <h3>Box 7: Place of Delivery</h3>
         <div class="form-grid">
-          <div class="field"><label>Trader ID <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-trader-id" value="GB00AIP67RAO3" maxlength="16" required></div>
-          <div class="field"><label>Trader Name <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-name" value="Delivery Point" maxlength="182" required></div>
-          <div class="field"><label>Street Name <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-street" value="Arrival Street" maxlength="65" required></div>
-          <div class="field"><label>Street Number</label><input type="text" id="s-delivery-street-num" value="77" maxlength="11"></div>
-          <div class="field"><label>Postcode <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-postcode" value="M2 2BB" maxlength="10" required></div>
-          <div class="field"><label>City <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-city" value="Manchester" maxlength="50" required></div>
+          <div class="field"><label>Trader ID <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-trader-id" maxlength="16" required></div>
+          <div class="field"><label>Name <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-name" maxlength="182" required></div>
+          <div class="field"><label>Street <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-street" maxlength="65" required></div>
+          <div class="field"><label>Street Number</label><input type="text" id="s-delivery-street-num" maxlength="11"></div>
+          <div class="field"><label>Postcode <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-postcode" maxlength="10" required></div>
+          <div class="field"><label>City <span class="required-asterisk">*</span></label><input type="text" id="s-delivery-city" maxlength="50" required></div>
         </div>
 
-        <h3>Box 9: e-AD <span class="format-badge">Required</span></h3>
+        <h3>Box 9: e-AD</h3>
         <div class="form-grid">
-          <div class="field"><label>Local Reference Number (LRN)</label><input type="text" id="s-lrn" value="" maxlength="22" placeholder="Auto-generated or use magic LRN"></div>
-          <div class="field"><label>Invoice Number <span class="required-asterisk">*</span></label><input type="text" id="s-invoice-number" value="INV-2026-001" maxlength="35" required></div>
+          <div class="field"><label>LRN</label><input type="text" id="s-lrn" maxlength="22" placeholder="Auto-generated or magic LRN"></div>
+          <div class="field"><label>Invoice Number <span class="required-asterisk">*</span></label><input type="text" id="s-invoice-number" maxlength="35" required></div>
           <div class="field"><label>Invoice Date <span class="required-asterisk">*</span></label><input type="date" id="s-invoice-date" required></div>
-          <div class="field"><label>Origin Type Code <span class="required-asterisk">*</span></label>
+          <div class="field"><label>Origin Type <span class="required-asterisk">*</span></label>
             <select id="s-origin-type" required><option value="1" selected>1 - Tax warehouse</option><option value="2">2 - Import</option></select>
           </div>
           <div class="field"><label>Date of Dispatch <span class="required-asterisk">*</span></label><input type="date" id="s-date" required></div>
           <div class="field"><label>Time of Dispatch <span class="required-asterisk">*</span></label><input type="time" id="s-time" value="12:00" required></div>
         </div>
 
-        <h3>Boxes 10/11/13/15: Authorities & Transport <span class="format-badge">Required</span></h3>
+        <h3>Boxes 10/11/13/15: Authorities & Transport</h3>
         <div class="form-grid">
-          <div class="field"><label>Dispatch Office Ref <span class="required-asterisk">*</span></label><input type="text" id="s-dispatch-office" value="GB004098" maxlength="8" required></div>
+          <div class="field"><label>Dispatch Office Ref <span class="required-asterisk">*</span></label><input type="text" id="s-dispatch-office" maxlength="8" required></div>
           <div class="field"><label>Guarantor Type <span class="required-asterisk">*</span></label>
-            <select id="s-guarantor-type" required><option value="1" selected>1 - Consignor</option><option value="2">2 - Transporter</option><option value="3">3 - Owner</option><option value="4">4 - Consignee</option><option value="0">0 - Not required</option></select>
+            <select id="s-guarantor-type" required>
+              <option value="1" selected>1 - Consignor</option><option value="2">2 - Transporter</option>
+              <option value="3">3 - Owner</option><option value="4">4 - Consignee</option><option value="0">0 - Not required</option>
+            </select>
           </div>
           <div class="field"><label>Transport Mode <span class="required-asterisk">*</span></label>
-            <select id="s-transport-mode" required><option value="3" selected>3 - Road</option><option value="1">1 - Sea</option><option value="2">2 - Rail</option><option value="4">4 - Air</option></select>
+            <select id="s-transport-mode" required>
+              <option value="3" selected>3 - Road</option><option value="1">1 - Sea</option>
+              <option value="2">2 - Rail</option><option value="4">4 - Air</option>
+            </select>
           </div>
-          <div class="field"><label>Transporter VAT <span class="required-asterisk">*</span></label><input type="text" id="s-transporter-vat" value="123798354" maxlength="35" required></div>
-          <div class="field"><label>Transporter Name <span class="required-asterisk">*</span></label><input type="text" id="s-transporter-name" value="Fast Freight Ltd" maxlength="182" required></div>
-          <div class="field"><label>Transporter City <span class="required-asterisk">*</span></label><input type="text" id="s-transporter-city" value="Dover" maxlength="50" required></div>
+          <div class="field"><label>Transporter VAT <span class="required-asterisk">*</span></label><input type="text" id="s-transporter-vat" maxlength="35" required></div>
+          <div class="field"><label>Transporter Name <span class="required-asterisk">*</span></label><input type="text" id="s-transporter-name" maxlength="182" required></div>
+          <div class="field"><label>Transporter City <span class="required-asterisk">*</span></label><input type="text" id="s-transporter-city" maxlength="50" required></div>
         </div>
 
-        <h3>Box 16: Transport Details <span class="format-badge">Required</span></h3>
-        <div id="transport-units-container">
-          <div class="transport-unit-field" data-unit="1">
-            <h4>Transport Unit 1</h4>
-            <div class="form-grid">
-              <div class="field"><label>Transport Unit Code <span class="required-asterisk">*</span></label>
-                <select class="s-transport-unit-code" required>
-                  <option value="1" selected>1 - Container</option><option value="2">2 - Vehicle</option><option value="3">3 - Trailer</option><option value="4">4 - Tractor</option>
-                </select>
-              </div>
-              <div class="field"><label>Identity of Transport Units <span class="required-asterisk">*</span></label><input type="text" class="s-identity-transport" value="AB12CDE" maxlength="35" required></div>
-            </div>
-          </div>
-        </div>
+        <h3>Box 16: Transport Details</h3>
+        <div id="transport-units-container"></div>
         <button type="button" id="add-transport-unit-btn" class="btn-green btn-small">+ Add Transport Unit</button>
 
-        <h3>Box 17: e-AD Body (Goods Items) <span class="format-badge">Required</span></h3>
+        <h3>Box 17: Goods Items</h3>
         <div style="margin-bottom: 10px;">
           <button type="button" id="add-goods-item-btn" class="btn-green btn-small">+ Add Item</button>
         </div>
@@ -403,11 +213,10 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
         <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
           <button id="submit-movement-btn">Submit Movement</button>
           <button id="save-draft-btn" class="btn-orange">💾 Save as Draft</button>
-          <button id="export-last-csv-btn" class="btn-green" style="display:none;">📤 Export Last Submission to CSV</button>
+          <button id="export-last-csv-btn" class="btn-green" style="display:none;">📤 Export to CSV</button>
         </div>
         <pre id="submit-output">Waiting...</pre>
 
-        <!-- Drafts section - only shown when drafts exist -->
         <div id="drafts-section" class="section-drafts" style="display:none;">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
             <h3 style="margin:0; border:none; font-size:1em;">📝 Saved Drafts</h3>
@@ -417,11 +226,11 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
         </div>
 
         <div class="cheat-sheet">
-          <h3>🎯 Sandbox Magic LRNs (for testing specific scenarios)</h3>
-          <p style="margin-bottom:10px; font-size:12px;">Copy one of these into the LRN field above to trigger a specific sandbox response.</p>
+          <h3>🎯 Sandbox Magic LRNs</h3>
+          <p style="margin-bottom:10px; font-size:12px;">Copy one of these into the LRN field to trigger a specific sandbox response.</p>
           <table>
             <tr><th>LRN Value</th><th>Result</th></tr>
-            <tr><td><code>lrnie8156540856</code></td><td>202 Success + IE801 Acceptance (ARC issued)</td></tr>
+            <tr><td><code>lrnie8156540856</code></td><td>202 Success + IE801 Acceptance</td></tr>
             <tr><td><code>lrnie8155973812</code></td><td>Success + IE818 Report of Receipt</td></tr>
             <tr><td><code>lrnie8155743934</code></td><td>Success + IE810 Cancellation</td></tr>
             <tr><td><code>lrnie8154968571</code></td><td>Success + IE813 Change of Destination</td></tr>
@@ -441,14 +250,9 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
         <h2>Get Single Movement</h2>
         <div class="field"><label>Movement ID</label><input type="text" id="gsm-id" placeholder="Paste a Movement ID"></div>
         <button id="get-single-movement-btn" style="margin-top:15px;">Get Movement</button>
-        <div class="section-title" style="margin-top:20px;">
-          <h3 style="margin:0; border:none;">Parsed View</h3>
-        </div>
+        <div class="section-title" style="margin-top:20px;"><h3 style="margin:0; border:none;">Parsed View</h3></div>
         <div id="gsm-parsed" class="parsed-container"></div>
-        <details class="raw-toggle">
-          <summary>📄 Show Raw JSON Response</summary>
-          <pre id="gsm-output">Waiting...</pre>
-        </details>
+        <details class="raw-toggle"><summary>📄 Show Raw JSON Response</summary><pre id="gsm-output">Waiting...</pre></details>
       </div>
     </div>
 
@@ -470,16 +274,14 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
               <option value="IE871">IE871 - Reason for Shortage</option>
             </select>
           </div>
-          <div class="field"><label>Message Identifier</label><input type="text" id="sm-msgid" value="GB100000000302249"></div>
+          <div class="field"><label>Message Identifier</label><input type="text" id="sm-msgid"></div>
         </div>
-
         <div id="ie818-section" style="display:none; margin-top:20px;">
           <h3>Item-Level Report of Receipt</h3>
           <p style="font-size:13px; color:#666; margin-bottom:10px;">Load the original movement's goods items to report per-item receipts, shortages, or excesses.</p>
           <button type="button" id="load-818-items-btn" class="btn-green">🔄 Load Movement Items</button>
           <div id="ie818-items-container" style="margin-top:15px;"></div>
         </div>
-
         <div id="msg-specific-fields"></div>
         <button id="submit-message-btn" style="margin-top:20px;">Submit Message</button>
         <pre id="sm-output">Waiting...</pre>
@@ -492,15 +294,9 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
         <h2>Get All Messages</h2>
         <div class="field"><label>Movement ID</label><input type="text" id="gmsg-id" placeholder="Paste a Movement ID"></div>
         <button id="get-messages-btn" style="margin-top:15px;">Get Messages</button>
-        <div class="section-title" style="margin-top:20px;">
-          <h3 style="margin:0; border:none;">Parsed Messages</h3>
-          <span id="gmsg-count" style="color:#666; font-size:13px;"></span>
-        </div>
+        <div class="section-title" style="margin-top:20px;"><h3 style="margin:0; border:none;">Parsed Messages</h3><span id="gmsg-count" style="color:#666; font-size:13px;"></span></div>
         <div id="gmsg-parsed" class="parsed-container"></div>
-        <details class="raw-toggle">
-          <summary>📄 Show Raw JSON Response</summary>
-          <pre id="gmsg-output">Waiting...</pre>
-        </details>
+        <details class="raw-toggle"><summary>📄 Show Raw JSON Response</summary><pre id="gmsg-output">Waiting...</pre></details>
       </div>
     </div>
 
@@ -513,14 +309,9 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
           <div class="field"><label>Message ID</label><input type="text" id="gsmsg-id" placeholder="e.g. XI000002"></div>
         </div>
         <button id="get-single-message-btn" style="margin-top:15px;">Get Message</button>
-        <div class="section-title" style="margin-top:20px;">
-          <h3 style="margin:0; border:none;">Parsed Message</h3>
-        </div>
+        <div class="section-title" style="margin-top:20px;"><h3 style="margin:0; border:none;">Parsed Message</h3></div>
         <div id="gsmsg-parsed" class="parsed-container"></div>
-        <details class="raw-toggle">
-          <summary>📄 Show Raw XML Response</summary>
-          <pre id="gsmsg-output">Waiting...</pre>
-        </details>
+        <details class="raw-toggle"><summary>📄 Show Raw XML Response</summary><pre id="gsmsg-output">Waiting...</pre></details>
       </div>
     </div>
 
@@ -529,18 +320,15 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
       <div class="card">
         <h2>Pre-Validate Trader</h2>
         <div class="form-grid">
-          <div class="field"><label>Target ERN</label><input type="text" id="pv-ern" value="GBWK000000206"></div>
+          <div class="field"><label>Target ERN</label><input type="text" id="pv-ern"></div>
           <div class="field"><label>Entity Group</label>
             <select id="pv-group"><option value="UK Record">UK Record</option><option value="EU Trader">EU Trader</option><option value="EU Warehouse">EU Warehouse</option></select>
           </div>
-          <div class="field"><label>Product Code</label><input type="text" id="pv-p1" value="W200"></div>
+          <div class="field"><label>Product Code</label><input type="text" id="pv-p1"></div>
         </div>
         <button id="pre-validate-btn" style="margin-top:15px;">Validate</button>
         <div id="pv-parsed" class="parsed-container" style="margin-top:15px;"></div>
-        <details class="raw-toggle">
-          <summary>📄 Show Raw JSON Response</summary>
-          <pre id="pv-output">Waiting...</pre>
-        </details>
+        <details class="raw-toggle"><summary>📄 Show Raw JSON Response</summary><pre id="pv-output">Waiting...</pre></details>
       </div>
     </div>
 
@@ -548,7 +336,7 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
     <div id="tab-subscribe" class="tab">
       <div class="card">
         <h2>Subscribe ERN</h2>
-        <div class="field"><label>ERN</label><input type="text" id="sub-ern" value="GBWK002281023"></div>
+        <div class="field"><label>ERN</label><input type="text" id="sub-ern"></div>
         <button id="subscribe-ern-btn" class="btn-green" style="margin-top:15px;">Subscribe</button>
         <pre id="sub-output">Waiting...</pre>
       </div>
@@ -558,13 +346,13 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
     <div id="tab-unsubscribe" class="tab">
       <div class="card">
         <h2>Unsubscribe ERN</h2>
-        <div class="field"><label>ERN</label><input type="text" id="unsub-ern" value="GBWK002281023"></div>
+        <div class="field"><label>ERN</label><input type="text" id="unsub-ern"></div>
         <button id="unsubscribe-ern-btn" class="btn-red" style="margin-top:15px;">Unsubscribe</button>
         <pre id="unsub-output">Waiting...</pre>
       </div>
     </div>
 
-    <!-- TAB 10: PROFILES (neutral colors) -->
+    <!-- TAB 10: PROFILES -->
     <div id="tab-profiles" class="tab">
       <div class="card">
         <h2>Manage Profiles</h2>
@@ -595,1551 +383,6 @@ pre { background: #1d1d1d; color: #00ff00; padding: 15px; border-radius: 5px; ov
   </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  var today = new Date().toISOString().slice(0, 10);
-  document.getElementById('s-date').value = today;
-  document.getElementById('s-invoice-date').value = today;
-
-  var TMS_NS = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.23';
-  window.monitorData = [];
-  window.ie818Items = [];
-  window.currentDraftId = null;
-
-  var MESSAGE_TYPE_NAMES = {
-    'IE801': 'Acceptance (ARC Issued)',
-    'IE802': 'Acceptance Rejected',
-    'IE803': 'Change of Destination (Alternative)',
-    'IE807': 'Movement Interrupted',
-    'IE810': 'Cancellation',
-    'IE813': 'Change of Destination',
-    'IE818': 'Report of Receipt',
-    'IE819': 'Alert or Rejection',
-    'IE837': 'Explanation of Delay',
-    'IE838': 'Delay Explanation Accepted',
-    'IE839': 'Customs Rejection',
-    'IE871': 'Reason for Shortage',
-    'IE881': 'Manual Closure',
-    'IE905': 'Status Response'
-  };
-
-  var TERMINAL_STATES = ['IE810', 'IE818', 'IE819', 'IE839', 'IE881'];
-
-  var CN_CODES = {
-    'B000': '22030001', 'W200': '22042142', 'W300': '22041011',
-    'I000': '22042999', 'S200': '22089091', 'S300': '22071000',
-    'T200': '24022010', 'T300': '24021000', 'E410': '27101231', 'E420': '27101211'
-  };
-
-  var PACKAGE_CODES = [
-    { code: 'BA', name: 'Barrel' }, { code: 'BB', name: 'Bobbin' }, { code: 'BD', name: 'Board' },
-    { code: 'BE', name: 'Bundle' }, { code: 'BG', name: 'Bag' }, { code: 'BI', name: 'Bin' },
-    { code: 'BJ', name: 'Bucket' }, { code: 'BK', name: 'Basket' }, { code: 'BL', name: 'Bale' },
-    { code: 'BO', name: 'Bottle' }, { code: 'BX', name: 'Box' }, { code: 'CA', name: 'Can' },
-    { code: 'CB', name: 'Crate' }, { code: 'CC', name: 'Carrying case' }, { code: 'CF', name: 'Coffer' },
-    { code: 'CI', name: 'Canister' }, { code: 'CK', name: 'Cask' }, { code: 'CL', name: 'Coil' },
-    { code: 'CM', name: 'Card' }, { code: 'CN', name: 'Container' }, { code: 'CO', name: 'Carboy' },
-    { code: 'CS', name: 'Case' }, { code: 'CT', name: 'Carton' }, { code: 'CU', name: 'Cup' },
-    { code: 'CV', name: 'Cover' }, { code: 'CX', name: 'Chest' }, { code: 'CY', name: 'Cylinder' },
-    { code: 'DR', name: 'Drum' }, { code: 'DS', name: 'Display' }, { code: 'EN', name: 'Envelope' },
-    { code: 'FB', name: 'Flexible bag' }, { code: 'FI', name: 'Firkin' }, { code: 'FL', name: 'Flask' },
-    { code: 'GI', name: 'Girder' }, { code: 'KG', name: 'Keg (large)' }, { code: 'KE', name: 'Keg' },
-    { code: 'NE', name: 'Unpacked' }, { code: 'NS', name: 'Nest' }, { code: 'OT', name: 'Other' },
-    { code: 'OU', name: 'Container, outer' }, { code: 'PK', name: 'Package' }, { code: 'PL', name: 'Pail' },
-    { code: 'PU', name: 'Tray pack' }, { code: 'PX', name: 'Pallet' }, { code: 'PZ', name: 'Pallet box' },
-    { code: 'RL', name: 'Reel' }, { code: 'RO', name: 'Roll' }, { code: 'SC', name: 'Sachet' },
-    { code: 'SK', name: 'Skein' }, { code: 'SL', name: 'Slab' }, { code: 'SM', name: 'Sheet' },
-    { code: 'ST', name: 'Sheet' }, { code: 'SU', name: 'Suitcase' }, { code: 'TB', name: 'Tub' },
-    { code: 'TC', name: 'Tube container' }, { code: 'TD', name: 'Tube' }, { code: 'TG', name: 'Tank container' },
-    { code: 'TK', name: 'Tank' }, { code: 'TN', name: 'Tin' }, { code: 'TR', name: 'Trunk' },
-    { code: 'TS', name: 'Tins' }, { code: 'TU', name: 'Tube' }, { code: 'UN', name: 'Unit' },
-    { code: 'VG', name: 'Bulk, gas' }, { code: 'VI', name: 'Vial' }, { code: 'VR', name: 'Bulk, liquid' },
-    { code: 'VO', name: 'Bulk, solid' }, { code: 'XE', name: 'Bin pallet' }
-  ];
-
-  function buildPackageOptions(selected) {
-    return PACKAGE_CODES.map(function(p) {
-      var sel = (p.code === selected) ? ' selected' : '';
-      return '<option value="' + p.code + '"' + sel + '>' + p.code + ' - ' + p.name + '</option>';
-    }).join('');
-  }
-
-  // ==================== PARSING HELPERS ====================
-  function escapeHtml(s) {
-    if (s === null || s === undefined) return '';
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-
-  function extractXmlValue(xml, tagName) {
-    if (!xml) return null;
-    var patterns = [
-      new RegExp('<[^:>]+:' + tagName + '[^>]*>([^<]*)</[^:>]+:' + tagName + '>'),
-      new RegExp('<' + tagName + '[^>]*>([^<]*)</' + tagName + '>')
-    ];
-    for (var i = 0; i < patterns.length; i++) {
-      var match = xml.match(patterns[i]);
-      if (match) return match[1];
-    }
-    return null;
-  }
-
-  function extractAllXmlValues(xml, tagName) {
-    if (!xml) return [];
-    var results = [];
-    var patterns = [
-      new RegExp('<[^:>]+:' + tagName + '[^>]*>([^<]*)</[^:>]+:' + tagName + '>', 'g'),
-      new RegExp('<' + tagName + '[^>]*>([^<]*)</' + tagName + '>', 'g')
-    ];
-    for (var i = 0; i < patterns.length; i++) {
-      var match;
-      while ((match = patterns[i].exec(xml)) !== null) results.push(match[1]);
-      if (results.length > 0) return results;
-    }
-    return results;
-  }
-
-  function renderField(label, value, valueClass) {
-    if (value === null || value === undefined || value === '') return '';
-    var cls = valueClass ? ' class="' + valueClass + '"' : '';
-    return '<div class="parsed-field"><div class="label">' + escapeHtml(label) + '</div><div class="value"' + cls + '>' + escapeHtml(value) + '</div></div>';
-  }
-
-  function renderMovementParsed(data) {
-    if (!data) return '<p style="color:#666;">No data to display.</p>';
-    var html = '<div class="parsed-card"><h4>Movement Summary <span class="type-badge">IE815</span></h4><div class="parsed-grid">';
-    html += renderField('Movement ID', data.movementId);
-    html += renderField('ARC', data.administrativeReferenceCode, 'arc');
-    html += renderField('LRN', data.localReferenceNumber);
-    html += renderField('Consignor ERN', data.consignorId);
-    html += renderField('Consignee ERN', data.consigneeId);
-    html += renderField('Last Updated', data.lastUpdated);
-    html += renderField('Box ID', data.boxId);
-    html += '</div></div>';
-    return html;
-  }
-
-  function renderMessagesParsed(msgs) {
-    if (!msgs || !Array.isArray(msgs) || msgs.length === 0) {
-      return '<p style="color:#666;">No messages found for this movement.</p>';
-    }
-    var html = '';
-    msgs.forEach(function(m) {
-      var xml = m.decodedXml || '';
-      var type = m.messageType || 'Unknown';
-      var typeName = MESSAGE_TYPE_NAMES[type] || type;
-      var typeClass = type.toLowerCase();
-
-      var arc = extractXmlValue(xml, 'AdministrativeReferenceCode');
-      var lrn = extractXmlValue(xml, 'LocalReferenceNumber');
-      var msgId = extractXmlValue(xml, 'MessageIdentifier');
-      var corrId = extractXmlValue(xml, 'CorrelationIdentifier');
-      var datePrep = extractXmlValue(xml, 'DateOfPreparation');
-      var timePrep = extractXmlValue(xml, 'TimeOfPreparation');
-      var consignorErn = extractXmlValue(xml, 'TraderExciseNumber');
-      var consigneeId = extractXmlValue(xml, 'Traderid');
-      var consignorName = extractXmlValue(xml, 'TraderName');
-      var destType = extractXmlValue(xml, 'DestinationTypeCode');
-      var journeyTime = extractXmlValue(xml, 'JourneyTime');
-      var productCode = extractXmlValue(xml, 'ExciseProductCode');
-      var quantity = extractXmlValue(xml, 'Quantity');
-      var grossMass = extractXmlValue(xml, 'GrossMass');
-      var netMass = extractXmlValue(xml, 'NetMass');
-      var dateDispatch = extractXmlValue(xml, 'DateOfDispatch');
-      var invoiceNum = extractXmlValue(xml, 'InvoiceNumber');
-
-      html += '<div class="parsed-card">';
-      html += '<h4>' + escapeHtml(type) + ' — ' + escapeHtml(typeName) + ' <span class="type-badge ' + typeClass + '">' + escapeHtml(type) + '</span></h4>';
-      html += '<div class="parsed-grid">';
-      html += renderField('Message ID', m.messageId || msgId);
-      html += renderField('ARC', arc, 'arc');
-      html += renderField('LRN', lrn);
-      html += renderField('Received', m.createdOn);
-      html += renderField('Date Prepared', datePrep);
-      html += renderField('Time Prepared', timePrep);
-      html += renderField('Correlation ID', corrId);
-      html += renderField('Consignor ERN', consignorErn);
-      html += renderField('Consignee ID', consigneeId);
-      html += renderField('Consignor Name', consignorName);
-      html += renderField('Destination Type', destType);
-      html += renderField('Journey Time', journeyTime);
-      html += renderField('Product Code', productCode);
-      html += renderField('Quantity', quantity);
-      html += renderField('Gross Mass (kg)', grossMass);
-      html += renderField('Net Mass (kg)', netMass);
-      html += renderField('Date of Dispatch', dateDispatch);
-      html += renderField('Invoice Number', invoiceNum);
-      html += '</div>';
-      html += '<details class="raw-toggle" style="margin-top:10px;"><summary>📄 Show Raw XML</summary><pre>' + escapeHtml(xml) + '</pre></details>';
-      html += '</div>';
-    });
-    return html;
-  }
-
-  function renderSingleMessageParsed(xml) {
-    if (!xml) return '<p style="color:#666;">No XML data to display.</p>';
-    var typeMatch = xml.match(/<[^:>]+:(IE\d{3})/);
-    var type = typeMatch ? typeMatch[1] : 'Unknown';
-    var typeName = MESSAGE_TYPE_NAMES[type] || type;
-    var typeClass = type.toLowerCase();
-
-    var html = '<div class="parsed-card">';
-    html += '<h4>' + escapeHtml(type) + ' — ' + escapeHtml(typeName) + ' <span class="type-badge ' + typeClass + '">' + escapeHtml(type) + '</span></h4>';
-    html += '<div class="parsed-grid">';
-    html += renderField('Message Sender', extractXmlValue(xml, 'MessageSender'));
-    html += renderField('Message Recipient', extractXmlValue(xml, 'MessageRecipient'));
-    html += renderField('Message Identifier', extractXmlValue(xml, 'MessageIdentifier'));
-    html += renderField('Correlation ID', extractXmlValue(xml, 'CorrelationIdentifier'));
-    html += renderField('Date Prepared', extractXmlValue(xml, 'DateOfPreparation'));
-    html += renderField('Time Prepared', extractXmlValue(xml, 'TimeOfPreparation'));
-    html += renderField('ARC', extractXmlValue(xml, 'AdministrativeReferenceCode'), 'arc');
-    html += renderField('LRN', extractXmlValue(xml, 'LocalReferenceNumber'));
-    html += renderField('Sequence Number', extractXmlValue(xml, 'SequenceNumber'));
-    html += renderField('Consignor ERN', extractXmlValue(xml, 'TraderExciseNumber'));
-    html += renderField('Consignor Name', extractXmlValue(xml, 'TraderName'));
-    html += renderField('Consignee ID', extractXmlValue(xml, 'Traderid'));
-    html += renderField('Dispatch Warehouse', extractXmlValue(xml, 'ReferenceOfTaxWarehouse'));
-    html += renderField('Dispatch Office', extractXmlValue(xml, 'ReferenceNumber'));
-    html += renderField('Destination Type', extractXmlValue(xml, 'DestinationTypeCode'));
-    html += renderField('Journey Time', extractXmlValue(xml, 'JourneyTime'));
-    html += renderField('Transport Arrangement', extractXmlValue(xml, 'TransportArrangement'));
-    html += renderField('Transport Mode', extractXmlValue(xml, 'TransportModeCode'));
-    html += renderField('Guarantor Type', extractXmlValue(xml, 'GuarantorTypeCode'));
-    html += renderField('Product Code', extractXmlValue(xml, 'ExciseProductCode'));
-    html += renderField('CN Code', extractXmlValue(xml, 'CnCode'));
-    html += renderField('Quantity', extractXmlValue(xml, 'Quantity'));
-    html += renderField('Gross Mass', extractXmlValue(xml, 'GrossMass'));
-    html += renderField('Net Mass', extractXmlValue(xml, 'NetMass'));
-    html += renderField('ABV %', extractXmlValue(xml, 'AlcoholicStrengthByVolumeInPercentage'));
-    html += renderField('Package Kind', extractXmlValue(xml, 'KindOfPackages'));
-    html += renderField('Package Count', extractXmlValue(xml, 'NumberOfPackages'));
-    html += renderField('Invoice Number', extractXmlValue(xml, 'InvoiceNumber'));
-    html += renderField('Invoice Date', extractXmlValue(xml, 'InvoiceDate'));
-    html += renderField('Origin Type', extractXmlValue(xml, 'OriginTypeCode'));
-    html += renderField('Date of Dispatch', extractXmlValue(xml, 'DateOfDispatch'));
-    html += renderField('Time of Dispatch', extractXmlValue(xml, 'TimeOfDispatch'));
-    var transportUnits = extractAllXmlValues(xml, 'IdentityOfTransportUnits');
-    if (transportUnits.length > 0) html += renderField('Transport Units', transportUnits.join(', '));
-    html += '</div></div>';
-    return html;
-  }
-
-  function renderPrevalidateParsed(data) {
-    if (!data) return '';
-    var html = '<div class="parsed-card"><h4>Trader Validation Result</h4><div class="parsed-grid">';
-    html += renderField('ERN', data.exciseRegistrationNumber);
-    html += renderField('Entity Group', data.entityGroup);
-    html += renderField('Valid Trader', data.validTrader ? '✅ YES' : '❌ NO', data.validTrader ? '' : 'warn');
-    html += renderField('Trader Type', data.traderType);
-    html += renderField('Validation Time', data.validationTimeStamp);
-    if (data.validateProductAuthorisationResponse) {
-      html += renderField('Product Authorised', data.validateProductAuthorisationResponse.valid ? '✅ YES' : '❌ NO', data.validateProductAuthorisationResponse.valid ? '' : 'warn');
-    }
-    html += '</div></div>';
-    return html;
-  }
-
-  // ==================== AUTH & 2FA ====================
-  function checkAuth() {
-    if (localStorage.getItem('dashboard_auth') === 'authenticated') {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
-      updateHmrcStatus();
-    }
-  }
-
-  function updateHmrcStatus() {
-    var el = document.getElementById('hmrc-status');
-    if (localStorage.getItem('hmrc_token')) {
-      el.innerText = 'HMRC: Logged In';
-      el.className = 'token-status token-ok';
-    } else {
-      el.innerText = 'HMRC: Not Logged In';
-      el.className = 'token-status token-missing';
-    }
-  }
-
-  var urlParams = new URLSearchParams(window.location.search);
-  var hmrcTokenFromUrl = urlParams.get('hmrc_token');
-  if (hmrcTokenFromUrl) {
-    localStorage.setItem('hmrc_token', hmrcTokenFromUrl);
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-
-  checkAuth();
-
-  document.getElementById('login-btn').addEventListener('click', async function() {
-    try {
-      var res = await fetch('/api/protect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          password: document.getElementById('password').value,
-          totpCode: document.getElementById('totp-code').value
-        })
-      });
-      var data = await res.json();
-      if (data.requires2FA) {
-        document.getElementById('totp-code').style.display = 'block';
-        document.getElementById('login-error').innerText = 'Enter your 2FA code';
-        document.getElementById('totp-code').focus();
-        return;
-      }
-      if (res.ok && data.success) {
-        localStorage.setItem('dashboard_auth', 'authenticated');
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
-        updateHmrcStatus();
-      } else {
-        document.getElementById('login-error').innerText = data.error || 'Login failed';
-      }
-    } catch (err) {
-      document.getElementById('login-error').innerText = 'Network error';
-    }
-  });
-
-  document.getElementById('logout-btn').addEventListener('click', function(e) {
-    e.preventDefault();
-    localStorage.clear();
-    location.reload();
-  });
-
-  document.getElementById('setup-2fa-btn').addEventListener('click', async function() {
-    try {
-      var res = await fetch('/api/setup-2fa', { method: 'POST' });
-      if (res.ok) {
-        var data = await res.json();
-        document.getElementById('2fa-setup').style.display = 'block';
-        document.getElementById('qr-code').src = data.qrCode;
-        document.getElementById('secret-text').innerText = data.secret;
-        window.tempSecret = data.secret;
-      } else {
-        alert('Please login first or check server configuration.');
-      }
-    } catch (err) { alert('Network error during 2FA setup.'); }
-  });
-
-  document.getElementById('verify-2fa-btn').addEventListener('click', async function() {
-    try {
-      var res = await fetch('/api/setup-2fa', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret: window.tempSecret, token: document.getElementById('verify-code').value })
-      });
-      var data = await res.json();
-      if (data.success) {
-        document.getElementById('2fa-result').innerHTML = '<span class="success">✅ Verified! Add this to Vercel environment variable TOTP_SECRET: <code>' + data.secret + '</code></span>';
-      } else {
-        document.getElementById('2fa-result').innerHTML = '<span class="error">❌ ' + (data.error || 'Verification failed') + '</span>';
-      }
-    } catch (err) {
-      document.getElementById('2fa-result').innerHTML = '<span class="error">Network error.</span>';
-    }
-  });
-
-  // ==================== TABS ====================
-  document.querySelectorAll('.nav-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
-      document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
-      document.getElementById(this.getAttribute('data-tab')).classList.add('active');
-      this.classList.add('active');
-      if (this.getAttribute('data-tab') === 'tab-monitor') fetchMonitorData();
-    });
-  });
-
-  // ==================== HELPERS ====================
-  async function getHeaders() {
-    return { 'Authorization': 'Bearer ' + localStorage.getItem('hmrc_token'), 'x-client-ip': '127.0.0.1' };
-  }
-  function xmlField(tag, value) {
-    if (!value || value.trim() === '') return '';
-    return '<urn:' + tag + '>' + value + '</urn:' + tag + '>';
-  }
-
-  function extractArcFromXml(xml) {
-    if (!xml) return null;
-    var match = xml.match(/<[^>]*AdministrativeReferenceCode[^>]*>([^<]+)<\/[^>]+>/);
-    return match ? match[1] : null;
-  }
-
-  async function fetchMovementDetails(movId, h) {
-    try {
-      var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages', { headers: h });
-      if (!res.ok) return { arc: null, latestStatus: null, latestDate: null };
-      var text = await res.text();
-      var msgs = JSON.parse(text);
-      if (!Array.isArray(msgs) || msgs.length === 0) return { arc: null, latestStatus: null, latestDate: null };
-      
-      msgs.forEach(function(m) {
-        if (m.encodedMessage && !m.decodedXml) {
-          try { m.decodedXml = atob(m.encodedMessage); } catch(e) {}
-        }
-      });
-      
-      var arc = null;
-      for (var i = 0; i < msgs.length; i++) {
-        if (msgs[i].messageType === 'IE801') {
-          arc = extractArcFromXml(msgs[i].decodedXml);
-          if (arc) break;
-        }
-      }
-      
-      var latest = msgs.reduce(function(prev, current) {
-        return (prev.createdOn > current.createdOn) ? prev : current;
-      });
-      
-      return { arc: arc, latestStatus: latest.messageType, latestDate: latest.createdOn };
-    } catch(e) { return { arc: null, latestStatus: null, latestDate: null }; }
-  }
-
-  // ==================== PROFILES ====================
-  function getProfiles() {
-    try { return JSON.parse(localStorage.getItem('emcs_profiles') || '[]'); } catch(e) { return []; }
-  }
-  function saveProfiles(profiles) { localStorage.setItem('emcs_profiles', JSON.stringify(profiles)); }
-  function getActiveProfileId() { return parseInt(localStorage.getItem('emcs_active_profile') || '0'); }
-  function setActiveProfileId(id) { localStorage.setItem('emcs_active_profile', id.toString()); }
-  function getActiveProfile() {
-    var profiles = getProfiles();
-    var id = getActiveProfileId();
-    return profiles.find(function(p) { return p.id === id; }) || profiles[0] || null;
-  }
-
-  function initDefaultProfiles() {
-    if (localStorage.getItem('emcs_profiles_initialized')) return;
-    var defaults = [
-      { id: 1, name: 'Default Consignor', type: 'consignor', ern: 'GBWK002281023', traderName: 'Test Consignor Ltd', street: 'Test Street', postcode: 'E1 8QS', city: 'London', office: 'GB004098' },
-      { id: 2, name: 'Default Consignee', type: 'consignee', ern: 'GBWKQOZ8OVLYR', traderName: 'Test Consignee Ltd', street: 'Delivery Road', postcode: 'M1 1AA', city: 'Manchester', office: 'GB004098' }
-    ];
-    saveProfiles(defaults);
-    setActiveProfileId(1);
-    localStorage.setItem('emcs_profiles_initialized', '1');
-  }
-  initDefaultProfiles();
-
-  function renderProfileDropdown() {
-    var profiles = getProfiles();
-    var activeId = getActiveProfileId();
-    var sel = document.getElementById('active-profile-select');
-    sel.innerHTML = profiles.map(function(p) {
-      var selected = (p.id === activeId) ? ' selected' : '';
-      return '<option value="' + p.id + '"' + selected + '>' + p.name + ' (' + p.ern + ')</option>';
-    }).join('');
-  }
-
-  function renderProfileChips() {
-    var profiles = getProfiles();
-    var activeId = getActiveProfileId();
-    var container = document.getElementById('profile-chips');
-    if (profiles.length === 0) {
-      container.innerHTML = '<p style="color:#666;">No profiles yet.</p>';
-      return;
-    }
-    container.innerHTML = profiles.map(function(p) {
-      var activeClass = (p.id === activeId) ? ' active' : '';
-      return '<div class="profile-chip' + activeClass + '" data-id="' + p.id + '">' +
-        '<span class="load-prof">' + p.name + ' (' + p.ern + ') - ' + p.type + '</span>' +
-        '<span class="del-prof" data-id="' + p.id + '" title="Delete">✕</span></div>';
-    }).join('');
-
-    container.querySelectorAll('.load-prof').forEach(function(el) {
-      el.addEventListener('click', function() {
-        var id = parseInt(this.parentElement.getAttribute('data-id'));
-        setActiveProfileId(id);
-        applyProfileToForms();
-        renderProfileDropdown();
-        renderProfileChips();
-        alert('Switched to profile: ' + getActiveProfile().name);
-      });
-    });
-    container.querySelectorAll('.del-prof').forEach(function(el) {
-      el.addEventListener('click', function(e) {
-        e.stopPropagation();
-        var id = parseInt(this.getAttribute('data-id'));
-        var profiles = getProfiles();
-        if (profiles.length <= 1) { alert('You must have at least one profile.'); return; }
-        if (confirm('Delete this profile?')) {
-          profiles = profiles.filter(function(p) { return p.id !== id; });
-          saveProfiles(profiles);
-          if (getActiveProfileId() === id) setActiveProfileId(profiles[0].id);
-          renderProfileDropdown();
-          renderProfileChips();
-          applyProfileToForms();
-        }
-      });
-    });
-  }
-
-  function applyProfileToForms() {
-    var p = getActiveProfile();
-    if (!p) return;
-    if (p.type === 'consignor') {
-      document.getElementById('s-consignor-ern').value = p.ern || '';
-      document.getElementById('s-consignor-name').value = p.traderName || '';
-      document.getElementById('s-consignor-street').value = p.street || '';
-      document.getElementById('s-consignor-postcode').value = p.postcode || '';
-      document.getElementById('s-consignor-city').value = p.city || '';
-      document.getElementById('s-dispatch-office').value = p.office || 'GB004098';
-    } else {
-      document.getElementById('s-consignee-ern').value = p.ern || '';
-      document.getElementById('s-consignee-name').value = p.traderName || '';
-      document.getElementById('s-consignee-street').value = p.street || '';
-      document.getElementById('s-consignee-postcode').value = p.postcode || '';
-      document.getElementById('s-consignee-city').value = p.city || '';
-    }
-    localStorage.setItem('last_ern', p.ern);
-  }
-
-  document.getElementById('active-profile-select').addEventListener('change', function() {
-    setActiveProfileId(parseInt(this.value));
-    applyProfileToForms();
-    renderProfileChips();
-  });
-
-  document.getElementById('create-profile-btn').addEventListener('click', function() {
-    var name = document.getElementById('prof-name').value.trim();
-    var ern = document.getElementById('prof-ern').value.trim();
-    if (!name || !ern) { alert('Name and ERN are required.'); return; }
-    if (!/^[A-Z]{2}[A-Z0-9]{11}$/.test(ern)) { alert('Invalid ERN format.'); return; }
-    var profiles = getProfiles();
-    var newId = profiles.length > 0 ? Math.max.apply(null, profiles.map(function(p) { return p.id; })) + 1 : 1;
-    profiles.push({
-      id: newId, name: name, type: document.getElementById('prof-type').value, ern: ern,
-      traderName: document.getElementById('prof-trader-name').value,
-      street: document.getElementById('prof-street').value,
-      postcode: document.getElementById('prof-postcode').value,
-      city: document.getElementById('prof-city').value,
-      office: document.getElementById('prof-office').value
-    });
-    saveProfiles(profiles);
-    renderProfileDropdown();
-    renderProfileChips();
-    ['prof-name', 'prof-ern', 'prof-trader-name', 'prof-street', 'prof-postcode', 'prof-city'].forEach(function(id) {
-      document.getElementById(id).value = '';
-    });
-    alert('Profile created!');
-  });
-
-  renderProfileDropdown();
-  renderProfileChips();
-  applyProfileToForms();
-
-  // ==================== DRAFTS ====================
-  function getDrafts() {
-    try { return JSON.parse(localStorage.getItem('emcs_drafts') || '[]'); } catch(e) { return []; }
-  }
-  function saveDrafts(drafts) { localStorage.setItem('emcs_drafts', JSON.stringify(drafts)); }
-
-  function captureFormData() {
-    var fieldIds = [
-      's-dest-type', 's-journey-time', 's-transport-arrangement',
-      's-consignor-ern', 's-consignor-name', 's-consignor-street', 's-consignor-street-num',
-      's-consignor-postcode', 's-consignor-city',
-      's-dispatch-warehouse', 's-dispatch-name', 's-dispatch-street', 's-dispatch-street-num',
-      's-dispatch-postcode', 's-dispatch-city',
-      's-consignee-ern', 's-consignee-name', 's-consignee-street', 's-consignee-street-num',
-      's-consignee-postcode', 's-consignee-city',
-      's-delivery-trader-id', 's-delivery-name', 's-delivery-street', 's-delivery-street-num',
-      's-delivery-postcode', 's-delivery-city',
-      's-lrn', 's-invoice-number', 's-invoice-date', 's-origin-type', 's-date', 's-time',
-      's-dispatch-office', 's-guarantor-type', 's-transport-mode',
-      's-transporter-vat', 's-transporter-name', 's-transporter-city'
-    ];
-    var formData = {};
-    fieldIds.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) formData[id] = el.value;
-    });
-
-    var transportUnits = [];
-    document.querySelectorAll('#transport-units-container .transport-unit-field').forEach(function(unit) {
-      transportUnits.push({
-        unitCode: unit.querySelector('.s-transport-unit-code').value,
-        identity: unit.querySelector('.s-identity-transport').value
-      });
-    });
-
-    var goodsItems = [];
-    document.querySelectorAll('#goods-items-container .item-field').forEach(function(item) {
-      goodsItems.push({
-        productCode: item.querySelector('.s-product-code').value,
-        cnCode: item.querySelector('.s-cn-code').value,
-        qty: item.querySelector('.s-qty').value,
-        gross: item.querySelector('.s-weight').value,
-        net: item.querySelector('.s-net-weight').value,
-        abv: item.querySelector('.s-abv').value,
-        commDesc: item.querySelector('.s-comm-desc').value,
-        brand: item.querySelector('.s-brand').value,
-        pkgKind: item.querySelector('.s-package-kind').value,
-        pkgCount: item.querySelector('.s-package-count').value,
-        bulk: item.querySelector('.s-bulk').checked,
-        shipMark: item.querySelector('.s-ship-mark').value,
-        seal: item.querySelector('.s-seal').value,
-        smallProducer: item.querySelector('.s-small-producer').checked
-      });
-    });
-
-    return { formData: formData, transportUnits: transportUnits, goodsItems: goodsItems };
-  }
-
-  function applyDraftData(draft) {
-    Object.keys(draft.formData).forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.value = draft.formData[id];
-    });
-
-    var tuContainer = document.getElementById('transport-units-container');
-    tuContainer.innerHTML = '';
-    if (draft.transportUnits && draft.transportUnits.length > 0) {
-      draft.transportUnits.forEach(function(tu, idx) {
-        addTransportUnit(tu.unitCode, tu.identity, idx + 1);
-      });
-    } else {
-      addTransportUnit('1', '', 1);
-    }
-
-    if (draft.goodsItems && draft.goodsItems.length > 0) {
-      renderGoodsItems(draft.goodsItems.length, draft.goodsItems);
-    } else {
-      renderGoodsItems(1);
-    }
-  }
-
-  function addTransportUnit(unitCode, identity, idx) {
-    var container = document.getElementById('transport-units-container');
-    var newUnit = document.createElement('div');
-    newUnit.className = 'transport-unit-field';
-    newUnit.setAttribute('data-unit', idx);
-    newUnit.innerHTML = '<h4>Transport Unit ' + idx + ' <button type="button" class="btn-red btn-small remove-unit-btn" style="float:right;">Remove</button></h4>' +
-      '<div class="form-grid">' +
-      '<div class="field"><label>Transport Unit Code <span class="required-asterisk">*</span></label>' +
-      '<select class="s-transport-unit-code" required>' +
-      '<option value="1"' + (unitCode === '1' ? ' selected' : '') + '>1 - Container</option>' +
-      '<option value="2"' + (unitCode === '2' ? ' selected' : '') + '>2 - Vehicle</option>' +
-      '<option value="3"' + (unitCode === '3' ? ' selected' : '') + '>3 - Trailer</option>' +
-      '<option value="4"' + (unitCode === '4' ? ' selected' : '') + '>4 - Tractor</option>' +
-      '</select></div>' +
-      '<div class="field"><label>Identity of Transport Units <span class="required-asterisk">*</span></label>' +
-      '<input type="text" class="s-identity-transport" value="' + escapeHtml(identity || '') + '" maxlength="35" required></div>' +
-      '</div>';
-    container.appendChild(newUnit);
-    newUnit.querySelector('.remove-unit-btn').addEventListener('click', function() {
-      newUnit.remove();
-      renumberTransportUnits();
-    });
-  }
-
-  function renumberTransportUnits() {
-    var units = document.querySelectorAll('#transport-units-container .transport-unit-field');
-    units.forEach(function(u, idx) {
-      u.setAttribute('data-unit', idx + 1);
-      var h4 = u.querySelector('h4');
-      if (h4) {
-        var btn = h4.querySelector('.remove-unit-btn');
-        h4.textContent = 'Transport Unit ' + (idx + 1) + ' ';
-        if (btn) h4.appendChild(btn);
-      }
-    });
-  }
-
-  document.getElementById('add-transport-unit-btn').addEventListener('click', function() {
-    var container = document.getElementById('transport-units-container');
-    var newIdx = container.children.length + 1;
-    addTransportUnit('1', '', newIdx);
-  });
-
-  function renderDrafts() {
-    var drafts = getDrafts();
-    var section = document.getElementById('drafts-section');
-    var container = document.getElementById('draft-list');
-    var countEl = document.getElementById('draft-count');
-
-    if (drafts.length === 0) {
-      section.style.display = 'none';
-      return;
-    }
-
-    section.style.display = 'block';
-    countEl.textContent = drafts.length + ' draft' + (drafts.length !== 1 ? 's' : '') + ' saved';
-
-    container.innerHTML = drafts.map(function(d) {
-      var isActive = window.currentDraftId === d.id;
-      var borderStyle = isActive ? 'border-left-color:#005ea5;' : '';
-      var itemsCount = (d.goodsItems || []).length;
-      return '<div class="draft-card" style="' + borderStyle + '">' +
-        '<div class="draft-info">' +
-          '<div class="draft-name">' + escapeHtml(d.name) + (isActive ? ' <span style="color:#00703c; font-size:11px;">(loaded)</span>' : '') + '</div>' +
-          '<div class="draft-meta">' +
-            '<span>📅 ' + new Date(d.created).toLocaleString() + '</span>' +
-            '<span>🏭 ' + escapeHtml(d.formData['s-consignor-ern'] || '—') + '</span>' +
-            '<span>→ ' + escapeHtml(d.formData['s-consignee-ern'] || '—') + '</span>' +
-            '<span>📦 ' + itemsCount + ' item' + (itemsCount !== 1 ? 's' : '') + '</span>' +
-          '</div>' +
-        '</div>' +
-        '<div class="draft-actions">' +
-          '<button class="btn-small btn-green" onclick="loadDraft(' + d.id + ')">Load</button>' +
-          '<button class="btn-small btn-orange" onclick="submitDraft(' + d.id + ')">Submit</button>' +
-          '<button class="btn-small btn-red" onclick="deleteDraft(' + d.id + ')">Delete</button>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-  }
-
-  window.loadDraft = function(id) {
-    var drafts = getDrafts();
-    var draft = drafts.find(function(d) { return d.id === id; });
-    if (!draft) { alert('Draft not found.'); return; }
-    if (window.currentDraftId !== null && window.currentDraftId !== id) {
-      if (!confirm('You have another draft loaded. Loading this one will replace it. Continue?')) return;
-    }
-    applyDraftData(draft);
-    window.currentDraftId = id;
-    renderDrafts();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    alert('Draft "' + draft.name + '" loaded into the form.');
-  };
-
-  window.deleteDraft = function(id) {
-    if (!confirm('Delete this draft? This cannot be undone.')) return;
-    var drafts = getDrafts();
-    drafts = drafts.filter(function(d) { return d.id !== id; });
-    saveDrafts(drafts);
-    if (window.currentDraftId === id) window.currentDraftId = null;
-    renderDrafts();
-  };
-
-  window.submitDraft = function(id) {
-    if (!confirm('Load this draft and submit it to HMRC?')) return;
-    window.loadDraft(id);
-    setTimeout(function() {
-      document.getElementById('submit-movement-btn').click();
-    }, 300);
-  };
-
-  document.getElementById('save-draft-btn').addEventListener('click', function() {
-    var name = prompt('Enter a name for this draft:', 'Draft ' + new Date().toLocaleDateString());
-    if (!name) return;
-    name = name.trim();
-    if (!name) { alert('Draft name cannot be empty.'); return; }
-
-    var draftData = captureFormData();
-    var drafts = getDrafts();
-
-    if (window.currentDraftId !== null) {
-      var existingIdx = drafts.findIndex(function(d) { return d.id === window.currentDraftId; });
-      if (existingIdx !== -1) {
-        if (confirm('A draft is already loaded. Update "' + drafts[existingIdx].name + '" instead of creating a new one?')) {
-          drafts[existingIdx].name = name;
-          drafts[existingIdx].formData = draftData.formData;
-          drafts[existingIdx].transportUnits = draftData.transportUnits;
-          drafts[existingIdx].goodsItems = draftData.goodsItems;
-          drafts[existingIdx].modified = new Date().toISOString();
-          saveDrafts(drafts);
-          renderDrafts();
-          alert('Draft "' + name + '" updated.');
-          return;
-        }
-      }
-    }
-
-    var newDraft = {
-      id: Date.now(),
-      name: name,
-      created: new Date().toISOString(),
-      formData: draftData.formData,
-      transportUnits: draftData.transportUnits,
-      goodsItems: draftData.goodsItems
-    };
-    drafts.unshift(newDraft);
-    saveDrafts(drafts);
-    window.currentDraftId = newDraft.id;
-    renderDrafts();
-    alert('Draft "' + name + '" saved.');
-  });
-
-  renderDrafts();
-
-  // ==================== GOODS ITEMS ====================
-  function updateItemFieldVisibility(item) {
-    var pc = item.querySelector('.s-product-code').value.toUpperCase();
-    var abvField = item.querySelector('.s-abv').parentElement;
-    var alcoholCodes = ['B000', 'W200', 'W300', 'I000', 'S200', 'S300', 'S400', 'S500'];
-    abvField.style.display = alcoholCodes.includes(pc) ? 'block' : 'none';
-  }
-  function autoFillCNCode(item) {
-    var pc = item.querySelector('.s-product-code').value.toUpperCase();
-    if (CN_CODES[pc]) item.querySelector('.s-cn-code').value = CN_CODES[pc];
-  }
-  function bindItemEvents(item) {
-    item.querySelector('.s-product-code').addEventListener('change', function() {
-      autoFillCNCode(this.closest('.item-field'));
-      updateItemFieldVisibility(this.closest('.item-field'));
-    });
-    item.querySelector('.s-bulk').addEventListener('change', function() {
-      var p = this.closest('.item-field');
-      var netField = p.querySelector('.s-net-weight');
-      if (this.checked) { netField.value = p.querySelector('.s-weight').value; netField.disabled = true; }
-      else { netField.disabled = false; }
-    });
-    item.querySelector('.s-weight').addEventListener('input', function() {
-      var p = this.closest('.item-field');
-      if (p.querySelector('.s-bulk').checked) p.querySelector('.s-net-weight').value = this.value;
-    });
-    item.querySelector('.collapse-btn').addEventListener('click', function() {
-      var it = this.closest('.item-field');
-      it.classList.toggle('collapsed');
-      this.textContent = it.classList.contains('collapsed') ? '▶' : '▼';
-    });
-    item.querySelector('.remove-btn').addEventListener('click', function() {
-      this.closest('.item-field').remove();
-      renumberItems();
-    });
-    updateItemFieldVisibility(item);
-  }
-  function renumberItems() {
-    var items = document.querySelectorAll('#goods-items-container .item-field');
-    items.forEach(function(it, idx) {
-      it.setAttribute('data-item', idx + 1);
-      var h4 = it.querySelector('h4');
-      if (h4) {
-        h4.textContent = 'Item ' + (idx + 1) + ' ';
-        var actions = it.querySelector('.item-actions');
-        if (actions) h4.appendChild(actions);
-      }
-    });
-  }
-  function createItemElement(idx, data) {
-    var it = data || {};
-    var div = document.createElement('div');
-    div.className = 'item-field';
-    div.setAttribute('data-item', idx);
-    div.innerHTML = 
-      '<div class="item-header"><h4>Item ' + idx + '</h4>' +
-        '<div class="item-actions">' +
-          '<button type="button" class="btn-small collapse-btn">▼</button>' +
-          '<button type="button" class="btn-small btn-red remove-btn">✕ Remove</button>' +
-        '</div></div>' +
-      '<div class="form-grid">' +
-        '<div class="field"><label>Excise Product Code <span class="required-asterisk">*</span></label><input type="text" class="s-product-code" value="' + (it.productCode || 'B000') + '" pattern="^[A-Z][0-9]{3}$" maxlength="4" required></div>' +
-        '<div class="field"><label>CN Code <span class="required-asterisk">*</span></label><input type="text" class="s-cn-code" value="' + (it.cnCode || '22030001') + '" pattern="^\\d{8}$" maxlength="8" required></div>' +
-        '<div class="field"><label>Quantity <span class="required-asterisk">*</span></label><input type="number" class="s-qty" value="' + (it.qty || 2000) + '" step="0.001" required></div>' +
-        '<div class="field"><label>Bulk Movement</label><input type="checkbox" class="s-bulk" style="width:auto; margin-top:10px;"' + (it.bulk ? ' checked' : '') + '></div>' +
-        '<div class="field"><label>Gross Mass (kg) <span class="required-asterisk">*</span></label><input type="number" class="s-weight" value="' + (it.gross || 20000) + '" step="0.000001" required></div>' +
-        '<div class="field"><label>Net Mass (kg) <span class="required-asterisk">*</span></label><input type="number" class="s-net-weight" value="' + (it.net || 19999) + '" step="0.000001" required></div>' +
-        '<div class="field"><label>Commercial Description <span class="required-asterisk">*</span></label><input type="text" class="s-comm-desc" value="' + escapeHtml(it.commDesc || '') + '" required></div>' +
-        '<div class="field"><label>Brand Name</label><input type="text" class="s-brand" value="' + escapeHtml(it.brand || '') + '"></div>' +
-        '<div class="field"><label>ABV %</label><input type="number" class="s-abv" value="' + (it.abv !== undefined ? it.abv : 5.0) + '" step="0.01"></div>' +
-        '<div class="field"><label>Kind of Packages <span class="required-asterisk">*</span></label><select class="s-package-kind" required>' + buildPackageOptions(it.pkgKind || 'BA') + '</select></div>' +
-        '<div class="field"><label>Number of Packages <span class="required-asterisk">*</span></label><input type="number" class="s-package-count" value="' + (it.pkgCount !== undefined ? it.pkgCount : 2) + '" min="0" required></div>' +
-        '<div class="field"><label>Shipping Mark</label><input type="text" class="s-ship-mark" value="' + escapeHtml(it.shipMark || '') + '" placeholder="Optional"></div>' +
-        '<div class="field"><label>Commercial Seal ID</label><input type="text" class="s-seal" value="' + escapeHtml(it.seal || '') + '" placeholder="Optional"></div>' +
-        '<div class="field" style="grid-column: 1 / -1;"><label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="s-small-producer" style="width:auto;"' + (it.smallProducer ? ' checked' : '') + '> Independent Small Producer Declaration</label></div>' +
-      '</div>';
-    return div;
-  }
-  function renderGoodsItems(count, existingItems) {
-    var container = document.getElementById('goods-items-container');
-    container.innerHTML = '';
-    for (var i = 1; i <= count; i++) {
-      var it = (existingItems && existingItems[i-1]) || {};
-      var div = createItemElement(i, it);
-      container.appendChild(div);
-      bindItemEvents(div);
-    }
-    if (existingItems) {
-      existingItems.forEach(function(it, idx) {
-        if (it.bulk) {
-          var item = container.children[idx];
-          if (item) {
-            var netField = item.querySelector('.s-net-weight');
-            if (netField) {
-              netField.value = item.querySelector('.s-weight').value;
-              netField.disabled = true;
-            }
-          }
-        }
-      });
-    }
-  }
-  renderGoodsItems(1);
-
-  document.getElementById('add-goods-item-btn').addEventListener('click', function() {
-    var container = document.getElementById('goods-items-container');
-    var newIdx = container.children.length + 1;
-    var div = createItemElement(newIdx, {});
-    container.appendChild(div);
-    bindItemEvents(div);
-  });
-
-  // ==================== CSV EXPORT ====================
-  document.getElementById('export-last-csv-btn').addEventListener('click', function() {
-    var last = JSON.parse(localStorage.getItem('emcs_last_submission') || 'null');
-    if (!last) { alert('No submission to export.'); return; }
-    var headers = ['MovementID', 'ARC', 'LRN', 'ConsignorERN', 'ConsigneeERN', 'ProductCode', 'Quantity', 'DispatchDate', 'Status'];
-    var rows = [headers.join(',')];
-    last.items.forEach(function(it) {
-      rows.push([last.movementId, last.arc, last.lrn, last.consignorErn, last.consigneeErn, it.productCode, it.qty, last.date, 'Submitted'].map(function(v) { return '"' + (v || '') + '"'; }).join(','));
-    });
-    var blob = new Blob([rows.join('\n')], { type: 'text/csv' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'emcs-submission-' + last.lrn + '.csv';
-    a.click();
-  });
-
-  // ==================== MONITOR DASHBOARD ====================
-  async function fetchMonitorData() {
-    if (!localStorage.getItem('hmrc_token')) return;
-    document.getElementById('mon-loading').style.display = 'block';
-    document.getElementById('mon-table').style.display = 'none';
-    var h = await getHeaders();
-    var p = getActiveProfile();
-    var ern = (p && p.ern) || localStorage.getItem('last_ern') || 'GBWK002281023';
-    
-    try {
-      var res = await fetch('/api/emcs?endpoint=/customs/excise/movements?ern=' + encodeURIComponent(ern), { headers: h });
-      var text = await res.text();
-      window.monitorData = JSON.parse(text);
-      if (!Array.isArray(window.monitorData)) window.monitorData = [];
-    } catch(e) { window.monitorData = []; }
-
-    if (window.monitorData.length > 0) {
-      document.getElementById('mon-loading').innerHTML = '<span class="loading-spinner"></span>Fetching movement details for ' + window.monitorData.length + ' movement(s)...';
-      var batchSize = 5;
-      for (var i = 0; i < window.monitorData.length; i += batchSize) {
-        var batch = window.monitorData.slice(i, i + batchSize);
-        var promises = batch.map(function(m) {
-          return fetchMovementDetails(m.movementId, h).then(function(details) {
-            if (details.arc) m.administrativeReferenceCode = details.arc;
-            if (details.latestStatus) m._latestStatus = details.latestStatus;
-            if (details.latestDate) m._latestStatusDate = details.latestDate;
-          });
-        });
-        await Promise.all(promises);
-      }
-    }
-
-    document.getElementById('mon-loading').style.display = 'none';
-    applyMonitorFilters();
-  }
-
-  function getStatusCategory(latestStatus) {
-    if (!latestStatus) return 'pending';
-    var map = {
-      'IE801': 'accepted', 'IE810': 'cancelled', 'IE818': 'receipted',
-      'IE819': 'rejected', 'IE807': 'interrupted', 'IE813': 'changed',
-      'IE803': 'changed', 'IE839': 'rejected', 'IE881': 'closed',
-      'IE837': 'delay', 'IE871': 'shortage', 'IE905': 'accepted'
-    };
-    return map[latestStatus] || 'accepted';
-  }
-
-  function getMovementStatusIndicator(m) {
-    var arc = m.administrativeReferenceCode;
-    var latestStatus = m._latestStatus;
-    
-    if (!arc) {
-      return '<span class="status-indicator"><span class="status-dot dot-grey"></span>Pending</span>';
-    }
-    
-    var statusMap = {
-      'IE801': { label: 'Accepted', dot: 'dot-green' },
-      'IE810': { label: 'Cancelled', dot: 'dot-red' },
-      'IE818': { label: 'Receipted', dot: 'dot-green' },
-      'IE819': { label: 'Rejected', dot: 'dot-red' },
-      'IE807': { label: 'Interrupted', dot: 'dot-amber' },
-      'IE813': { label: 'Dest. Changed', dot: 'dot-blue' },
-      'IE803': { label: 'Dest. Changed', dot: 'dot-blue' },
-      'IE839': { label: 'Customs Rejected', dot: 'dot-red' },
-      'IE881': { label: 'Manually Closed', dot: 'dot-green' },
-      'IE837': { label: 'Delay Explained', dot: 'dot-amber' },
-      'IE871': { label: 'Shortage Explained', dot: 'dot-amber' },
-      'IE905': { label: 'Status Update', dot: 'dot-blue' }
-    };
-    
-    if (latestStatus && statusMap[latestStatus]) {
-      var s = statusMap[latestStatus];
-      return '<span class="status-indicator"><span class="status-dot ' + s.dot + '"></span>' + s.label + '</span>';
-    }
-    
-    return '<span class="status-indicator"><span class="status-dot dot-green"></span>Accepted</span>';
-  }
-
-  function applyMonitorFilters() {
-    var direction = document.getElementById('mon-direction').value;
-    var statusFilter = document.getElementById('mon-status').value;
-    var p = getActiveProfile();
-    var myErn = (p && p.ern) || localStorage.getItem('last_ern') || 'GBWK002281023';
-    var today = new Date();
-    var dispFrom = document.getElementById('mon-disp-from').value;
-    var dispTo = document.getElementById('mon-disp-to').value;
-
-    var filtered = window.monitorData.filter(function(m) {
-      var isOut = m.consignorId === myErn;
-      if (direction === 'in' && isOut) return false;
-      if (direction === 'out' && !isOut) return false;
-      
-      if (statusFilter) {
-        var category = m.administrativeReferenceCode ? getStatusCategory(m._latestStatus) : 'pending';
-        if (statusFilter !== category) return false;
-      }
-      
-      if (dispFrom) { var d = m.lastUpdated ? m.lastUpdated.split('T')[0] : ''; if (d < dispFrom) return false; }
-      if (dispTo) { var d = m.lastUpdated ? m.lastUpdated.split('T')[0] : ''; if (d > dispTo) return false; }
-      return true;
-    });
-
-    var tbody = document.getElementById('mon-tbody');
-    tbody.innerHTML = '';
-    if (filtered.length === 0) {
-      document.getElementById('mon-table').style.display = 'none';
-      document.getElementById('mon-no-results').style.display = 'block';
-      return;
-    }
-    document.getElementById('mon-table').style.display = 'table';
-    document.getElementById('mon-no-results').style.display = 'none';
-
-    filtered.forEach(function(m) {
-      var isOut = m.consignorId === myErn;
-      var counterparty = isOut ? m.consigneeId : m.consignorId;
-      var directionText = isOut ? 'Goods out' : 'Goods in';
-      var dispatchDate = m.lastUpdated ? new Date(m.lastUpdated) : new Date();
-      var daysOpen = Math.floor((today - dispatchDate) / (1000 * 60 * 60 * 24));
-      var isOverdue = daysOpen > 5;
-      var rowClass = isOverdue ? 'warning-row' : '';
-      var daysClass = isOverdue ? 'warning-text' : '';
-
-      var arc = m.administrativeReferenceCode;
-      var arcCell;
-      if (arc) {
-        arcCell = '<div class="arc-cell"><span class="arc-value">' + arc + '</span>' +
-          '<span class="lrn">LRN: ' + (m.localReferenceNumber || '') + '</span></div>';
-      } else {
-        arcCell = '<div class="arc-cell"><span class="pending">Pending ARC</span>' +
-          '<span class="lrn">LRN: ' + (m.localReferenceNumber || '') + '</span></div>';
-      }
-
-      var statusIndicator = getMovementStatusIndicator(m);
-      var lastMessage = m._latestStatus || '—';
-      
-      var isTerminal = m._latestStatus && TERMINAL_STATES.indexOf(m._latestStatus) !== -1;
-      var actions = '<div class="actions-cell">';
-      actions += '<button class="btn-small btn-grey" onclick="viewMovement(\'' + m.movementId + '\')">View</button>';
-      
-      if (isOut && arc && !isTerminal) {
-        actions += '<button class="btn-small btn-red" onclick="cancelMovement(\'' + m.movementId + '\', \'' + arc + '\')">Cancel</button>';
-      }
-      
-      if (!isOut && arc && !isTerminal) {
-        actions += '<button class="btn-small btn-green" onclick="receiptMovement(\'' + m.movementId + '\', \'' + arc + '\')">Receipt</button>';
-      }
-      actions += '</div>';
-
-      var tr = document.createElement('tr');
-      tr.className = rowClass;
-      tr.innerHTML = '<td>' + arcCell + '</td>' +
-        '<td>' + directionText + '</td>' +
-        '<td>' + counterparty + '</td>' +
-        '<td>' + (m.lastUpdated ? m.lastUpdated.split('T')[0] : '—') + '</td>' +
-        '<td>' + statusIndicator + '</td>' +
-        '<td style="font-size:11px; font-family:\'SF Mono\', Monaco, monospace; color:#505a5f;">' + lastMessage + '</td>' +
-        '<td style="text-align:center;" class="' + daysClass + '">' + daysOpen + '</td>' +
-        '<td style="text-align:right;">' + actions + '</td>';
-      tbody.appendChild(tr);
-    });
-  }
-
-  window.viewMovement = function(movId) {
-    document.getElementById('gsm-id').value = movId;
-    document.querySelector('[data-tab="tab-get-movement"]').click();
-    document.getElementById('get-single-movement-btn').click();
-  };
-  window.cancelMovement = function(movId, arc) {
-    if (!arc) { alert('Cannot cancel: this movement has no ARC yet.'); return; }
-    document.getElementById('sm-mov-id').value = movId;
-    document.getElementById('sm-arc').value = arc;
-    document.getElementById('sm-type').value = 'IE810';
-    document.getElementById('sm-type').dispatchEvent(new Event('change'));
-    document.querySelector('[data-tab="tab-submit-msg"]').click();
-  };
-  window.receiptMovement = function(movId, arc) {
-    if (!arc) { alert('Cannot receipt: this movement has no ARC yet.'); return; }
-    document.getElementById('sm-mov-id').value = movId;
-    document.getElementById('sm-arc').value = arc;
-    document.getElementById('sm-type').value = 'IE818';
-    document.getElementById('sm-type').dispatchEvent(new Event('change'));
-    document.querySelector('[data-tab="tab-submit-msg"]').click();
-  };
-
-  document.getElementById('mon-apply-filters').addEventListener('click', applyMonitorFilters);
-  document.getElementById('mon-clear-filters').addEventListener('click', function() {
-    ['mon-direction', 'mon-status', 'mon-epc', 'mon-disp-from', 'mon-disp-to'].forEach(function(id) {
-      document.getElementById(id).value = '';
-    });
-    applyMonitorFilters();
-  });
-  document.getElementById('mon-refresh').addEventListener('click', fetchMonitorData);
-
-  // ==================== IE818 ITEM-LEVEL ====================
-  function showHideIE818Section() {
-    var msgType = document.getElementById('sm-type').value;
-    document.getElementById('ie818-section').style.display = (msgType === 'IE818') ? 'block' : 'none';
-  }
-
-  document.getElementById('load-818-items-btn').addEventListener('click', async function() {
-    var movId = document.getElementById('sm-mov-id').value || localStorage.getItem('last_movement_id');
-    if (!movId) { alert('Movement ID required.'); return; }
-    var h = await getHeaders();
-    try {
-      var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId), { headers: h });
-      var text = await res.text();
-      var data = JSON.parse(text);
-      var items = [];
-      if (data.bodyEadEsad && Array.isArray(data.bodyEadEsad)) items = data.bodyEadEsad;
-      else if (data.items && Array.isArray(data.items)) items = data.items;
-      else items = [{ bodyRecordUniqueReference: 1, exciseProductCode: 'B000', quantity: 0, description: 'Item (details unavailable - please fill manually)' }];
-      window.ie818Items = items;
-      renderIE818Items(items);
-    } catch(e) {
-      alert('Failed to load movement: ' + e.message);
-    }
-  });
-
-  function renderIE818Items(items) {
-    var container = document.getElementById('ie818-items-container');
-    if (items.length === 0) {
-      container.innerHTML = '<p>No items found in this movement.</p>';
-      return;
-    }
-    var html = '<table class="receipt-table"><thead><tr>' +
-      '<th>#</th><th>Product Code</th><th>Description</th><th>Expected Qty</th>' +
-      '<th>Received Qty</th><th>Status</th><th>Reason Code</th><th>Notes</th>' +
-      '</tr></thead><tbody>';
-    items.forEach(function(it, idx) {
-      var ref = it.bodyRecordUniqueReference || (idx + 1);
-      var pc = it.exciseProductCode || '';
-      var desc = it.commercialDescription || it.description || '';
-      var expQty = it.quantity || 0;
-      html += '<tr data-idx="' + idx + '">' +
-        '<td>' + ref + '</td><td>' + pc + '</td><td>' + desc + '</td>' +
-        '<td><input type="number" class="ie818-expected" value="' + expQty + '" step="0.001" readonly style="background:#eee;"></td>' +
-        '<td><input type="number" class="ie818-received" value="' + expQty + '" step="0.001" onchange="updateIE818Row(this)"></td>' +
-        '<td class="ie818-status">OK</td>' +
-        '<td><select class="ie818-reason"><option value="">-- None --</option>' +
-          '<option value="1">1 - Breakage</option><option value="2">2 - Leakage</option>' +
-          '<option value="3">3 - Quantity discrepancy</option><option value="4">4 - Product type discrepancy</option>' +
-          '<option value="5">5 - Other</option></select></td>' +
-        '<td><input type="text" class="ie818-notes" placeholder="Optional notes"></td></tr>';
-    });
-    html += '</tbody></table>';
-    container.innerHTML = html;
-  }
-
-  window.updateIE818Row = function(input) {
-    var row = input.closest('tr');
-    var expected = parseFloat(row.querySelector('.ie818-expected').value) || 0;
-    var received = parseFloat(input.value) || 0;
-    var statusCell = row.querySelector('.ie818-status');
-    row.classList.remove('shortage', 'excess');
-    if (received < expected) {
-      statusCell.textContent = 'SHORT (' + (expected - received).toFixed(3) + ')';
-      row.classList.add('shortage');
-    } else if (received > expected) {
-      statusCell.textContent = 'EXCESS (+' + (received - expected).toFixed(3) + ')';
-      row.classList.add('excess');
-    } else {
-      statusCell.textContent = 'OK';
-    }
-  };
-
-  // ==================== SUBMIT MOVEMENT ====================
-  document.getElementById('submit-movement-btn').addEventListener('click', async function() {
-    if (!localStorage.getItem('hmrc_token')) { alert('Login to HMRC first!'); return; }
-    var h = await getHeaders();
-    var uniqueLrn = document.getElementById('s-lrn').value || ('LRN' + Date.now().toString().slice(-10));
-    var submitDate = new Date().toISOString().slice(0, 10);
-    var prepareTime = new Date().toISOString().slice(11, 19);
-
-    var bodyEadEsadXml = '';
-    var itemSummary = [];
-    document.querySelectorAll('#goods-items-container .item-field').forEach(function(item, idx) {
-      var bulk = item.querySelector('.s-bulk').checked;
-      var netW = bulk ? item.querySelector('.s-weight').value : item.querySelector('.s-net-weight').value;
-      var pc = item.querySelector('.s-product-code').value;
-      var qty = item.querySelector('.s-qty').value;
-      var abv = item.querySelector('.s-abv').value;
-      var commDesc = item.querySelector('.s-comm-desc').value;
-      var brand = item.querySelector('.s-brand').value;
-      var shipMark = item.querySelector('.s-ship-mark').value;
-
-      bodyEadEsadXml += '<urn:BodyEadEsad>' +
-        '<urn:BodyRecordUniqueReference>' + (idx + 1) + '</urn:BodyRecordUniqueReference>' +
-        '<urn:ExciseProductCode>' + pc + '</urn:ExciseProductCode>' +
-        '<urn:CnCode>' + item.querySelector('.s-cn-code').value + '</urn:CnCode>' +
-        '<urn:Quantity>' + qty + '</urn:Quantity>' +
-        '<urn:GrossMass>' + item.querySelector('.s-weight').value + '</urn:GrossMass>' +
-        '<urn:NetMass>' + netW + '</urn:NetMass>' +
-        (abv ? '<urn:AlcoholicStrengthByVolumeInPercentage>' + abv + '</urn:AlcoholicStrengthByVolumeInPercentage>' : '') +
-        '<urn:FiscalMarkUsedFlag>0</urn:FiscalMarkUsedFlag>' +
-        (commDesc ? '<urn:CommercialDescription>' + commDesc + '</urn:CommercialDescription>' : '') +
-        (brand ? '<urn:BrandName>' + brand + '</urn:BrandName>' : '') +
-        '<urn:Package><urn:KindOfPackages>' + item.querySelector('.s-package-kind').value + '</urn:KindOfPackages>' +
-        '<urn:NumberOfPackages>' + item.querySelector('.s-package-count').value + '</urn:NumberOfPackages>' +
-        (shipMark ? '<urn:ShippingMarks>' + shipMark + '</urn:ShippingMarks>' : '') +
-        '</urn:Package></urn:BodyEadEsad>';
-      itemSummary.push({ productCode: pc, qty: qty });
-    });
-
-    var xml = '<urn:IE815 xmlns:urn="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:IE815:V3.23" xmlns:urn1="' + TMS_NS + '">' +
-      '<urn:Header><urn1:MessageSender>NDEA.GB</urn1:MessageSender><urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>' +
-      '<urn1:DateOfPreparation>' + submitDate + '</urn1:DateOfPreparation><urn1:TimeOfPreparation>' + prepareTime + '</urn1:TimeOfPreparation>' +
-      '<urn1:MessageIdentifier>' + uniqueLrn + '</urn1:MessageIdentifier><urn1:CorrelationIdentifier>PORTAL' + uniqueLrn + '</urn1:CorrelationIdentifier></urn:Header>' +
-      '<urn:Body><urn:SubmittedDraftOfEADESAD><urn:Attributes><urn:SubmissionMessageType>1</urn:SubmissionMessageType></urn:Attributes>' +
-      '<urn:ConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid>' +
-      '<urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName>' +
-      '<urn:StreetName>' + document.getElementById('s-consignee-street').value + '</urn:StreetName>' +
-      xmlField('StreetNumber', document.getElementById('s-consignee-street-num').value) +
-      '<urn:Postcode>' + document.getElementById('s-consignee-postcode').value + '</urn:Postcode>' +
-      '<urn:City>' + document.getElementById('s-consignee-city').value + '</urn:City></urn:ConsigneeTrader>' +
-      '<urn:ConsignorTrader language="en"><urn:TraderExciseNumber>' + document.getElementById('s-consignor-ern').value + '</urn:TraderExciseNumber>' +
-      '<urn:TraderName>' + document.getElementById('s-consignor-name').value + '</urn:TraderName>' +
-      '<urn:StreetName>' + document.getElementById('s-consignor-street').value + '</urn:StreetName>' +
-      xmlField('StreetNumber', document.getElementById('s-consignor-street-num').value) +
-      '<urn:Postcode>' + document.getElementById('s-consignor-postcode').value + '</urn:Postcode>' +
-      '<urn:City>' + document.getElementById('s-consignor-city').value + '</urn:City></urn:ConsignorTrader>';
-
-    var dw = document.getElementById('s-dispatch-warehouse').value.trim();
-    if (dw) {
-      xml += '<urn:PlaceOfDispatchTrader language="en"><urn:ReferenceOfTaxWarehouse>' + dw + '</urn:ReferenceOfTaxWarehouse>' +
-        xmlField('TraderName', document.getElementById('s-dispatch-name').value) +
-        xmlField('StreetName', document.getElementById('s-dispatch-street').value) +
-        xmlField('StreetNumber', document.getElementById('s-dispatch-street-num').value) +
-        xmlField('Postcode', document.getElementById('s-dispatch-postcode').value) +
-        xmlField('City', document.getElementById('s-dispatch-city').value) +
-        '</urn:PlaceOfDispatchTrader>';
-    }
-
-    xml += '<urn:DeliveryPlaceTrader language="en"><urn:Traderid>' + document.getElementById('s-delivery-trader-id').value + '</urn:Traderid>' +
-      '<urn:TraderName>' + document.getElementById('s-delivery-name').value + '</urn:TraderName>' +
-      '<urn:StreetName>' + document.getElementById('s-delivery-street').value + '</urn:StreetName>' +
-      xmlField('StreetNumber', document.getElementById('s-delivery-street-num').value) +
-      '<urn:Postcode>' + document.getElementById('s-delivery-postcode').value + '</urn:Postcode>' +
-      '<urn:City>' + document.getElementById('s-delivery-city').value + '</urn:City></urn:DeliveryPlaceTrader>' +
-      '<urn:CompetentAuthorityDispatchOffice><urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber></urn:CompetentAuthorityDispatchOffice>' +
-      '<urn:FirstTransporterTrader language="en"><urn:VatNumber>' + document.getElementById('s-transporter-vat').value + '</urn:VatNumber>' +
-      '<urn:TraderName>' + document.getElementById('s-transporter-name').value + '</urn:TraderName>' +
-      '<urn:StreetName>Logistics Way</urn:StreetName><urn:StreetNumber>5</urn:StreetNumber>' +
-      '<urn:Postcode>FR5 4RN</urn:Postcode>' +
-      '<urn:City>' + document.getElementById('s-transporter-city').value + '</urn:City></urn:FirstTransporterTrader>' +
-      '<urn:HeaderEadEsad><urn:DestinationTypeCode>' + document.getElementById('s-dest-type').value + '</urn:DestinationTypeCode>' +
-      '<urn:JourneyTime>' + document.getElementById('s-journey-time').value + '</urn:JourneyTime>' +
-      '<urn:TransportArrangement>' + document.getElementById('s-transport-arrangement').value + '</urn:TransportArrangement></urn:HeaderEadEsad>' +
-      '<urn:TransportMode><urn:TransportModeCode>' + document.getElementById('s-transport-mode').value + '</urn:TransportModeCode></urn:TransportMode>' +
-      '<urn:MovementGuarantee><urn:GuarantorTypeCode>' + document.getElementById('s-guarantor-type').value + '</urn:GuarantorTypeCode></urn:MovementGuarantee>' +
-      bodyEadEsadXml +
-      '<urn:EadEsadDraft><urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>' +
-      '<urn:InvoiceNumber>' + document.getElementById('s-invoice-number').value + '</urn:InvoiceNumber>' +
-      '<urn:InvoiceDate>' + document.getElementById('s-invoice-date').value + '</urn:InvoiceDate>' +
-      '<urn:OriginTypeCode>' + document.getElementById('s-origin-type').value + '</urn:OriginTypeCode>' +
-      '<urn:DateOfDispatch>' + document.getElementById('s-date').value + '</urn:DateOfDispatch>' +
-      '<urn:TimeOfDispatch>' + document.getElementById('s-time').value + ':00</urn:TimeOfDispatch></urn:EadEsadDraft>';
-
-    document.querySelectorAll('.transport-unit-field').forEach(function(unit) {
-      var uc = unit.querySelector('.s-transport-unit-code').value;
-      var ui = unit.querySelector('.s-identity-transport').value;
-      if (uc && ui) xml += '<urn:TransportDetails><urn:TransportUnitCode>' + uc + '</urn:TransportUnitCode><urn:IdentityOfTransportUnits>' + ui + '</urn:IdentityOfTransportUnits></urn:TransportDetails>';
-    });
-
-    xml += '</urn:SubmittedDraftOfEADESAD></urn:Body></urn:IE815>';
-
-    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements', { method: 'POST', headers: Object.assign({}, h, { 'Content-Type': 'application/xml' }), body: xml });
-    var responseText = await res.text();
-    document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
-
-    if (res.status === 202) {
-      try {
-        var parsed = JSON.parse(responseText);
-        if (parsed.movementId) {
-          localStorage.setItem('last_movement_id', parsed.movementId);
-          localStorage.setItem('last_ern', document.getElementById('s-consignor-ern').value);
-          localStorage.setItem('last_arc', parsed.administrativeReferenceCode || '');
-          localStorage.setItem('last_lrn', parsed.localReferenceNumber || uniqueLrn);
-          localStorage.setItem('emcs_last_submission', JSON.stringify({
-            movementId: parsed.movementId, arc: parsed.administrativeReferenceCode || '',
-            lrn: parsed.localReferenceNumber || uniqueLrn,
-            consignorErn: document.getElementById('s-consignor-ern').value,
-            consigneeErn: document.getElementById('s-consignee-ern').value,
-            date: submitDate, items: itemSummary
-          }));
-          document.getElementById('export-last-csv-btn').style.display = 'inline-block';
-          
-          if (window.currentDraftId !== null) {
-            var drafts = getDrafts();
-            drafts = drafts.filter(function(d) { return d.id !== window.currentDraftId; });
-            saveDrafts(drafts);
-            window.currentDraftId = null;
-            renderDrafts();
-          }
-        }
-      } catch(e) { console.error(e); }
-    }
-  });
-
-  // ==================== TAB 3 ====================
-  document.getElementById('get-single-movement-btn').addEventListener('click', async function() {
-    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
-    var h = await getHeaders();
-    var movId = document.getElementById('gsm-id').value || localStorage.getItem('last_movement_id');
-    if (!movId) { alert('Movement ID required'); return; }
-    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId), { headers: h });
-    var text = await res.text();
-    document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + text;
-    try {
-      var data = JSON.parse(text);
-      document.getElementById('gsm-parsed').innerHTML = renderMovementParsed(data);
-    } catch(e) {
-      document.getElementById('gsm-parsed').innerHTML = '<p style="color:#d4351c;">Could not parse response: ' + e.message + '</p>';
-    }
-  });
-
-  // ==================== TAB 4 ====================
-  document.getElementById('sm-type').addEventListener('change', function() {
-    showHideIE818Section();
-    var container = document.getElementById('msg-specific-fields');
-    var msgType = this.value;
-    if (msgType === 'IE818') {
-      container.innerHTML = '<h3 style="margin-top:20px;">IE818 Global Fields</h3><div class="form-grid">' +
-        '<div class="field"><label>Date of Arrival</label><input type="date" id="msg-arrival-date" value="' + today + '"></div>' +
-        '<div class="field"><label>Global Conclusion</label>' +
-        '<select id="msg-receipt-conclusion">' +
-        '<option value="1">1 - Acceptable (all items OK)</option>' +
-        '<option value="2" selected>2 - Unacceptable with reservations</option>' +
-        '<option value="3">3 - Refusal (entire shipment rejected)</option>' +
-        '</select></div></div>' +
-        '<p style="font-size:12px; color:#666; margin-top:10px;">Use the item-level table above to report per-item shortages/excesses.</p>';
-      return;
-    }
-    var html = '<h3 style="margin-top:20px;">Message-Specific Fields</h3><div class="form-grid">';
-    if (msgType === 'IE810') {
-      html += '<div class="field"><label>Cancellation Reason</label><select id="msg-cancel-reason"><option value="1">1 - Duplicate</option><option value="2">2 - Erroneous</option><option value="3" selected>3 - Before dispatch</option><option value="4">4 - During transit</option></select></div>';
-    } else if (msgType === 'IE813') {
-      html += '<div class="field"><label>New Destination Type</label><select id="msg-dest-type"><option value="1">1 - Tax warehouse</option><option value="2">2 - Registered consignee</option></select></div>';
-      html += '<div class="field"><label>New Consignee ERN</label><input type="text" id="msg-new-consignee" value="GBWK240176600"></div>';
-      html += '<div class="field"><label>New Consignee Name</label><input type="text" id="msg-new-consignee-name" value="New Consignee Ltd"></div>';
-    } else if (msgType === 'IE819') {
-      html += '<div class="field"><label>Date of Alert</label><input type="date" id="msg-alert-date" value="' + today + '"></div>';
-      html += '<div class="field"><label>Rejected Flag</label><select id="msg-rejected-flag"><option value="0">0 - No</option><option value="1" selected>1 - Yes</option></select></div>';
-      html += '<div class="field"><label>Reason Code</label><select id="msg-rejection-reason"><option value="1">1 - Other</option><option value="2" selected>2 - Quantity discrepancy</option></select></div>';
-      html += '<div class="field"><label>Info</label><input type="text" id="msg-rejection-info" value="Goods rejected"></div>';
-    } else if (msgType === 'IE837') {
-      html += '<div class="field"><label>Submitter Type</label><select id="msg-submitter-type"><option value="1" selected>1 - Consignor</option><option value="2">2 - Consignee</option></select></div>';
-      html += '<div class="field"><label>Explanation Code</label><select id="msg-explanation-code"><option value="1">1 - Transport problems</option><option value="2">2 - Force majeure</option><option value="6" selected>6 - Other</option></select></div>';
-      html += '<div class="field"><label>Info</label><input type="text" id="msg-delay-info" value="Accident on M5"></div>';
-    } else if (msgType === 'IE871') {
-      html += '<div class="field"><label>Date of Analysis</label><input type="date" id="msg-analysis-date" value="' + today + '"></div>';
-      html += '<div class="field"><label>Global Explanation</label><input type="text" id="msg-shortage-explanation" value="Courier drank the wine"></div>';
-    }
-    html += '</div>';
-    container.innerHTML = html;
-  });
-  document.getElementById('sm-type').dispatchEvent(new Event('change'));
-
-  document.getElementById('submit-message-btn').addEventListener('click', async function() {
-    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
-    var movId = document.getElementById('sm-mov-id').value || localStorage.getItem('last_movement_id');
-    var arc = document.getElementById('sm-arc').value || localStorage.getItem('last_arc');
-    if (!movId) { alert('Movement ID required'); return; }
-    if (!arc) { alert('ARC required'); return; }
-
-    var h = await getHeaders();
-    var msgType = document.getElementById('sm-type').value;
-    var seq = document.getElementById('sm-seq').value || '1';
-    var msgId = document.getElementById('sm-msgid').value || ('MSG' + Date.now());
-    var submitDate = new Date().toISOString().slice(0, 10);
-    var prepareTime = new Date().toISOString().slice(11, 19);
-    var namespace = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:' + msgType + ':V3.23';
-    var bodyXml = '';
-
-    if (msgType === 'IE810') {
-      var reason = document.getElementById('msg-cancel-reason').value;
-      bodyXml = '<urn:CancellationOfEAD><urn:Attributes><urn:DateAndTimeOfValidationOfCancellation>' + prepareTime + '</urn:DateAndTimeOfValidationOfCancellation></urn:Attributes>' +
-        '<urn:ExciseMovementEad><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode></urn:ExciseMovementEad>' +
-        '<urn:Cancellation><urn:CancellationReasonCode>' + reason + '</urn:CancellationReasonCode></urn:Cancellation></urn:CancellationOfEAD>';
-    } else if (msgType === 'IE818') {
-      var arrivalDate = document.getElementById('msg-arrival-date').value;
-      var conclusion = document.getElementById('msg-receipt-conclusion').value;
-      var bodyReportXml = '';
-      var hasShortage = false;
-      window.ie818Items.forEach(function(it, idx) {
-        var row = document.querySelector('#ie818-items-container tr[data-idx="' + idx + '"]');
-        if (!row) return;
-        var expected = parseFloat(row.querySelector('.ie818-expected').value) || 0;
-        var received = parseFloat(row.querySelector('.ie818-received').value) || 0;
-        var reason = row.querySelector('.ie818-reason').value;
-        var notes = row.querySelector('.ie818-notes').value;
-        var ref = it.bodyRecordUniqueReference || (idx + 1);
-        if (received !== expected || reason) {
-          hasShortage = true;
-          bodyReportXml += '<urn:BodyReportOfReceiptExport><urn:BodyRecordUniqueReference>' + ref + '</urn:BodyRecordUniqueReference>';
-          if (received !== expected) {
-            var diffCode = received < expected ? 'S' : 'E';
-            bodyReportXml += '<urn:ObservedShortageOrExcess><urn:ObservedQuantity>' + received + '</urn:ObservedQuantity>' +
-              '<urn:ObservedShortageOrExcessCode>' + diffCode + '</urn:ObservedShortageOrExcessCode></urn:ObservedShortageOrExcess>';
-          }
-          if (reason) {
-            bodyReportXml += '<urn:UnsatisfactoryReason><urn:UnsatisfactoryReasonCode>' + reason + '</urn:UnsatisfactoryReasonCode>' +
-              (notes ? '<urn:ComplementaryInformation language="en">' + notes + '</urn:ComplementaryInformation>' : '') +
-              '</urn:UnsatisfactoryReason>';
-          }
-          bodyReportXml += '</urn:BodyReportOfReceiptExport>';
-        }
-      });
-      if (hasShortage && conclusion === '1') conclusion = '2';
-      bodyXml = '<urn:AcceptedOrRejectedReportOfReceiptExport>' +
-        '<urn:Attributes><urn:DateAndTimeOfValidationOfReportOfReceiptExport>' + prepareTime + '</urn:DateAndTimeOfValidationOfReportOfReceiptExport></urn:Attributes>' +
-        '<urn:ConsigneeTrader language="en"><urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid><urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName></urn:ConsigneeTrader>' +
-        '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
-        '<urn:DestinationOffice><urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber></urn:DestinationOffice>' +
-        '<urn:ReportOfReceiptExport><urn:DateOfArrivalOfExciseProducts>' + arrivalDate + '</urn:DateOfArrivalOfExciseProducts>' +
-        '<urn:GlobalConclusionOfReceipt>' + conclusion + '</urn:GlobalConclusionOfReceipt></urn:ReportOfReceiptExport>' +
-        bodyReportXml + '</urn:AcceptedOrRejectedReportOfReceiptExport>';
-    } else if (msgType === 'IE837') {
-      var submitterType = document.getElementById('msg-submitter-type').value;
-      var submitterId = submitterType === '1' ? document.getElementById('s-consignor-ern').value : document.getElementById('s-consignee-ern').value;
-      bodyXml = '<urn:ExplanationOnDelayForDelivery><urn:Attributes>' +
-        '<urn:SubmitterIdentification>' + submitterId + '</urn:SubmitterIdentification>' +
-        '<urn:SubmitterType>' + submitterType + '</urn:SubmitterType>' +
-        '<urn:ExplanationCode>' + document.getElementById('msg-explanation-code').value + '</urn:ExplanationCode>' +
-        '<urn:ComplementaryInformation language="en">' + document.getElementById('msg-delay-info').value + '</urn:ComplementaryInformation>' +
-        '<urn:MessageRole>1</urn:MessageRole></urn:Attributes>' +
-        '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
-        '</urn:ExplanationOnDelayForDelivery>';
-    } else if (msgType === 'IE871') {
-      bodyXml = '<urn:ExplanationOnReasonForShortage><urn:Attributes><urn:SubmitterType>1</urn:SubmitterType>' +
-        '<urn:DateAndTimeOfValidationOfExplanationOnShortage>' + prepareTime + '</urn:DateAndTimeOfValidationOfExplanationOnShortage></urn:Attributes>' +
-        '<urn:ExciseMovement><urn:AdministrativeReferenceCode>' + arc + '</urn:AdministrativeReferenceCode><urn:SequenceNumber>' + seq + '</urn:SequenceNumber></urn:ExciseMovement>' +
-        '<urn:ConsignorTrader language="en"><urn:TraderExciseNumber>' + document.getElementById('s-consignor-ern').value + '</urn:TraderExciseNumber><urn:TraderName>' + document.getElementById('s-consignor-name').value + '</urn:TraderName></urn:ConsignorTrader>' +
-        '<urn:Analysis><urn:DateOfAnalysis>' + document.getElementById('msg-analysis-date').value + '</urn:DateOfAnalysis><urn:GlobalExplanation language="en">' + document.getElementById('msg-shortage-explanation').value + '</urn:GlobalExplanation></urn:Analysis>' +
-        '</urn:ExplanationOnReasonForShortage>';
-    } else {
-      alert('Message type ' + msgType + ' - please check fields are populated.');
-      return;
-    }
-
-    var xml = '<urn:' + msgType + ' xmlns:urn="' + namespace + '" xmlns:urn1="' + TMS_NS + '"><urn:Header>' +
-      '<urn1:MessageSender>NDEA.GB</urn1:MessageSender><urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>' +
-      '<urn1:DateOfPreparation>' + submitDate + '</urn1:DateOfPreparation><urn1:TimeOfPreparation>' + prepareTime + '</urn1:TimeOfPreparation>' +
-      '<urn1:MessageIdentifier>' + msgId + '</urn1:MessageIdentifier><urn1:CorrelationIdentifier>PORTAL' + msgId + '</urn1:CorrelationIdentifier></urn:Header>' +
-      '<urn:Body>' + bodyXml + '</urn:Body></urn:' + msgType + '>';
-
-    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages', { method: 'POST', headers: Object.assign({}, h, { 'Content-Type': 'application/xml' }), body: xml });
-    document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-  });
-
-  // ==================== TAB 5 ====================
-  document.getElementById('get-messages-btn').addEventListener('click', async function() {
-    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
-    var h = await getHeaders();
-    var movId = document.getElementById('gmsg-id').value || localStorage.getItem('last_movement_id');
-    if (!movId) { alert('Movement ID required'); return; }
-    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages', { headers: h });
-    var text = await res.text();
-    document.getElementById('gmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
-    try {
-      var msgs = JSON.parse(text);
-      if (Array.isArray(msgs)) {
-        msgs.forEach(function(m) { if (m.encodedMessage) { try { m.decodedXml = atob(m.encodedMessage); } catch(e) {} } });
-        document.getElementById('gmsg-count').textContent = msgs.length + ' message(s)';
-        document.getElementById('gmsg-parsed').innerHTML = renderMessagesParsed(msgs);
-      } else {
-        document.getElementById('gmsg-count').textContent = '';
-        document.getElementById('gmsg-parsed').innerHTML = '<p style="color:#d4351c;">Unexpected response format.</p>';
-      }
-    } catch(e) {
-      document.getElementById('gmsg-count').textContent = '';
-      document.getElementById('gmsg-parsed').innerHTML = '<p style="color:#d4351c;">Could not parse response: ' + e.message + '</p>';
-    }
-  });
-
-  // ==================== TAB 6 ====================
-  document.getElementById('get-single-message-btn').addEventListener('click', async function() {
-    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
-    var h = await getHeaders();
-    h['Accept'] = 'application/vnd.hmrc.1.0+xml';
-    var movId = document.getElementById('gsmsg-mid').value || localStorage.getItem('last_movement_id');
-    var msgId = document.getElementById('gsmsg-id').value;
-    if (!movId || !msgId) { alert('Both IDs required'); return; }
-    var res = await fetch('/api/emcs?endpoint=/customs/excise/movements/' + encodeURIComponent(movId) + '/messages/' + encodeURIComponent(msgId), { headers: h });
-    var text = await res.text();
-    document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
-    if (res.status === 200) {
-      document.getElementById('gsmsg-parsed').innerHTML = renderSingleMessageParsed(text);
-    } else {
-      document.getElementById('gsmsg-parsed').innerHTML = '<p style="color:#d4351c;">Error: Status ' + res.status + '</p>';
-    }
-  });
-
-  // ==================== TAB 7 ====================
-  document.getElementById('pre-validate-btn').addEventListener('click', async function() {
-    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
-    var h = await getHeaders();
-    h['x-correlation-id'] = crypto.randomUUID();
-    var requestBody = {
-      exciseTraderValidationRequest: {
-        exciseTraderRequest: {
-          exciseRegistrationNumber: document.getElementById('pv-ern').value,
-          entityGroup: document.getElementById('pv-group').value,
-          validateProductAuthorisationRequest: [{ product: { exciseProductCode: document.getElementById('pv-p1').value } }]
-        }
-      }
-    };
-    var res = await fetch('/api/emcs?endpoint=/customs/excise/traders/pre-validate', {
-      method: 'POST',
-      headers: Object.assign({}, h, { 'Content-Type': 'application/json' }),
-      body: JSON.stringify(requestBody)
-    });
-    var text = await res.text();
-    document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + text;
-    try {
-      var data = JSON.parse(text);
-      document.getElementById('pv-parsed').innerHTML = renderPrevalidateParsed(data);
-    } catch(e) {
-      document.getElementById('pv-parsed').innerHTML = '<p style="color:#d4351c;">Could not parse response.</p>';
-    }
-  });
-
-  // ==================== TAB 8 ====================
-  document.getElementById('subscribe-ern-btn').addEventListener('click', async function() {
-    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
-    var h = await getHeaders();
-    var res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + document.getElementById('sub-ern').value + '/subscription', {
-      method: 'POST',
-      headers: Object.assign({}, h, { 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ boxId: '42c75e22-7bba-44f2-a610-4b4c3b262e3e' })
-    });
-    document.getElementById('sub-output').innerText = 'Status: ' + res.status + '\n\n' + await res.text();
-  });
-
-  // ==================== TAB 9 ====================
-  document.getElementById('unsubscribe-ern-btn').addEventListener('click', async function() {
-    if (!localStorage.getItem('hmrc_token')) { alert('Login first'); return; }
-    var h = await getHeaders();
-    var res = await fetch('/api/emcs?endpoint=/customs/excise/erns/' + document.getElementById('unsub-ern').value + '/subscription', { method: 'DELETE', headers: h });
-    var text = await res.text();
-    document.getElementById('unsub-output').innerText = res.status === 202 ? 'Successfully unsubscribed' : 'Status: ' + res.status + '\n\n' + text;
-  });
-
-  // Initial load
-  if (localStorage.getItem('last_movement_id')) {
-    ['gsm-id', 'sm-mov-id', 'gmsg-id', 'gsmsg-mid'].forEach(function(fid) {
-      var el = document.getElementById(fid);
-      if (el) el.value = localStorage.getItem('last_movement_id');
-    });
-  }
-  if (localStorage.getItem('last_arc')) {
-    document.getElementById('sm-arc').value = localStorage.getItem('last_arc');
-  }
-});
-</script>
+<script src="/app.js"></script>
 </body>
 </html>
