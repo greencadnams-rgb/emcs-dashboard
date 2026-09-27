@@ -1,21 +1,22 @@
 document.addEventListener('DOMContentLoaded', async function() {
-  console.log('App.js loaded successfully');
+  console.log('App.js loaded successfully - All 10 tabs functional');
 
-  // --- 1. AUTHENTICATION & SESSION ---
+  // === HELPERS ===
+  function xmlField(tag, value) { return value ? `<urn:${tag}>${value}</urn:${tag}>` : ''; }
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+  
   function showLoginScreen() {
     const ls = document.getElementById('login-screen');
     const db = document.getElementById('dashboard');
     if (ls) ls.style.display = 'flex';
     if (db) db.style.display = 'none';
   }
-
   function showDashboard() {
     const ls = document.getElementById('login-screen');
     const db = document.getElementById('dashboard');
     if (ls) ls.style.display = 'none';
     if (db) db.style.display = 'block';
   }
-
   function updateHmrcStatus(authenticated) {
     const badge = document.getElementById('hmrc-status');
     const link = document.getElementById('hmrc-login-link');
@@ -50,18 +51,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     return null;
   }
 
+  // === AUTH ===
   const loginBtn = document.getElementById('login-btn');
   if (loginBtn) {
     loginBtn.addEventListener('click', async function() {
       const password = document.getElementById('password').value;
       const totpCode = document.getElementById('totp-code').value;
       const errorEl = document.getElementById('login-error');
-
       if (!password) {
         if (errorEl) { errorEl.textContent = 'Please enter your password'; errorEl.style.display = 'block'; }
         return;
       }
-
       try {
         const res = await fetch('/api/login', {
           method: 'POST', credentials: 'include',
@@ -112,12 +112,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   const verify2faBtn = document.getElementById('verify-2fa-btn');
   if (verify2faBtn) {
-    verify2faBtn.addEventListener('click', async function() {
+    verify2faBtn.addEventListener('click', function() {
       const secret = document.getElementById('secret-text').textContent;
       const token = document.getElementById('verify-code').value;
       if (!token || token.length !== 6) { alert('Please enter a valid 6-digit code'); return; }
-      alert('2FA Verified! Please add TOTP_SECRET="' + secret + '" to your Vercel environment variables.');
-      document.getElementById('2fa-result').textContent = 'Success! Remember to save the secret in Vercel.';
+      alert('2FA Verified! Add TOTP_SECRET="' + secret + '" to Vercel env vars.');
+      document.getElementById('2fa-result').textContent = 'Success!';
       document.getElementById('2fa-result').style.color = 'green';
     });
   }
@@ -128,8 +128,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       e.preventDefault();
       await fetch('/api/logout', { method: 'POST', credentials: 'include' });
       showLoginScreen();
-      document.getElementById('password').value = '';
-      document.getElementById('totp-code').value = '';
     });
   }
 
@@ -141,7 +139,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // --- 2. TAB NAVIGATION ---
+  // === TAB NAVIGATION ===
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -152,21 +150,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   });
 
-  // --- 3. PROFILE MANAGEMENT ---
+  // === PROFILES (Tab 10) ===
   async function loadProfiles() {
     try {
-      console.log('Fetching profiles...');
       const res = await fetch('/api/profiles', { credentials: 'include' });
-      
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error('Profile fetch failed with status:', res.status, errText);
-        return;
-      }
-
+      if (!res.ok) return;
       const profiles = await res.json();
-      console.log('Profiles loaded successfully:', profiles);
-
       const profileSelect = document.getElementById('active-profile-select');
       const profileChips = document.getElementById('profile-chips');
       
@@ -178,8 +167,7 @@ document.addEventListener('DOMContentLoaded', async function() {
           opt.textContent = `${p.name} (${p.ern})`;
           profileSelect.appendChild(opt);
         });
-        
-        profileSelect.addEventListener('change', function() {
+        profileSelect.onchange = function() {
           const selected = profiles.find(p => p.id == this.value);
           if (selected) {
             document.getElementById('s-consignor-ern').value = selected.ern;
@@ -189,9 +177,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             document.getElementById('s-consignor-city').value = selected.city || '';
             document.getElementById('s-dispatch-office').value = selected.office || 'GB004098';
           }
-        });
+        };
       }
-
       if (profileChips) {
         profileChips.innerHTML = '';
         profiles.forEach(p => {
@@ -200,7 +187,6 @@ document.addEventListener('DOMContentLoaded', async function() {
           chip.innerHTML = `<span>${p.name} (${p.ern})</span> <span class="del-prof" data-id="${p.id}">&times;</span>`;
           profileChips.appendChild(chip);
         });
-        
         profileChips.querySelectorAll('.del-prof').forEach(delBtn => {
           delBtn.addEventListener('click', async function() {
             if (confirm('Delete this profile?')) {
@@ -210,9 +196,7 @@ document.addEventListener('DOMContentLoaded', async function() {
           });
         });
       }
-    } catch(e) { 
-      console.error('Load profiles network error:', e); 
-    }
+    } catch(e) { console.error('Load profiles failed:', e); }
   }
 
   const createProfileBtn = document.getElementById('create-profile-btn');
@@ -247,7 +231,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // --- 4. DYNAMIC FORM ELEMENTS ---
+  // === DYNAMIC FORM ELEMENTS ===
   document.getElementById('add-transport-unit-btn')?.addEventListener('click', function() {
     const container = document.getElementById('transport-units-container');
     const div = document.createElement('div');
@@ -269,34 +253,31 @@ document.addEventListener('DOMContentLoaded', async function() {
     div.innerHTML = `
       <div class="item-header"><h4>Goods Item</h4><button type="button" class="btn-red btn-small remove-item">Remove</button></div>
       <div class="form-grid">
-        <div class="field"><label>Excise Product Code <span class="required-asterisk">*</span></label><input type="text" class="s-product-code" maxlength="4" required></div>
-        <div class="field"><label>CN Code <span class="required-asterisk">*</span></label><input type="text" class="s-cn-code" maxlength="8" required></div>
-        <div class="field"><label>Quantity <span class="required-asterisk">*</span></label><input type="number" class="s-qty" step="0.001" required></div>
-        <div class="field"><label>Gross Mass <span class="required-asterisk">*</span></label><input type="number" class="s-weight" step="0.01" required></div>
+        <div class="field"><label>Excise Product Code *</label><input type="text" class="s-product-code" maxlength="4" required></div>
+        <div class="field"><label>CN Code *</label><input type="text" class="s-cn-code" maxlength="8" required></div>
+        <div class="field"><label>Quantity *</label><input type="number" class="s-qty" step="0.001" required></div>
+        <div class="field"><label>Gross Mass *</label><input type="number" class="s-weight" step="0.01" required></div>
         <div class="field"><label>Net Mass</label><input type="number" class="s-net-weight" step="0.01"></div>
         <div class="field"><label>ABV (%)</label><input type="number" class="s-abv" step="0.1"></div>
         <div class="field"><label>Commercial Description</label><input type="text" class="s-comm-desc" maxlength="300"></div>
         <div class="field"><label>Brand Name</label><input type="text" class="s-brand" maxlength="50"></div>
-        <div class="field"><label>Kind of Packages <span class="required-asterisk">*</span></label><input type="text" class="s-package-kind" maxlength="2" required></div>
-        <div class="field"><label>Number of Packages <span class="required-asterisk">*</span></label><input type="number" class="s-package-count" required></div>
+        <div class="field"><label>Kind of Packages *</label><input type="text" class="s-package-kind" maxlength="2" required></div>
+        <div class="field"><label>Number of Packages *</label><input type="number" class="s-package-count" required></div>
         <div class="field"><label>Shipping Marks</label><input type="text" class="s-ship-mark" maxlength="35"></div>
       </div>`;
     container.appendChild(div);
     div.querySelector('.remove-item').addEventListener('click', () => div.remove());
     div.querySelector('.s-product-code').addEventListener('change', function() {
       const epc = this.value.toUpperCase();
-      const cnMap = { 'B000': '22030001', 'W200': '22042100', 'S200': '22089000' };
+      const cnMap = { 'B000': '22030001', 'W200': '22042100', 'W300': '22041000', 'S200': '22089000', 'E410': '27101231', 'E420': '27101231' };
       if (cnMap[epc]) div.querySelector('.s-cn-code').value = cnMap[epc];
     });
   });
 
-  // --- 5. SUBMIT MOVEMENT (IE815) ---
-  function xmlField(tag, value) { return value ? `<urn:${tag}>${value}</urn:${tag}>` : ''; }
-
+  // === TAB 2: SUBMIT MOVEMENT (IE815) ===
   document.getElementById('submit-movement-btn')?.addEventListener('click', async function() {
     const session = await checkSession();
-    if (!session) return;
-    if (!session.hmrcAuthenticated) { alert('Please login to HMRC first!'); return; }
+    if (!session || !session.hmrcAuthenticated) { alert('Please login to HMRC first!'); return; }
 
     const uniqueLrn = document.getElementById('s-lrn').value || ('LRN' + Date.now().toString().slice(-10));
     const submitDate = document.getElementById('s-date').value || new Date().toISOString().slice(0, 10);
@@ -322,6 +303,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         '<urn:NetMass>' + netW + '</urn:NetMass>' +
         (abv ? '<urn:AlcoholicStrengthByVolumeInPercentage>' + abv + '</urn:AlcoholicStrengthByVolumeInPercentage>' : '') +
         '<urn:FiscalMarkUsedFlag>0</urn:FiscalMarkUsedFlag>' +
+        (commDesc ? '<urn:CommercialDescription>' + commDesc + '</urn:CommercialDescription>' : '') +
+        (brand ? '<urn:BrandNameOfProducts>' + brand + '</urn:BrandNameOfProducts>' : '') +
         '<urn:Package>' +
         '<urn:KindOfPackages>' + item.querySelector('.s-package-kind').value + '</urn:KindOfPackages>' +
         '<urn:NumberOfPackages>' + item.querySelector('.s-package-count').value + '</urn:NumberOfPackages>' +
@@ -429,15 +412,16 @@ document.addEventListener('DOMContentLoaded', async function() {
       });
       const responseText = await res.text();
       document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
-
       if (res.status === 202) {
         try {
           const parsed = JSON.parse(responseText);
           if (parsed.movementId) {
             localStorage.setItem('emcs_last_submission', JSON.stringify({
               movementId: parsed.movementId, arc: parsed.administrativeReferenceCode || '',
-              lrn: parsed.localReferenceNumber || uniqueLrn, consignorErn: document.getElementById('s-consignor-ern').value,
-              consigneeErn: document.getElementById('s-consignee-ern').value, date: submitDate, items: itemSummary
+              lrn: parsed.localReferenceNumber || uniqueLrn,
+              consignorErn: document.getElementById('s-consignor-ern').value,
+              consigneeErn: document.getElementById('s-consignee-ern').value,
+              date: submitDate, items: itemSummary
             }));
             document.getElementById('export-last-csv-btn').style.display = 'inline-block';
           }
@@ -448,15 +432,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   });
 
-  // --- 6. MONITOR TAB REFRESH LOGIC (Optimized to prevent 429 Rate Limits) ---
+  // === TAB 1: MONITOR ===
   const monRefreshBtn = document.getElementById('mon-refresh');
   if (monRefreshBtn) {
     monRefreshBtn.addEventListener('click', async function() {
       const session = await checkSession();
-      if (!session || !session.hmrcAuthenticated) {
-        alert('Please login to HMRC first!');
-        return;
-      }
+      if (!session || !session.hmrcAuthenticated) { alert('Please login to HMRC first!'); return; }
 
       const loading = document.getElementById('mon-loading');
       const noResults = document.getElementById('mon-no-results');
@@ -469,36 +450,48 @@ document.addEventListener('DOMContentLoaded', async function() {
       tbody.innerHTML = '';
 
       try {
-        // 1. Fetch all movements (This is a single, safe API call)
         const res = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/movements'), {
           method: 'GET', credentials: 'include'
         });
         
         if (res.ok) {
           const movements = await res.json();
-          
           if (movements && movements.length > 0) {
             if (table) table.style.display = 'table';
-            
             const activeSelect = document.getElementById('active-profile-select');
             const selectedOption = activeSelect ? activeSelect.options[activeSelect.selectedIndex] : null;
             const activeProfileErn = selectedOption ? selectedOption.text.match(/\(([^)]+)\)/)?.[1] : '';
 
-            movements.forEach(mov => {
-              // Safe status inference without making extra API calls:
-              // If it has an ARC, it was accepted. Otherwise, it's pending.
-              const hasArc = !!mov.administrativeReferenceCode;
-              const status = hasArc ? 'Accepted' : 'Pending';
-              const statusDot = hasArc ? 'dot-green' : 'dot-grey';
-              const lastMsg = hasArc ? 'IE801' : 'None';
-              
+            for (const mov of movements) {
+              let status = 'Pending', lastMsg = 'None', statusDot = 'dot-grey';
+              try {
+                const msgRes = await fetch(`/api/emcs?endpoint=${encodeURIComponent(`/customs/excise/movements/${mov.movementId}/messages`)}`, {
+                  method: 'GET', credentials: 'include'
+                });
+                if (msgRes.ok) {
+                  const msgs = await msgRes.json();
+                  if (msgs && msgs.length > 0) {
+                    msgs.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
+                    lastMsg = msgs[0].messageType || 'Unknown';
+                    const statusMap = {
+                      'IE801': ['Accepted', 'dot-green'], 'IE818': ['Receipted', 'dot-blue'],
+                      'IE810': ['Cancelled', 'dot-red'], 'IE813': ['Changed', 'dot-amber'],
+                      'IE819': ['Rejected', 'dot-red'], 'IE839': ['Custom Rejected', 'dot-red'],
+                      'IE807': ['Interrupted', 'dot-amber'], 'IE881': ['Closed', 'dot-grey'],
+                      'IE905': ['Status Response', 'dot-blue'], 'IE802': ['Reminder', 'dot-amber']
+                    };
+                    if (statusMap[lastMsg]) { status = statusMap[lastMsg][0]; statusDot = statusMap[lastMsg][1]; }
+                  }
+                }
+              } catch (e) { console.error('Failed to fetch messages for', mov.movementId, e); }
+
+              await sleep(400); // Rate limiting
+
               const daysOpen = mov.lastUpdated ? Math.floor((Date.now() - new Date(mov.lastUpdated).getTime()) / (1000 * 60 * 60 * 24)) : 0;
               const isOut = mov.consignorId === activeProfileErn || (activeProfileErn && mov.consigneeId !== activeProfileErn);
               
-              let actionsHtml = `<button class="btn-small btn-grey view-movement" data-id="${mov.movementId}" data-arc="${mov.administrativeReferenceCode || ''}">View</button>`;
-              
-              const isCancelable = isOut && (status === 'Accepted' || status === 'Pending');
-              if (isCancelable) {
+              let actionsHtml = `<button class="btn-small btn-grey view-movement" data-id="${mov.movementId}">View</button>`;
+              if (isOut && (status === 'Accepted' || status === 'Pending')) {
                 actionsHtml += ` <button class="btn-small btn-red cancel-movement" data-id="${mov.movementId}" data-arc="${mov.administrativeReferenceCode || ''}" data-lrn="${mov.localReferenceNumber}">Cancel</button>`;
               }
 
@@ -514,47 +507,32 @@ document.addEventListener('DOMContentLoaded', async function() {
                 <td><span class="status-indicator"><span class="status-dot ${statusDot}"></span> ${status}</span></td>
                 <td>${lastMsg}</td>
                 <td style="text-align:center;">${daysOpen}</td>
-                <td class="actions-cell">${actionsHtml}</td>
-              `;
+                <td class="actions-cell">${actionsHtml}</td>`;
               tbody.appendChild(tr);
-            });
+            }
 
-            // Attach View Button Logic (Fetches messages ONLY when clicked)
             tbody.querySelectorAll('.view-movement').forEach(btn => {
               btn.addEventListener('click', function() {
                 const movId = this.getAttribute('data-id');
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelector('[data-tab="tab-get-messages"]').classList.add('active');
-                document.getElementById('tab-get-messages').classList.add('active');
-                
+                document.querySelector('[data-tab="tab-get-messages"]').click();
                 document.getElementById('gmsg-id').value = movId;
                 document.getElementById('get-messages-btn').click();
               });
             });
 
-            // Attach Cancel Button Logic
             tbody.querySelectorAll('.cancel-movement').forEach(btn => {
               btn.addEventListener('click', function() {
                 const movId = this.getAttribute('data-id');
                 const arc = this.getAttribute('data-arc');
                 const lrn = this.getAttribute('data-lrn');
-                
-                if (!confirm(`Are you sure you want to cancel movement ${movId} (LRN: ${lrn})?`)) return;
-
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelector('[data-tab="tab-submit-msg"]').classList.add('active');
-                document.getElementById('tab-submit-msg').classList.add('active');
-
+                if (!confirm(`Cancel movement ${movId} (LRN: ${lrn})?`)) return;
+                document.querySelector('[data-tab="tab-submit-msg"]').click();
                 document.getElementById('sm-mov-id').value = movId;
                 document.getElementById('sm-arc').value = arc;
                 document.getElementById('sm-type').value = 'IE810';
-                
-                alert('Movement ID and ARC loaded into Submit Message tab. Please review, add a cancellation reason, and submit.');
+                alert('Loaded into Submit Message tab. Add reason and submit.');
               });
             });
-
           } else {
             if (noResults) noResults.style.display = 'block';
           }
@@ -563,79 +541,357 @@ document.addEventListener('DOMContentLoaded', async function() {
           alert('Failed to fetch movements: ' + res.status + '\n' + err);
         }
       } catch(e) {
-        alert('Network error fetching movements: ' + e.message);
+        alert('Network error: ' + e.message);
       } finally {
         if (loading) loading.style.display = 'none';
       }
     });
   }
 
-  // --- 7. PROFILE MANAGEMENT (With Debug Logging) ---
-  async function loadProfiles() {
+  // === TAB 3: GET SINGLE MOVEMENT ===
+  document.getElementById('get-single-movement-btn')?.addEventListener('click', async function() {
+    const session = await checkSession();
+    if (!session || !session.hmrcAuthenticated) { alert('Please login to HMRC first!'); return; }
+    const movId = document.getElementById('gsm-id').value.trim();
+    if (!movId) { alert('Please enter a Movement ID'); return; }
+
+    document.getElementById('gsm-output').innerText = 'Fetching...';
+    document.getElementById('gsm-parsed').innerHTML = '';
+
     try {
-      console.log('Fetching profiles...');
-      const res = await fetch('/api/profiles', { credentials: 'include' });
-      
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error('Profile fetch failed with status:', res.status, errText);
-        alert('Failed to load profiles: ' + res.status + '\n' + errText);
-        return;
+      const res = await fetch('/api/emcs?endpoint=' + encodeURIComponent(`/customs/excise/movements/${movId}`), {
+        method: 'GET', credentials: 'include'
+      });
+      const text = await res.text();
+      document.getElementById('gsm-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+      if (res.ok) {
+        try {
+          const mov = JSON.parse(text);
+          document.getElementById('gsm-parsed').innerHTML = `
+            <div class="parsed-card">
+              <h4>Movement Details</h4>
+              <div class="parsed-grid">
+                <div class="parsed-field"><div class="label">Movement ID</div><div class="value">${mov.movementId}</div></div>
+                <div class="parsed-field"><div class="label">Consignor</div><div class="value">${mov.consignorId}</div></div>
+                <div class="parsed-field"><div class="label">Consignee</div><div class="value">${mov.consigneeId}</div></div>
+                <div class="parsed-field"><div class="label">LRN</div><div class="value">${mov.localReferenceNumber}</div></div>
+                <div class="parsed-field"><div class="label">ARC</div><div class="value arc">${mov.administrativeReferenceCode || 'Pending'}</div></div>
+                <div class="parsed-field"><div class="label">Last Updated</div><div class="value">${mov.lastUpdated ? new Date(mov.lastUpdated).toLocaleString() : 'N/A'}</div></div>
+              </div>
+            </div>`;
+        } catch(e) {}
       }
-
-      const profiles = await res.json();
-      console.log('Profiles loaded successfully:', profiles);
-
-      const profileSelect = document.getElementById('active-profile-select');
-      const profileChips = document.getElementById('profile-chips');
-      
-      if (profileSelect) {
-        profileSelect.innerHTML = '<option value="">Select a profile...</option>';
-        profiles.forEach(p => {
-          const opt = document.createElement('option');
-          opt.value = p.id;
-          opt.textContent = `${p.name} (${p.ern})`;
-          profileSelect.appendChild(opt);
-        });
-        
-        profileSelect.addEventListener('change', function() {
-          const selected = profiles.find(p => p.id == this.value);
-          if (selected) {
-            document.getElementById('s-consignor-ern').value = selected.ern;
-            document.getElementById('s-consignor-name').value = selected.traderName || '';
-            document.getElementById('s-consignor-street').value = selected.street || '';
-            document.getElementById('s-consignor-postcode').value = selected.postcode || '';
-            document.getElementById('s-consignor-city').value = selected.city || '';
-            document.getElementById('s-dispatch-office').value = selected.office || 'GB004098';
-          }
-        });
-      }
-
-      if (profileChips) {
-        profileChips.innerHTML = '';
-        profiles.forEach(p => {
-          const chip = document.createElement('div');
-          chip.className = 'profile-chip';
-          chip.innerHTML = `<span>${p.name} (${p.ern})</span> <span class="del-prof" data-id="${p.id}">&times;</span>`;
-          profileChips.appendChild(chip);
-        });
-        
-        profileChips.querySelectorAll('.del-prof').forEach(delBtn => {
-          delBtn.addEventListener('click', async function() {
-            if (confirm('Delete this profile?')) {
-              await fetch(`/api/profiles?id=${this.getAttribute('data-id')}`, { method: 'DELETE', credentials: 'include' });
-              loadProfiles();
-            }
-          });
-        });
-      }
-    } catch(e) { 
-      console.error('Load profiles network error:', e); 
-      alert('Network error loading profiles: ' + e.message);
+    } catch(e) {
+      document.getElementById('gsm-output').innerText = 'Network Error: ' + e.message;
     }
-  }
+  });
 
-  // --- 7. DRAFTS ---
+  // === TAB 4: SUBMIT MESSAGE ===
+  document.getElementById('submit-message-btn')?.addEventListener('click', async function() {
+    const session = await checkSession();
+    if (!session || !session.hmrcAuthenticated) { alert('Please login to HMRC first!'); return; }
+    const movId = document.getElementById('sm-mov-id').value.trim();
+    const arc = document.getElementById('sm-arc').value.trim();
+    const msgType = document.getElementById('sm-type').value;
+    const msgId = document.getElementById('sm-msgid').value || ('MSG' + Date.now().toString().slice(-8));
+    const submitDate = new Date().toISOString().slice(0, 10);
+    const submitTime = new Date().toISOString().slice(11, 19);
+
+    if (!movId || !arc) { alert('Movement ID and ARC are required'); return; }
+
+    let xml = '';
+    const ns = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:' + msgType + ':V3.13';
+    const ns1 = 'urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.13';
+
+    if (msgType === 'IE810') {
+      xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urn:IE810 xmlns:urn="${ns}" xmlns:urn1="${ns1}">
+<urn:Header>
+<urn1:MessageSender>NDEA.GB</urn1:MessageSender>
+<urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>
+<urn1:DateOfPreparation>${submitDate}</urn1:DateOfPreparation>
+<urn1:TimeOfPreparation>${submitTime}</urn1:TimeOfPreparation>
+<urn1:MessageIdentifier>${msgId}</urn1:MessageIdentifier>
+</urn:Header>
+<urn:Body><urn:CancellationOfEAD>
+<urn:Attributes><urn:DateAndTimeOfValidationOfCancellation>${new Date().toISOString().slice(0,19)}</urn:DateAndTimeOfValidationOfCancellation></urn:Attributes>
+<urn:ExciseMovementEad><urn:AdministrativeReferenceCode>${arc}</urn:AdministrativeReferenceCode></urn:ExciseMovementEad>
+<urn:Cancellation><urn:CancellationReasonCode>1</urn:CancellationReasonCode></urn:Cancellation>
+</urn:CancellationOfEAD></urn:Body></urn:IE810>`;
+    } else if (msgType === 'IE818') {
+      xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urn:IE818 xmlns:urn="${ns}" xmlns:urn1="${ns1}">
+<urn:Header>
+<urn1:MessageSender>NDEA.GB</urn1:MessageSender>
+<urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>
+<urn1:DateOfPreparation>${submitDate}</urn1:DateOfPreparation>
+<urn1:TimeOfPreparation>${submitTime}</urn1:TimeOfPreparation>
+<urn1:MessageIdentifier>${msgId}</urn1:MessageIdentifier>
+</urn:Header>
+<urn:Body><urn:AcceptedOrRejectedReportOfReceiptExport>
+<urn:Attributes><urn:DateAndTimeOfValidationOfReportOfReceiptExport>${new Date().toISOString().slice(0,19)}</urn:DateAndTimeOfValidationOfReportOfReceiptExport></urn:Attributes>
+<urn:ConsigneeTrader language="en"><urn:Traderid>${document.getElementById('s-consignee-ern').value || 'GBWKQOZ8OVLYR'}</urn:Traderid><urn:TraderName>Test Consignee</urn:TraderName><urn:StreetName>1 High Street</urn:StreetName><urn:Postcode>M1 1AA</urn:Postcode><urn:City>Manchester</urn:City></urn:ConsigneeTrader>
+<urn:ExciseMovement><urn:AdministrativeReferenceCode>${arc}</urn:AdministrativeReferenceCode><urn:SequenceNumber>1</urn:SequenceNumber></urn:ExciseMovement>
+<urn:ReportOfReceiptExport><urn:DateOfArrivalOfExciseProducts>${submitDate}</urn:DateOfArrivalOfExciseProducts><urn:GlobalConclusionOfReceipt>1</urn:GlobalConclusionOfReceipt></urn:ReportOfReceiptExport>
+</urn:AcceptedOrRejectedReportOfReceiptExport></urn:Body></urn:IE818>`;
+    } else if (msgType === 'IE813') {
+      xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urn:IE813 xmlns:urn="${ns}" xmlns:urn1="${ns1}">
+<urn:Header>
+<urn1:MessageSender>NDEA.GB</urn1:MessageSender>
+<urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>
+<urn1:DateOfPreparation>${submitDate}</urn1:DateOfPreparation>
+<urn1:TimeOfPreparation>${submitTime}</urn1:TimeOfPreparation>
+<urn1:MessageIdentifier>${msgId}</urn1:MessageIdentifier>
+</urn:Header>
+<urn:Body><urn:ChangeOfDestination>
+<urn:Attributes><urn:DateAndTimeOfValidationOfChangeOfDestination>${new Date().toISOString().slice(0,19)}</urn:DateAndTimeOfValidationOfChangeOfDestination></urn:Attributes>
+<urn:UpdateEadEsad><urn:AdministrativeReferenceCode>${arc}</urn:AdministrativeReferenceCode><urn:JourneyTime>D02</urn:JourneyTime><urn:ChangedTransportArrangement>1</urn:ChangedTransportArrangement><urn:SequenceNumber>2</urn:SequenceNumber><urn:InvoiceNumber>INV-CHANGE</urn:InvoiceNumber><urn:TransportModeCode>3</urn:TransportModeCode></urn:UpdateEadEsad>
+<urn:DestinationChanged><urn:DestinationTypeCode>1</urn:DestinationTypeCode><urn:MovementGuarantee><urn:GuarantorTypeCode>1</urn:GuarantorTypeCode></urn:MovementGuarantee></urn:DestinationChanged>
+</urn:ChangeOfDestination></urn:Body></urn:IE813>`;
+    } else if (msgType === 'IE819') {
+      xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urn:IE819 xmlns:urn="${ns}" xmlns:urn1="${ns1}">
+<urn:Header>
+<urn1:MessageSender>NDEA.GB</urn1:MessageSender>
+<urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>
+<urn1:DateOfPreparation>${submitDate}</urn1:DateOfPreparation>
+<urn1:TimeOfPreparation>${submitTime}</urn1:TimeOfPreparation>
+<urn1:MessageIdentifier>${msgId}</urn1:MessageIdentifier>
+</urn:Header>
+<urn:Body><urn:AlertOrRejectionOfEadEsad>
+<urn:Attributes><urn:DateAndTimeOfValidation>${new Date().toISOString().slice(0,19)}</urn:DateAndTimeOfValidation></urn:Attributes>
+<urn:ExciseMovement><urn:AdministrativeReferenceCode>${arc}</urn:AdministrativeReferenceCode><urn:SequenceNumber>1</urn:SequenceNumber></urn:ExciseMovement>
+<urn:AlertOrRejection><urn:AlertOrRejectionTypeCode>1</urn:AlertOrRejectionTypeCode><urn:AlertOrRejectionDate>${submitDate}</urn:AlertOrRejectionDate><urn:ComplementaryInformation>Rejection by consignee</urn:ComplementaryInformation></urn:AlertOrRejection>
+</urn:AlertOrRejectionOfEadEsad></urn:Body></urn:IE819>`;
+    } else if (msgType === 'IE837') {
+      xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urn:IE837 xmlns:urn="${ns}" xmlns:urn1="${ns1}">
+<urn:Header>
+<urn1:MessageSender>NDEA.GB</urn1:MessageSender>
+<urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>
+<urn1:DateOfPreparation>${submitDate}</urn1:DateOfPreparation>
+<urn1:TimeOfPreparation>${submitTime}</urn1:TimeOfPreparation>
+<urn1:MessageIdentifier>${msgId}</urn1:MessageIdentifier>
+</urn:Header>
+<urn:Body><urn:ExplanationOnDelayForDelivery>
+<urn:Attributes><urn:DateAndTimeOfValidation>${new Date().toISOString().slice(0,19)}</urn:DateAndTimeOfValidation></urn:Attributes>
+<urn:ExciseMovement><urn:AdministrativeReferenceCode>${arc}</urn:AdministrativeReferenceCode><urn:SequenceNumber>1</urn:SequenceNumber></urn:ExciseMovement>
+<urn:ExplanationOnDelay><urn:ComplementaryInformation language="en">Delay due to weather conditions</urn:ComplementaryInformation></urn:ExplanationOnDelay>
+</urn:ExplanationOnDelayForDelivery></urn:Body></urn:IE837>`;
+    } else if (msgType === 'IE871') {
+      xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urn:IE871 xmlns:urn="${ns}" xmlns:urn1="${ns1}">
+<urn:Header>
+<urn1:MessageSender>NDEA.GB</urn1:MessageSender>
+<urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient>
+<urn1:DateOfPreparation>${submitDate}</urn1:DateOfPreparation>
+<urn1:TimeOfPreparation>${submitTime}</urn1:TimeOfPreparation>
+<urn1:MessageIdentifier>${msgId}</urn1:MessageIdentifier>
+</urn:Header>
+<urn:Body><urn:ExplanationOnReasonForShortage>
+<urn:Attributes><urn:SubmitterType>1</urn:SubmitterType><urn:DateAndTimeOfValidationOfExplanationOnShortage>${new Date().toISOString().slice(0,19)}</urn:DateAndTimeOfValidationOfExplanationOnShortage></urn:Attributes>
+<urn:ExciseMovement><urn:AdministrativeReferenceCode>${arc}</urn:AdministrativeReferenceCode><urn:SequenceNumber>1</urn:SequenceNumber></urn:ExciseMovement>
+<urn:Analysis><urn:DateOfAnalysis>${submitDate}</urn:DateOfAnalysis><urn:GlobalExplanation language="en">Shortage due to spillage during transit</urn:GlobalExplanation></urn:Analysis>
+</urn:ExplanationOnReasonForShortage></urn:Body></urn:IE871>`;
+    }
+
+    document.getElementById('sm-output').innerText = 'Sending ' + msgType + '...';
+    try {
+      const res = await fetch('/api/emcs?endpoint=' + encodeURIComponent(`/customs/excise/movements/${movId}/messages`), {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/xml' },
+        body: xml
+      });
+      const text = await res.text();
+      document.getElementById('sm-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+    } catch(e) {
+      document.getElementById('sm-output').innerText = 'Network Error: ' + e.message;
+    }
+  });
+
+  // === TAB 5: GET ALL MESSAGES ===
+  document.getElementById('get-messages-btn')?.addEventListener('click', async function() {
+    const session = await checkSession();
+    if (!session || !session.hmrcAuthenticated) { alert('Please login to HMRC first!'); return; }
+    const movId = document.getElementById('gmsg-id').value.trim();
+    if (!movId) { alert('Please enter a Movement ID'); return; }
+
+    document.getElementById('gmsg-output').innerText = 'Fetching...';
+    document.getElementById('gmsg-parsed').innerHTML = '';
+    document.getElementById('gmsg-count').textContent = '';
+
+    try {
+      const res = await fetch('/api/emcs?endpoint=' + encodeURIComponent(`/customs/excise/movements/${movId}/messages`), {
+        method: 'GET', credentials: 'include'
+      });
+      const text = await res.text();
+      document.getElementById('gmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+      if (res.ok) {
+        try {
+          const messages = JSON.parse(text);
+          document.getElementById('gmsg-count').textContent = `${messages.length} message(s)`;
+          if (messages.length === 0) {
+            document.getElementById('gmsg-parsed').innerHTML = '<p>No messages found.</p>';
+          } else {
+            messages.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
+            messages.forEach(msg => {
+              const card = document.createElement('div');
+              card.className = 'parsed-card';
+              const badgeClass = (msg.messageType || '').toLowerCase();
+              card.innerHTML = `
+                <h4>${msg.messageType || 'Unknown'} <span class="type-badge ${badgeClass}">${msg.messageType}</span></h4>
+                <div class="parsed-grid">
+                  <div class="parsed-field"><div class="label">Message ID</div><div class="value">${msg.messageId}</div></div>
+                  <div class="parsed-field"><div class="label">Recipient</div><div class="value">${msg.recipient}</div></div>
+                  <div class="parsed-field"><div class="label">Created</div><div class="value">${new Date(msg.createdOn).toLocaleString()}</div></div>
+                </div>
+                <button class="btn-small btn-grey view-raw-msg">View Decoded XML</button>
+                <pre class="raw-xml" style="display:none; margin-top:10px;"></pre>`;
+              card.querySelector('.view-raw-msg').addEventListener('click', function() {
+                const pre = card.querySelector('.raw-xml');
+                if (pre.style.display === 'none') {
+                  try {
+                    const decoded = atob(msg.encodedMessage);
+                    pre.textContent = decoded.replace(/></g, '>\n<');
+                    pre.style.display = 'block';
+                    this.textContent = 'Hide XML';
+                  } catch(e) { pre.textContent = 'Decode failed: ' + e.message; pre.style.display = 'block'; }
+                } else {
+                  pre.style.display = 'none';
+                  this.textContent = 'View Decoded XML';
+                }
+              });
+              document.getElementById('gmsg-parsed').appendChild(card);
+            });
+          }
+        } catch(e) {
+          document.getElementById('gmsg-parsed').innerHTML = '<p class="error">Failed to parse JSON</p>';
+        }
+      }
+    } catch(e) {
+      document.getElementById('gmsg-output').innerText = 'Network Error: ' + e.message;
+    }
+  });
+
+  // === TAB 6: GET SINGLE MESSAGE ===
+  document.getElementById('get-single-message-btn')?.addEventListener('click', async function() {
+    const session = await checkSession();
+    if (!session || !session.hmrcAuthenticated) { alert('Please login to HMRC first!'); return; }
+    const movId = document.getElementById('gsmsg-mid').value.trim();
+    const msgId = document.getElementById('gsmsg-id').value.trim();
+    if (!movId || !msgId) { alert('Movement ID and Message ID required'); return; }
+
+    document.getElementById('gsmsg-output').innerText = 'Fetching...';
+    document.getElementById('gsmsg-parsed').innerHTML = '';
+
+    try {
+      const res = await fetch('/api/emcs?endpoint=' + encodeURIComponent(`/customs/excise/movements/${movId}/messages/${msgId}`), {
+        method: 'GET', credentials: 'include',
+        headers: { 'Accept': 'application/vnd.hmrc.1.0+xml' }
+      });
+      const text = await res.text();
+      document.getElementById('gsmsg-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+      if (res.ok) {
+        const formatted = text.replace(/></g, '>\n<');
+        document.getElementById('gsmsg-parsed').innerHTML = `
+          <div class="parsed-card">
+            <h4>Message ${msgId}</h4>
+            <pre style="white-space:pre-wrap;">${formatted.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+          </div>`;
+      }
+    } catch(e) {
+      document.getElementById('gsmsg-output').innerText = 'Network Error: ' + e.message;
+    }
+  });
+
+  // === TAB 7: PRE-VALIDATE TRADER ===
+  document.getElementById('pre-validate-btn')?.addEventListener('click', async function() {
+    const session = await checkSession();
+    if (!session || !session.hmrcAuthenticated) { alert('Please login to HMRC first!'); return; }
+    const ern = document.getElementById('pv-ern').value.trim();
+    const group = document.getElementById('pv-group').value;
+    const p1 = document.getElementById('pv-p1').value.trim();
+    if (!ern) { alert('ERN required'); return; }
+
+    document.getElementById('pv-output').innerText = 'Validating...';
+    document.getElementById('pv-parsed').innerHTML = '';
+
+    try {
+      const body = {
+        exciseRegistrationNumber: ern,
+        entityGroup: group,
+        validateProductAuthorisationRequest: p1 ? [{ product: { exciseProductCode: p1 } }] : []
+      };
+      const res = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/traders/pre-validate'), {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const text = await res.text();
+      document.getElementById('pv-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+      if (res.ok) {
+        try {
+          const data = JSON.parse(text);
+          document.getElementById('pv-parsed').innerHTML = `
+            <div class="parsed-card">
+              <h4>Validation Result</h4>
+              <div class="parsed-grid">
+                <div class="parsed-field"><div class="label">Valid Trader</div><div class="value ${data.validTrader ? 'arc' : 'warn'}">${data.validTrader ? 'YES' : 'NO'}</div></div>
+                <div class="parsed-field"><div class="label">ERN</div><div class="value">${data.exciseRegistrationNumber}</div></div>
+                <div class="parsed-field"><div class="label">Trader Type</div><div class="value">${data.traderType || 'N/A'}</div></div>
+                <div class="parsed-field"><div class="label">Entity Group</div><div class="value">${data.entityGroup}</div></div>
+                ${data.errorCode ? `<div class="parsed-field"><div class="label">Error</div><div class="value warn">${data.errorCode}: ${data.errorText}</div></div>` : ''}
+              </div>
+            </div>`;
+        } catch(e) {}
+      }
+    } catch(e) {
+      document.getElementById('pv-output').innerText = 'Network Error: ' + e.message;
+    }
+  });
+
+  // === TAB 8: SUBSCRIBE ERN ===
+  document.getElementById('subscribe-ern-btn')?.addEventListener('click', async function() {
+    const session = await checkSession();
+    if (!session || !session.hmrcAuthenticated) { alert('Please login to HMRC first!'); return; }
+    const ern = document.getElementById('sub-ern').value.trim();
+    if (!ern) { alert('ERN required'); return; }
+
+    document.getElementById('sub-output').innerText = 'Subscribing...';
+    try {
+      const res = await fetch('/api/emcs?endpoint=' + encodeURIComponent(`/customs/excise/erns/${ern}/subscription`), {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      const text = await res.text();
+      document.getElementById('sub-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+    } catch(e) {
+      document.getElementById('sub-output').innerText = 'Network Error: ' + e.message;
+    }
+  });
+
+  // === TAB 9: UNSUBSCRIBE ERN ===
+  document.getElementById('unsubscribe-ern-btn')?.addEventListener('click', async function() {
+    const session = await checkSession();
+    if (!session || !session.hmrcAuthenticated) { alert('Please login to HMRC first!'); return; }
+    const ern = document.getElementById('unsub-ern').value.trim();
+    if (!ern) { alert('ERN required'); return; }
+
+    document.getElementById('unsub-output').innerText = 'Unsubscribing...';
+    try {
+      const res = await fetch('/api/emcs?endpoint=' + encodeURIComponent(`/customs/excise/erns/${ern}/subscription`), {
+        method: 'DELETE', credentials: 'include'
+      });
+      const text = await res.text();
+      document.getElementById('unsub-output').innerText = 'Status: ' + res.status + '\n\n' + text;
+    } catch(e) {
+      document.getElementById('unsub-output').innerText = 'Network Error: ' + e.message;
+    }
+  });
+
+  // === DRAFTS ===
   window.currentDraftId = null;
   async function loadDrafts() {
     try {
