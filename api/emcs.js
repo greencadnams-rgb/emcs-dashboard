@@ -20,7 +20,6 @@ export default async function handler(req, res) {
   const url = `${getBaseUrl()}${endpoint}`;
 
   // Use query param ?accept=xml for reliable XML format detection
-  // This is more reliable than forwarding Accept headers through Vercel
   let acceptHeader = 'application/vnd.hmrc.1.0+json';
   if (req.query.accept === 'xml' || req.headers['accept']?.includes('xml')) {
     acceptHeader = 'application/vnd.hmrc.1.0+xml';
