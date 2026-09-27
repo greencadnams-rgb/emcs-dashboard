@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // TAB 6: GET SINGLE MESSAGE (FIXED - proper XML display)
+  // TAB 6: GET SINGLE MESSAGE
   document.getElementById('get-single-message-btn')?.addEventListener('click', async function() {
     const s = await checkSession();
     if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
@@ -403,7 +403,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       outputPre.innerText = 'Status: ' + r.status + '\n\n' + t;
       
       if (r.ok) {
-        // Format XML with syntax highlighting
         const formatted = esc(t)
           .replace(/(&lt;\/?)([a-zA-Z0-9:]+)/g, '$1<span style="color:#005ea5;font-weight:bold;">$2</span>')
           .replace(/(&gt;)/g, '<span style="color:#005ea5;">$1</span>')
@@ -438,7 +437,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   });
 
-  // TAB 7: PRE-VALIDATE
+  // TAB 7: PRE-VALIDATE TRADER (FIXED - correct JSON structure with exciseTraderRequest array)
   document.getElementById('pre-validate-btn')?.addEventListener('click', async function() {
     const s = await checkSession();
     if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
@@ -453,18 +452,22 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('pv-parsed').innerHTML = '';
     
     try {
-      const body = {
-        exciseTraderValidationRequest: {
-          exciseRegistrationNumber: ern,
-          entityGroup: group
-        }
+      const traderRequest = {
+        exciseRegistrationNumber: ern,
+        entityGroup: group
       };
       
       if (p1) {
-        body.exciseTraderValidationRequest.validateProductAuthorisationRequest = [
+        traderRequest.validateProductAuthorisationRequest = [
           { product: { exciseProductCode: p1 } }
         ];
       }
+      
+      const body = {
+        exciseTraderValidationRequest: {
+          exciseTraderRequest: [traderRequest]
+        }
+      };
       
       const r = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/traders/pre-validate'), {
         method: 'POST', credentials: 'include',
@@ -478,41 +481,54 @@ document.addEventListener('DOMContentLoaded', async function() {
       if (r.ok) {
         try {
           const d = JSON.parse(t);
-          const result = d.exciseTraderValidationResponse || d;
-          const valid = result.validTrader;
-          const trader = result.exciseTrader || {};
+          const response = d.exciseTraderValidationResponse || d;
+          const traders = Array.isArray(response.exciseTraderResponse) 
+            ? response.exciseTraderResponse 
+            : [response];
           
-          document.getElementById('pv-parsed').innerHTML = `
-            <div class="parsed-card">
-              <h4>Validation Result</h4>
-              <div class="parsed-grid">
+          let html = '<div class="parsed-card"><h4>Validation Result</h4>';
+          
+          traders.forEach(trader => {
+            const valid = trader.validTrader;
+            const details = trader.exciseTraderValidationDetail || trader;
+            
+            html += `
+              <div class="parsed-grid" style="margin-bottom:15px;">
                 <div class="parsed-field">
                   <div class="label">Valid Trader</div>
                   <div class="value ${valid ? 'arc' : 'warn'}" style="font-weight:bold;font-size:16px;">${valid ? '✅ YES' : '❌ NO'}</div>
                 </div>
-                <div class="parsed-field"><div class="label">ERN</div><div class="value">${result.exciseRegistrationNumber || ern}</div></div>
-                <div class="parsed-field"><div class="label">Trader Name</div><div class="value">${trader.traderName || 'N/A'}</div></div>
-                <div class="parsed-field"><div class="label">Trader Type</div><div class="value">${trader.traderType || result.traderType || 'N/A'}</div></div>
-                <div class="parsed-field"><div class="label">Entity Group</div><div class="value">${result.entityGroup || group}</div></div>
-                <div class="parsed-field"><div class="label">Street</div><div class="value">${trader.streetName || 'N/A'}</div></div>
-                <div class="parsed-field"><div class="label">Postcode</div><div class="value">${trader.postcode || 'N/A'}</div></div>
-                <div class="parsed-field"><div class="label">City</div><div class="value">${trader.city || 'N/A'}</div></div>
+                <div class="parsed-field"><div class="label">ERN</div><div class="value">${details.exciseRegistrationNumber || ern}</div></div>
+                <div class="parsed-field"><div class="label">Trader Name</div><div class="value">${details.traderName || 'N/A'}</div></div>
+                <div class="parsed-field"><div class="label">Trader Type</div><div class="value">${details.traderType || 'N/A'}</div></div>
+                <div class="parsed-field"><div class="label">Entity Group</div><div class="value">${details.entityGroup || group}</div></div>
+                <div class="parsed-field"><div class="label">Street</div><div class="value">${details.streetName || 'N/A'}</div></div>
+                <div class="parsed-field"><div class="label">Postcode</div><div class="value">${details.postcode || 'N/A'}</div></div>
+                <div class="parsed-field"><div class="label">City</div><div class="value">${details.city || 'N/A'}</div></div>
+                <div class="parsed-field"><div class="label">Country</div><div class="value">${details.countryId || 'N/A'}</div></div>
+                <div class="parsed-field"><div class="label">VAT Number</div><div class="value">${details.vatNumber || 'N/A'}</div></div>
               </div>
-              ${result.validateProductAuthorisationResponse ? `
-                <h4 style="margin-top:15px;">Product Authorisation</h4>
-                <div class="parsed-grid">
-                  ${result.validateProductAuthorisationResponse.map(p => `
-                    <div class="parsed-field">
-                      <div class="label">${p.product?.exciseProductCode || 'Product'}</div>
-                      <div class="value ${p.authorised ? 'arc' : 'warn'}">${p.authorised ? '✅ Authorised' : '❌ Not Authorised'}</div>
-                    </div>
-                  `).join('')}
-                </div>
-              ` : ''}
-            </div>
-          `;
+            `;
+            
+            if (details.validateProductAuthorisationResponse && details.validateProductAuthorisationResponse.length > 0) {
+              html += `<h4 style="margin-top:15px;">Product Authorisation</h4><div class="parsed-grid">`;
+              details.validateProductAuthorisationResponse.forEach(p => {
+                const authorised = p.authorised || p.productAuthorised;
+                html += `
+                  <div class="parsed-field">
+                    <div class="label">${p.product?.exciseProductCode || 'Product'}</div>
+                    <div class="value ${authorised ? 'arc' : 'warn'}">${authorised ? '✅ Authorised' : '❌ Not Authorised'}</div>
+                  </div>
+                `;
+              });
+              html += '</div>';
+            }
+          });
+          
+          html += '</div>';
+          document.getElementById('pv-parsed').innerHTML = html;
         } catch(e) {
-          document.getElementById('pv-parsed').innerHTML = `<p>Response received but couldn't be parsed: ${e.message}</p>`;
+          document.getElementById('pv-parsed').innerHTML = `<p>Response received but couldn't be parsed: ${e.message}</p><pre>${esc(t)}</pre>`;
         }
       } else {
         try {
@@ -535,7 +551,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   });
 
-  // TAB 8: SUBSCRIBE (WITH PARSED VIEW)
+  // TAB 8: SUBSCRIBE (SIMPLE - raw response only)
   document.getElementById('subscribe-ern-btn')?.addEventListener('click', async function() {
     const s = await checkSession();
     if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
@@ -554,48 +570,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       
       const t = await r.text();
       document.getElementById('sub-output').innerText = 'Status: ' + r.status + '\n\n' + t;
-      
-      // Parse response
-      if (r.ok) {
-        try {
-          const d = JSON.parse(t);
-          document.getElementById('sub-output').innerHTML = `
-            <div class="parsed-card" style="margin-top:15px;">
-              <h4>✅ Subscription Successful</h4>
-              <div class="parsed-grid">
-                <div class="parsed-field"><div class="label">ERN</div><div class="value">${d.ern || ern}</div></div>
-                <div class="parsed-field"><div class="label">Status</div><div class="value arc">Active</div></div>
-                <div class="parsed-field"><div class="label">Created</div><div class="value">${d.createdAt ? new Date(d.createdAt).toLocaleString() : 'Now'}</div></div>
-              </div>
-              <p style="margin-top:15px;color:#666;font-size:13px;">Your ERN is now subscribed to receive automatic notifications for movement updates.</p>
-            </div>
-            <details style="margin-top:15px;"><summary style="cursor:pointer;color:#005ea5;">Show Raw Response</summary><pre style="margin-top:10px;">${esc(t)}</pre></details>
-          `;
-        } catch(e) {
-          document.getElementById('sub-output').innerHTML += `<div class="parsed-card" style="margin-top:15px;"><h4>Response</h4><pre>${esc(t)}</pre></div>`;
-        }
-      } else {
-        try {
-          const err = JSON.parse(t);
-          document.getElementById('sub-output').innerHTML = `
-            <div class="parsed-card" style="margin-top:15px;">
-              <h4 style="color:#d4351c;">❌ Subscription Failed</h4>
-              <div class="parsed-grid">
-                <div class="parsed-field"><div class="label">Error</div><div class="value warn">${err.message || 'Unknown error'}</div></div>
-                ${err.debugMessage ? `<div class="parsed-field"><div class="label">Details</div><div class="value warn">${err.debugMessage}</div></div>` : ''}
-              </div>
-            </div>
-          `;
-        } catch(e) {
-          document.getElementById('sub-output').innerHTML += `<p class="error">Error ${r.status}: ${esc(t)}</p>`;
-        }
-      }
     } catch(e) {
       document.getElementById('sub-output').innerText = 'Error: ' + e.message;
     }
   });
 
-  // TAB 9: UNSUBSCRIBE (WITH PARSED VIEW)
+  // TAB 9: UNSUBSCRIBE (SIMPLE - raw response only)
   document.getElementById('unsubscribe-ern-btn')?.addEventListener('click', async function() {
     const s = await checkSession();
     if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
@@ -611,37 +591,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       });
       
       const t = await r.text();
-      document.getElementById('unsub-output').innerText = 'Status: ' + r.status + '\n\n' + t;
-      
-      // Parse response
-      if (r.ok || r.status === 204) {
-        document.getElementById('unsub-output').innerHTML = `
-          <div class="parsed-card" style="margin-top:15px;">
-            <h4>✅ Unsubscribed Successfully</h4>
-            <div class="parsed-grid">
-              <div class="parsed-field"><div class="label">ERN</div><div class="value">${ern}</div></div>
-              <div class="parsed-field"><div class="label">Status</div><div class="value">Removed</div></div>
-            </div>
-            <p style="margin-top:15px;color:#666;font-size:13px;">Your ERN will no longer receive automatic notifications. You can still manually fetch movements via the Monitor tab.</p>
-          </div>
-          ${t ? `<details style="margin-top:15px;"><summary style="cursor:pointer;color:#005ea5;">Show Raw Response</summary><pre style="margin-top:10px;">${esc(t)}</pre></details>` : ''}
-        `;
-      } else {
-        try {
-          const err = JSON.parse(t);
-          document.getElementById('unsub-output').innerHTML = `
-            <div class="parsed-card" style="margin-top:15px;">
-              <h4 style="color:#d4351c;">❌ Unsubscribe Failed</h4>
-              <div class="parsed-grid">
-                <div class="parsed-field"><div class="label">Error</div><div class="value warn">${err.message || 'Unknown error'}</div></div>
-                ${err.debugMessage ? `<div class="parsed-field"><div class="label">Details</div><div class="value warn">${err.debugMessage}</div></div>` : ''}
-              </div>
-            </div>
-          `;
-        } catch(e) {
-          document.getElementById('unsub-output').innerHTML += `<p class="error">Error ${r.status}: ${esc(t)}</p>`;
-        }
-      }
+      document.getElementById('unsub-output').innerText = 'Status: ' + r.status + '\n\n' + (t || '(No content)');
     } catch(e) {
       document.getElementById('unsub-output').innerText = 'Error: ' + e.message;
     }
