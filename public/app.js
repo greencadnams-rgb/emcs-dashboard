@@ -45,14 +45,11 @@ document.addEventListener('DOMContentLoaded', async function() {
           return session;
         }
       }
-    } catch(e) {
-      console.error('Session check failed:', e);
-    }
+    } catch(e) { console.error('Session check failed:', e); }
     showLoginScreen();
     return null;
   }
 
-  // Login Button
   const loginBtn = document.getElementById('login-btn');
   if (loginBtn) {
     loginBtn.addEventListener('click', async function() {
@@ -67,21 +64,17 @@ document.addEventListener('DOMContentLoaded', async function() {
 
       try {
         const res = await fetch('/api/login', {
-          method: 'POST',
-          credentials: 'include',
+          method: 'POST', credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password, totpCode })
         });
-
         const data = await res.json();
-
         if (data.requires2FA) {
           if (errorEl) { errorEl.textContent = '2FA is enabled. Please enter your 6-digit code.'; errorEl.style.display = 'block'; }
           document.getElementById('totp-code').style.display = 'block';
           document.getElementById('totp-code').focus();
           return;
         }
-
         if (res.ok) {
           if (errorEl) errorEl.style.display = 'none';
           await checkSession();
@@ -94,23 +87,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // Setup 2FA Button
   const setup2faBtn = document.getElementById('setup-2fa-btn');
   if (setup2faBtn) {
     setup2faBtn.addEventListener('click', async function() {
       const password = document.getElementById('password').value;
-      if (!password) {
-        alert('Please enter your master password first.');
-        return;
-      }
-
+      if (!password) { alert('Please enter your master password first.'); return; }
       try {
         const res = await fetch('/api/setup-2fa', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password })
         });
-
         if (res.ok) {
           const data = await res.json();
           document.getElementById('2fa-setup').style.display = 'block';
@@ -120,29 +106,22 @@ document.addEventListener('DOMContentLoaded', async function() {
           const data = await res.json();
           alert('Setup failed: ' + (data.error || 'Unknown error'));
         }
-      } catch(e) {
-        alert('Network error: ' + e.message);
-      }
+      } catch(e) { alert('Network error: ' + e.message); }
     });
   }
 
-  // Verify 2FA Button
   const verify2faBtn = document.getElementById('verify-2fa-btn');
   if (verify2faBtn) {
     verify2faBtn.addEventListener('click', async function() {
       const secret = document.getElementById('secret-text').textContent;
       const token = document.getElementById('verify-code').value;
-      if (!token || token.length !== 6) {
-        alert('Please enter a valid 6-digit code');
-        return;
-      }
+      if (!token || token.length !== 6) { alert('Please enter a valid 6-digit code'); return; }
       alert('2FA Verified! Please add TOTP_SECRET="' + secret + '" to your Vercel environment variables.');
       document.getElementById('2fa-result').textContent = 'Success! Remember to save the secret in Vercel.';
       document.getElementById('2fa-result').style.color = 'green';
     });
   }
 
-  // Logout Button
   const logoutBtn = document.getElementById('logout-link') || document.getElementById('logout-btn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async function(e) {
@@ -154,7 +133,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // HMRC Login Button
   const hmrcLoginBtn = document.getElementById('hmrc-login-link');
   if (hmrcLoginBtn) {
     hmrcLoginBtn.addEventListener('click', function(e) {
@@ -191,7 +169,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             opt.textContent = `${p.name} (${p.ern})`;
             profileSelect.appendChild(opt);
           });
-          
           profileSelect.addEventListener('change', function() {
             const selected = profiles.find(p => p.id == this.value);
             if (selected) {
@@ -213,21 +190,17 @@ document.addEventListener('DOMContentLoaded', async function() {
             chip.innerHTML = `<span>${p.name} (${p.ern})</span> <span class="del-prof" data-id="${p.id}">&times;</span>`;
             profileChips.appendChild(chip);
           });
-
           profileChips.querySelectorAll('.del-prof').forEach(delBtn => {
             delBtn.addEventListener('click', async function() {
               if (confirm('Delete this profile?')) {
-                const id = this.getAttribute('data-id');
-                await fetch(`/api/profiles?id=${id}`, { method: 'DELETE', credentials: 'include' });
+                await fetch(`/api/profiles?id=${this.getAttribute('data-id')}`, { method: 'DELETE', credentials: 'include' });
                 loadProfiles();
               }
             });
           });
         }
       }
-    } catch(e) {
-      console.error('Load profiles failed:', e);
-    }
+    } catch(e) { console.error('Load profiles failed:', e); }
   }
 
   const createProfileBtn = document.getElementById('create-profile-btn');
@@ -243,35 +216,22 @@ document.addEventListener('DOMContentLoaded', async function() {
         city: document.getElementById('prof-city').value,
         office: document.getElementById('prof-office').value
       };
-
-      if (!data.name || !data.ern) {
-        alert('Profile Name and ERN are required.');
-        return;
-      }
-
+      if (!data.name || !data.ern) { alert('Profile Name and ERN are required.'); return; }
       try {
         const res = await fetch('/api/profiles', {
-          method: 'POST',
-          credentials: 'include',
+          method: 'POST', credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
         if (res.ok) {
           alert('Profile created!');
-          document.getElementById('prof-name').value = '';
-          document.getElementById('prof-ern').value = '';
-          document.getElementById('prof-trader-name').value = '';
-          document.getElementById('prof-street').value = '';
-          document.getElementById('prof-postcode').value = '';
-          document.getElementById('prof-city').value = '';
+          ['prof-name','prof-ern','prof-trader-name','prof-street','prof-postcode','prof-city'].forEach(id => document.getElementById(id).value = '');
           loadProfiles();
         } else {
           const err = await res.json();
           alert('Error: ' + err.error);
         }
-      } catch(e) {
-        alert('Network error: ' + e.message);
-      }
+      } catch(e) { alert('Network error: ' + e.message); }
     });
   }
 
@@ -285,8 +245,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         <div class="field"><label>Unit Code</label><input type="text" class="s-transport-unit-code" maxlength="2"></div>
         <div class="field"><label>Identity</label><input type="text" class="s-identity-transport" maxlength="35"></div>
       </div>
-      <button type="button" class="btn-red btn-small remove-unit">Remove</button>
-    `;
+      <button type="button" class="btn-red btn-small remove-unit">Remove</button>`;
     container.appendChild(div);
     div.querySelector('.remove-unit').addEventListener('click', () => div.remove());
   });
@@ -296,10 +255,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const div = document.createElement('div');
     div.className = 'item-field';
     div.innerHTML = `
-      <div class="item-header">
-        <h4>Goods Item</h4>
-        <button type="button" class="btn-red btn-small remove-item">Remove</button>
-      </div>
+      <div class="item-header"><h4>Goods Item</h4><button type="button" class="btn-red btn-small remove-item">Remove</button></div>
       <div class="form-grid">
         <div class="field"><label>Excise Product Code <span class="required-asterisk">*</span></label><input type="text" class="s-product-code" maxlength="4" required></div>
         <div class="field"><label>CN Code <span class="required-asterisk">*</span></label><input type="text" class="s-cn-code" maxlength="8" required></div>
@@ -312,38 +268,28 @@ document.addEventListener('DOMContentLoaded', async function() {
         <div class="field"><label>Kind of Packages <span class="required-asterisk">*</span></label><input type="text" class="s-package-kind" maxlength="2" required></div>
         <div class="field"><label>Number of Packages <span class="required-asterisk">*</span></label><input type="number" class="s-package-count" required></div>
         <div class="field"><label>Shipping Marks</label><input type="text" class="s-ship-mark" maxlength="35"></div>
-      </div>
-    `;
+      </div>`;
     container.appendChild(div);
     div.querySelector('.remove-item').addEventListener('click', () => div.remove());
-    
     div.querySelector('.s-product-code').addEventListener('change', function() {
       const epc = this.value.toUpperCase();
       const cnMap = { 'B000': '22030001', 'W200': '22042100', 'S200': '22089000' };
-      if (cnMap[epc]) {
-        div.querySelector('.s-cn-code').value = cnMap[epc];
-      }
+      if (cnMap[epc]) div.querySelector('.s-cn-code').value = cnMap[epc];
     });
   });
 
-  // --- 5. SUBMIT MOVEMENT (IE815) - CORRECTED TO MATCH HMRC SPEC ---
-  function xmlField(tag, value) {
-    return value ? `<urn:${tag}>${value}</urn:${tag}>` : '';
-  }
+  // --- 5. SUBMIT MOVEMENT (IE815) ---
+  function xmlField(tag, value) { return value ? `<urn:${tag}>${value}</urn:${tag}>` : ''; }
 
   document.getElementById('submit-movement-btn')?.addEventListener('click', async function() {
     const session = await checkSession();
     if (!session) return;
-    if (!session.hmrcAuthenticated) {
-      alert('Please login to HMRC first!');
-      return;
-    }
+    if (!session.hmrcAuthenticated) { alert('Please login to HMRC first!'); return; }
 
     const uniqueLrn = document.getElementById('s-lrn').value || ('LRN' + Date.now().toString().slice(-10));
     const submitDate = document.getElementById('s-date').value || new Date().toISOString().slice(0, 10);
     const prepareTime = new Date().toISOString().slice(11, 19);
 
-    // Build BodyEadEsad XML
     let bodyEadEsadXml = '';
     const itemSummary = [];
     document.querySelectorAll('#goods-items-container .item-field').forEach(function(item, idx) {
@@ -373,7 +319,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       itemSummary.push({ productCode: pc, qty: qty });
     });
 
-    // CORRECTED: Exact field order matching IE815.xml example from HMRC spec
     let xml = '<?xml version="1.0" encoding="UTF-8"?>' +
       '<urn:IE815 xmlns:urn="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:IE815:V3.13" xmlns:urn1="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.13">' +
       '<urn:Header>' +
@@ -386,7 +331,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       '</urn:Header>' +
       '<urn:Body><urn:SubmittedDraftOfEADESAD>' +
       '<urn:Attributes><urn:SubmissionMessageType>1</urn:SubmissionMessageType></urn:Attributes>' +
-      // Consignee FIRST (matching IE815.xml example)
       '<urn:ConsigneeTrader language="en">' +
       '<urn:Traderid>' + document.getElementById('s-consignee-ern').value + '</urn:Traderid>' +
       '<urn:TraderName>' + document.getElementById('s-consignee-name').value + '</urn:TraderName>' +
@@ -395,7 +339,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       '<urn:Postcode>' + document.getElementById('s-consignee-postcode').value + '</urn:Postcode>' +
       '<urn:City>' + document.getElementById('s-consignee-city').value + '</urn:City>' +
       '</urn:ConsigneeTrader>' +
-      // Consignor SECOND
       '<urn:ConsignorTrader language="en">' +
       '<urn:TraderExciseNumber>' + document.getElementById('s-consignor-ern').value + '</urn:TraderExciseNumber>' +
       '<urn:TraderName>' + document.getElementById('s-consignor-name').value + '</urn:TraderName>' +
@@ -405,7 +348,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       '<urn:City>' + document.getElementById('s-consignor-city').value + '</urn:City>' +
       '</urn:ConsignorTrader>';
 
-    // Place of Dispatch (optional)
     const dw = document.getElementById('s-dispatch-warehouse').value.trim();
     if (dw) {
       xml += '<urn:PlaceOfDispatchTrader language="en">' +
@@ -418,7 +360,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         '</urn:PlaceOfDispatchTrader>';
     }
 
-    // Delivery Place
     xml += '<urn:DeliveryPlaceTrader language="en">' +
       '<urn:Traderid>' + document.getElementById('s-delivery-trader-id').value + '</urn:Traderid>' +
       '<urn:TraderName>' + document.getElementById('s-delivery-name').value + '</urn:TraderName>' +
@@ -427,11 +368,9 @@ document.addEventListener('DOMContentLoaded', async function() {
       '<urn:Postcode>' + document.getElementById('s-delivery-postcode').value + '</urn:Postcode>' +
       '<urn:City>' + document.getElementById('s-delivery-city').value + '</urn:City>' +
       '</urn:DeliveryPlaceTrader>' +
-      // Competent Authority
       '<urn:CompetentAuthorityDispatchOffice>' +
       '<urn:ReferenceNumber>' + document.getElementById('s-dispatch-office').value + '</urn:ReferenceNumber>' +
       '</urn:CompetentAuthorityDispatchOffice>' +
-      // First Transporter
       '<urn:FirstTransporterTrader language="en">' +
       '<urn:VatNumber>' + document.getElementById('s-transporter-vat').value + '</urn:VatNumber>' +
       '<urn:TraderName>' + document.getElementById('s-transporter-name').value + '</urn:TraderName>' +
@@ -440,23 +379,18 @@ document.addEventListener('DOMContentLoaded', async function() {
       '<urn:Postcode>FR5 4RN</urn:Postcode>' +
       '<urn:City>' + document.getElementById('s-transporter-city').value + '</urn:City>' +
       '</urn:FirstTransporterTrader>' +
-      // Header EadEsad
       '<urn:HeaderEadEsad>' +
       '<urn:DestinationTypeCode>' + document.getElementById('s-dest-type').value + '</urn:DestinationTypeCode>' +
       '<urn:JourneyTime>' + document.getElementById('s-journey-time').value + '</urn:JourneyTime>' +
       '<urn:TransportArrangement>' + document.getElementById('s-transport-arrangement').value + '</urn:TransportArrangement>' +
       '</urn:HeaderEadEsad>' +
-      // Transport Mode
       '<urn:TransportMode>' +
       '<urn:TransportModeCode>' + document.getElementById('s-transport-mode').value + '</urn:TransportModeCode>' +
       '</urn:TransportMode>' +
-      // Movement Guarantee
       '<urn:MovementGuarantee>' +
       '<urn:GuarantorTypeCode>' + document.getElementById('s-guarantor-type').value + '</urn:GuarantorTypeCode>' +
       '</urn:MovementGuarantee>' +
-      // Body EadEsad (goods items)
       bodyEadEsadXml +
-      // EadEsad Draft
       '<urn:EadEsadDraft>' +
       '<urn:LocalReferenceNumber>' + uniqueLrn + '</urn:LocalReferenceNumber>' +
       '<urn:InvoiceNumber>' + document.getElementById('s-invoice-number').value + '</urn:InvoiceNumber>' +
@@ -466,7 +400,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       '<urn:TimeOfDispatch>' + (document.getElementById('s-time').value || '12:00') + ':00</urn:TimeOfDispatch>' +
       '</urn:EadEsadDraft>';
 
-    // Transport Details
     document.querySelectorAll('.transport-unit-field').forEach(function(unit) {
       const uc = unit.querySelector('.s-transport-unit-code').value;
       const ui = unit.querySelector('.s-identity-transport').value;
@@ -476,15 +409,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     xml += '</urn:SubmittedDraftOfEADESAD></urn:Body></urn:IE815>';
 
     document.getElementById('submit-output').innerText = 'Sending...';
-    
     try {
       const res = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/movements'), {
-        method: 'POST',
-        credentials: 'include',
+        method: 'POST', credentials: 'include',
         headers: { 'Content-Type': 'application/xml' },
         body: xml
       });
-      
       const responseText = await res.text();
       document.getElementById('submit-output').innerText = 'Status: ' + res.status + '\n\n' + responseText;
 
@@ -493,13 +423,9 @@ document.addEventListener('DOMContentLoaded', async function() {
           const parsed = JSON.parse(responseText);
           if (parsed.movementId) {
             localStorage.setItem('emcs_last_submission', JSON.stringify({
-              movementId: parsed.movementId,
-              arc: parsed.administrativeReferenceCode || '',
-              lrn: parsed.localReferenceNumber || uniqueLrn,
-              consignorErn: document.getElementById('s-consignor-ern').value,
-              consigneeErn: document.getElementById('s-consignee-ern').value,
-              date: submitDate,
-              items: itemSummary
+              movementId: parsed.movementId, arc: parsed.administrativeReferenceCode || '',
+              lrn: parsed.localReferenceNumber || uniqueLrn, consignorErn: document.getElementById('s-consignor-ern').value,
+              consigneeErn: document.getElementById('s-consignee-ern').value, date: submitDate, items: itemSummary
             }));
             document.getElementById('export-last-csv-btn').style.display = 'inline-block';
           }
@@ -510,7 +436,73 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   });
 
-  // --- 6. DRAFTS ---
+  // --- 6. MONITOR TAB REFRESH LOGIC ---
+  const monRefreshBtn = document.getElementById('mon-refresh');
+  if (monRefreshBtn) {
+    monRefreshBtn.addEventListener('click', async function() {
+      const session = await checkSession();
+      if (!session || !session.hmrcAuthenticated) {
+        alert('Please login to HMRC first!');
+        return;
+      }
+
+      const loading = document.getElementById('mon-loading');
+      const noResults = document.getElementById('mon-no-results');
+      const table = document.getElementById('mon-table');
+      const tbody = document.getElementById('mon-tbody');
+
+      if (loading) loading.style.display = 'block';
+      if (noResults) noResults.style.display = 'none';
+      if (table) table.style.display = 'none';
+
+      try {
+        // Fetch all movements for the logged-in user's ERNs
+        const res = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/movements'), {
+          method: 'GET', credentials: 'include'
+        });
+        
+        if (res.ok) {
+          const movements = await res.json();
+          tbody.innerHTML = '';
+          
+          if (movements && movements.length > 0) {
+            if (table) table.style.display = 'table';
+            movements.forEach(mov => {
+              const tr = document.createElement('tr');
+              const daysOpen = mov.lastUpdated ? Math.floor((Date.now() - new Date(mov.lastUpdated).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+              tr.innerHTML = `
+                <td class="arc-cell">
+                  <span class="arc-value">${mov.administrativeReferenceCode || 'Pending ARC'}</span>
+                  <span class="lrn">LRN: ${mov.localReferenceNumber}</span>
+                </td>
+                <td>${mov.consignorId === session.userId ? 'Out' : 'In'}</td>
+                <td>${mov.consigneeId || mov.consignorId}</td>
+                <td>${mov.lastUpdated ? new Date(mov.lastUpdated).toLocaleDateString() : 'N/A'}</td>
+                <td><span class="status-indicator"><span class="status-dot dot-green"></span> Accepted</span></td>
+                <td>IE801</td>
+                <td style="text-align:center;">${daysOpen}</td>
+                <td class="actions-cell">
+                  <button class="btn-small btn-grey view-movement" data-id="${mov.movementId}">View</button>
+                </td>
+              `;
+              tbody.appendChild(tr);
+            });
+          } else {
+            if (noResults) noResults.style.display = 'block';
+          }
+        } else {
+          const err = await res.text();
+          alert('Failed to fetch movements: ' + res.status + '\n' + err);
+        }
+      } catch(e) {
+        alert('Network error fetching movements: ' + e.message);
+      } finally {
+        if (loading) loading.style.display = 'none';
+      }
+    });
+  }
+
+  // --- 7. DRAFTS ---
   window.currentDraftId = null;
   async function loadDrafts() {
     try {
@@ -520,28 +512,21 @@ document.addEventListener('DOMContentLoaded', async function() {
         const draftList = document.getElementById('draft-list');
         const draftCount = document.getElementById('draft-count');
         const draftsSection = document.getElementById('drafts-section');
-        
         if (draftsSection) draftsSection.style.display = 'block';
         if (draftCount) draftCount.textContent = `${drafts.length} saved`;
-        
         if (draftList) {
           draftList.innerHTML = '';
           drafts.forEach(d => {
             const card = document.createElement('div');
             card.className = 'draft-card';
             card.innerHTML = `
-              <div class="draft-info">
-                <div class="draft-name">${d.name}</div>
-                <div class="draft-meta"><span>Modified: ${new Date(d.modified).toLocaleDateString()}</span></div>
-              </div>
+              <div class="draft-info"><div class="draft-name">${d.name}</div><div class="draft-meta"><span>Modified: ${new Date(d.modified).toLocaleDateString()}</span></div></div>
               <div class="draft-actions">
                 <button class="btn-green btn-small load-draft" data-id="${d.id}">Load</button>
                 <button class="btn-red btn-small delete-draft" data-id="${d.id}">Delete</button>
-              </div>
-            `;
+              </div>`;
             draftList.appendChild(card);
           });
-
           draftList.querySelectorAll('.load-draft').forEach(btn => {
             btn.addEventListener('click', function() {
               const draft = drafts.find(d => d.id === this.getAttribute('data-id'));
@@ -552,46 +537,31 @@ document.addEventListener('DOMContentLoaded', async function() {
               }
             });
           });
-
           draftList.querySelectorAll('.delete-draft').forEach(btn => {
             btn.addEventListener('click', async function() {
               if (confirm('Delete this draft?')) {
-                const id = this.getAttribute('data-id');
-                await fetch(`/api/drafts?id=${id}`, { method: 'DELETE', credentials: 'include' });
+                await fetch(`/api/drafts?id=${this.getAttribute('data-id')}`, { method: 'DELETE', credentials: 'include' });
                 loadDrafts();
               }
             });
           });
         }
       }
-    } catch(e) {
-      console.error('Load drafts failed:', e);
-    }
+    } catch(e) { console.error('Load drafts failed:', e); }
   }
 
   document.getElementById('save-draft-btn')?.addEventListener('click', async function() {
     const name = prompt('Enter a name for this draft:');
     if (!name) return;
-    
-    const data = {
-      lrn: document.getElementById('s-lrn').value,
-      consigneeErn: document.getElementById('s-consignee-ern').value
-    };
-
+    const data = { lrn: document.getElementById('s-lrn').value, consigneeErn: document.getElementById('s-consignee-ern').value };
     try {
       const res = await fetch('/api/drafts', {
-        method: 'POST',
-        credentials: 'include',
+        method: 'POST', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, data, id: window.currentDraftId })
       });
-      if (res.ok) {
-        alert('Draft saved!');
-        loadDrafts();
-      }
-    } catch(e) {
-      alert('Error saving draft: ' + e.message);
-    }
+      if (res.ok) { alert('Draft saved!'); loadDrafts(); }
+    } catch(e) { alert('Error saving draft: ' + e.message); }
   });
 
   // Initialize
