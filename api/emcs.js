@@ -1,5 +1,6 @@
 import { getSession, getHmrcToken } from './lib/auth.js';
 import { logAudit } from './lib/audit.js';
+import crypto from 'crypto';
 
 function getBaseUrl() {
   const env = process.env.HMRC_ENVIRONMENT || 'test';
@@ -27,34 +28,30 @@ export default async function handler(req, res) {
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}${endpoint}`;
 
-  // Determine Accept header based on request type
+  // HMRC API Spec Compliance:
+  // - POST submissions (IE815, IE818, etc.) MUST expect JSON responses.
+  // - GET single message MUST expect XML responses.
   let acceptHeader = 'application/vnd.hmrc.1.0+json';
-  
-  // If browser is sending XML, it expects XML back
-  if (req.headers['content-type'] && req.headers['content-type'].includes('xml')) {
-    acceptHeader = 'application/xml';
-  }
-  
-  // If browser explicitly requested XML (for Get Single Message)
   if (req.headers['accept'] && req.headers['accept'].includes('xml')) {
-    acceptHeader = req.headers['accept'];
+    acceptHeader = 'application/vnd.hmrc.1.0+xml';
   }
 
   const headers = {
     'Authorization': `Bearer ${hmrcToken}`,
     'Accept': acceptHeader,
-    'User-Agent': 'EMCS-Dashboard/2.0'
+    'User-Agent': 'EMCS-Dashboard/2.0',
+    'x-correlation-id': crypto.randomUUID()
   };
 
-  // Forward headers from browser
+  // Forward Content-Type from browser (application/xml for movements, application/json for pre-validate)
   if (req.headers['content-type']) {
     headers['Content-Type'] = req.headers['content-type'];
+  } else if (req.method === 'POST' || req.method === 'PUT') {
+    // Default to XML for movement submissions if not explicitly set
+    headers['Content-Type'] = 'application/xml';
   }
-  if (req.headers['x-correlation-id']) {
-    headers['x-correlation-id'] = req.headers['x-correlation-id'];
-  }
-  
-  // HMRC sandbox requires x-client-ip
+
+  // HMRC sandbox strictly requires x-client-ip
   const isTest = (process.env.HMRC_ENVIRONMENT || 'test') === 'test';
   if (isTest) {
     headers['x-client-ip'] = '127.0.0.1';
@@ -81,9 +78,7 @@ export default async function handler(req, res) {
         fetchOptions.body = req.body;
       } else if (req.body && Object.keys(req.body).length > 0) {
         fetchOptions.body = JSON.stringify(req.body);
-        if (!headers['Content-Type']) {
-          headers['Content-Type'] = 'application/json';
-        }
+        headers['Content-Type'] = 'application/json';
       }
     }
 
