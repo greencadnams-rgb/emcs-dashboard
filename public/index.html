@@ -13,7 +13,8 @@
     <h1>🔒 EMCS Dashboard</h1>
     <p style="margin-bottom:20px; color:#666;">Enter your password to continue</p>
     <input type="password" id="password" placeholder="Dashboard Password" style="margin-bottom:10px;">
-    <input type="text" id="totp-code" placeholder="6-digit 2FA code (if enabled)" maxlength="6" style="display:none; margin-bottom:10px;">
+    <!-- FIX 1: Removed style="display:none;" so the 2FA field is always visible -->
+    <input type="text" id="totp-code" placeholder="6-digit 2FA code (if enabled)" maxlength="6" style="margin-bottom:10px;">
     <button id="login-btn" style="width:100%; margin-top:10px;">Login</button>
     <p id="login-error" class="error" style="margin-top:10px;"></p>
     <hr style="margin:25px 0;">
@@ -128,7 +129,7 @@
 
         <h3>Box 2: Consignor</h3>
         <div class="form-grid">
-          <div class="field"><label>ERN <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-ern" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13" required></div>
+          <div class="field"><label>ERN <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-ern" pattern="^[A-Z]{2}[A-Z0-9]{9,12}$" maxlength="14" required></div>
           <div class="field"><label>Name <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-name" maxlength="182" required></div>
           <div class="field"><label>Street <span class="required-asterisk">*</span></label><input type="text" id="s-consignor-street" maxlength="65" required></div>
           <div class="field"><label>Street Number</label><input type="text" id="s-consignor-street-num" maxlength="11"></div>
@@ -139,7 +140,7 @@
         <div class="section-optional">
           <h3 style="margin-top:0;">Box 3: Place of Dispatch (Optional)</h3>
           <div class="form-grid">
-            <div class="field"><label>Warehouse Reference</label><input type="text" id="s-dispatch-warehouse" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13"></div>
+            <div class="field"><label>Warehouse Reference</label><input type="text" id="s-dispatch-warehouse" pattern="^[A-Z]{2}[A-Z0-9]{9,12}$" maxlength="14"></div>
             <div class="field"><label>Name</label><input type="text" id="s-dispatch-name" maxlength="182"></div>
             <div class="field"><label>Street</label><input type="text" id="s-dispatch-street" maxlength="65"></div>
             <div class="field"><label>Street Number</label><input type="text" id="s-dispatch-street-num" maxlength="11"></div>
@@ -367,7 +368,8 @@
                 <option value="consignee">Registered Consignee</option>
               </select>
             </div>
-            <div class="field"><label>ERN <span class="required-asterisk">*</span></label><input type="text" id="prof-ern" pattern="^[A-Z]{2}[A-Z0-9]{11}$" maxlength="13"></div>
+            <!-- FIX 2: Relaxed regex to accept 13-14 characters (e.g., GB741667790489) -->
+            <div class="field"><label>ERN <span class="required-asterisk">*</span></label><input type="text" id="prof-ern" pattern="^[A-Z]{2}[A-Z0-9]{9,12}$" maxlength="14" required></div>
             <div class="field"><label>Trader Name</label><input type="text" id="prof-trader-name"></div>
             <div class="field"><label>Street</label><input type="text" id="prof-street"></div>
             <div class="field"><label>Postcode</label><input type="text" id="prof-postcode"></div>
