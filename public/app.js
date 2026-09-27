@@ -113,15 +113,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
 
-  // Initial session check
-  const sessionData = await checkSession();
-  if (!sessionData.authenticated) {
+  // Initial session check (non-blocking - FIX for network error)
+  try {
+    const sessionData = await checkSession();
+    if (sessionData.authenticated) {
+      showDashboard();
+      updateHmrcStatus(sessionData.hmrcAuthenticated);
+      await loadProfiles();
+      await loadDrafts();
+    } else {
+      showLoginScreen();
+    }
+  } catch (e) {
+    // If session check fails, just show login screen
     showLoginScreen();
-  } else {
-    showDashboard();
-    updateHmrcStatus(sessionData.hmrcAuthenticated);
-    await loadProfiles();
-    await loadDrafts();
   }
 
   // Inactivity timeout (30 minutes)
@@ -166,7 +171,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('login-error').innerText = data.error || 'Login failed';
       }
     } catch (err) {
-      document.getElementById('login-error').innerText = 'Network error';
+      document.getElementById('login-error').innerText = 'Network error: ' + err.message;
     }
   });
 
