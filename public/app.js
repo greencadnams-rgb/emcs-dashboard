@@ -155,52 +155,64 @@ document.addEventListener('DOMContentLoaded', async function() {
   // --- 3. PROFILE MANAGEMENT ---
   async function loadProfiles() {
     try {
+      console.log('Fetching profiles...');
       const res = await fetch('/api/profiles', { credentials: 'include' });
-      if (res.ok) {
-        const profiles = await res.json();
-        const profileSelect = document.getElementById('active-profile-select');
-        const profileChips = document.getElementById('profile-chips');
+      
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('Profile fetch failed with status:', res.status, errText);
+        return;
+      }
+
+      const profiles = await res.json();
+      console.log('Profiles loaded successfully:', profiles);
+
+      const profileSelect = document.getElementById('active-profile-select');
+      const profileChips = document.getElementById('profile-chips');
+      
+      if (profileSelect) {
+        profileSelect.innerHTML = '<option value="">Select a profile...</option>';
+        profiles.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = `${p.name} (${p.ern})`;
+          profileSelect.appendChild(opt);
+        });
         
-        if (profileSelect) {
-          profileSelect.innerHTML = '<option value="">Select a profile...</option>';
-          profiles.forEach(p => {
-            const opt = document.createElement('option');
-            opt.value = p.id;
-            opt.textContent = `${p.name} (${p.ern})`;
-            profileSelect.appendChild(opt);
-          });
-          profileSelect.addEventListener('change', function() {
-            const selected = profiles.find(p => p.id == this.value);
-            if (selected) {
-              document.getElementById('s-consignor-ern').value = selected.ern;
-              document.getElementById('s-consignor-name').value = selected.traderName || '';
-              document.getElementById('s-consignor-street').value = selected.street || '';
-              document.getElementById('s-consignor-postcode').value = selected.postcode || '';
-              document.getElementById('s-consignor-city').value = selected.city || '';
-              document.getElementById('s-dispatch-office').value = selected.office || 'GB004098';
+        profileSelect.addEventListener('change', function() {
+          const selected = profiles.find(p => p.id == this.value);
+          if (selected) {
+            document.getElementById('s-consignor-ern').value = selected.ern;
+            document.getElementById('s-consignor-name').value = selected.traderName || '';
+            document.getElementById('s-consignor-street').value = selected.street || '';
+            document.getElementById('s-consignor-postcode').value = selected.postcode || '';
+            document.getElementById('s-consignor-city').value = selected.city || '';
+            document.getElementById('s-dispatch-office').value = selected.office || 'GB004098';
+          }
+        });
+      }
+
+      if (profileChips) {
+        profileChips.innerHTML = '';
+        profiles.forEach(p => {
+          const chip = document.createElement('div');
+          chip.className = 'profile-chip';
+          chip.innerHTML = `<span>${p.name} (${p.ern})</span> <span class="del-prof" data-id="${p.id}">&times;</span>`;
+          profileChips.appendChild(chip);
+        });
+        
+        profileChips.querySelectorAll('.del-prof').forEach(delBtn => {
+          delBtn.addEventListener('click', async function() {
+            if (confirm('Delete this profile?')) {
+              await fetch(`/api/profiles?id=${this.getAttribute('data-id')}`, { method: 'DELETE', credentials: 'include' });
+              loadProfiles();
             }
           });
-        }
-
-        if (profileChips) {
-          profileChips.innerHTML = '';
-          profiles.forEach(p => {
-            const chip = document.createElement('div');
-            chip.className = 'profile-chip';
-            chip.innerHTML = `<span>${p.name} (${p.ern})</span> <span class="del-prof" data-id="${p.id}">&times;</span>`;
-            profileChips.appendChild(chip);
-          });
-          profileChips.querySelectorAll('.del-prof').forEach(delBtn => {
-            delBtn.addEventListener('click', async function() {
-              if (confirm('Delete this profile?')) {
-                await fetch(`/api/profiles?id=${this.getAttribute('data-id')}`, { method: 'DELETE', credentials: 'include' });
-                loadProfiles();
-              }
-            });
-          });
-        }
+        });
       }
-    } catch(e) { console.error('Load profiles failed:', e); }
+    } catch(e) { 
+      console.error('Load profiles network error:', e); 
+    }
   }
 
   const createProfileBtn = document.getElementById('create-profile-btn');
@@ -436,7 +448,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   });
 
-    // --- 6. MONITOR TAB REFRESH LOGIC ---
+  // --- 6. MONITOR TAB REFRESH LOGIC (Smart Rate-Limiting) ---
   const monRefreshBtn = document.getElementById('mon-refresh');
   if (monRefreshBtn) {
     monRefreshBtn.addEventListener('click', async function() {
@@ -457,7 +469,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       tbody.innerHTML = '';
 
       try {
-        // 1. Fetch all movements
         const res = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/movements'), {
           method: 'GET', credentials: 'include'
         });
@@ -468,17 +479,16 @@ document.addEventListener('DOMContentLoaded', async function() {
           if (movements && movements.length > 0) {
             if (table) table.style.display = 'table';
             
-            // Get active profile ERN to help determine direction (In vs Out)
             const activeSelect = document.getElementById('active-profile-select');
             const selectedOption = activeSelect ? activeSelect.options[activeSelect.selectedIndex] : null;
             const activeProfileErn = selectedOption ? selectedOption.text.match(/\(([^)]+)\)/)?.[1] : '';
 
+            // Process movements sequentially with a delay to respect HMRC's 3 req/sec limit
             for (const mov of movements) {
               let status = 'Pending';
               let lastMsg = 'None';
               let statusDot = 'dot-grey';
               
-              // 2. Fetch messages for THIS movement to determine actual status and last message
               try {
                 const msgRes = await fetch(`/api/emcs?endpoint=${encodeURIComponent(`/customs/excise/movements/${mov.movementId}/messages`)}`, {
                   method: 'GET', credentials: 'include'
@@ -486,12 +496,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                 if (msgRes.ok) {
                   const msgs = await msgRes.json();
                   if (msgs && msgs.length > 0) {
-                    // Sort by createdOn descending to get the latest message
                     msgs.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
                     const latest = msgs[0];
                     lastMsg = latest.messageType || 'Unknown';
                     
-                    // Infer true status from the latest message type
                     if (lastMsg === 'IE801') { status = 'Accepted'; statusDot = 'dot-green'; }
                     else if (lastMsg === 'IE818') { status = 'Receipted'; statusDot = 'dot-blue'; }
                     else if (lastMsg === 'IE810') { status = 'Cancelled'; statusDot = 'dot-red'; }
@@ -499,22 +507,20 @@ document.addEventListener('DOMContentLoaded', async function() {
                     else if (lastMsg === 'IE819' || lastMsg === 'IE839') { status = 'Rejected'; statusDot = 'dot-red'; }
                     else if (lastMsg === 'IE807') { status = 'Interrupted'; statusDot = 'dot-amber'; }
                     else if (lastMsg === 'IE881') { status = 'Closed'; statusDot = 'dot-grey'; }
-                    else { status = 'Pending'; statusDot = 'dot-grey'; }
                   }
                 }
               } catch (e) {
-                console.error('Failed to fetch messages for movement', mov.movementId, e);
+                console.error('Failed to fetch messages for', mov.movementId, e);
               }
 
+              // 400ms delay strictly respects HMRC's 3 requests/second rate limit
+              await new Promise(r => setTimeout(r, 400));
+
               const daysOpen = mov.lastUpdated ? Math.floor((Date.now() - new Date(mov.lastUpdated).getTime()) / (1000 * 60 * 60 * 24)) : 0;
-              
-              // Determine if it's an 'Out' movement (we are the consignor)
               const isOut = mov.consignorId === activeProfileErn || (activeProfileErn && mov.consigneeId !== activeProfileErn);
               
-              // 3. Build action buttons
               let actionsHtml = `<button class="btn-small btn-grey view-movement" data-id="${mov.movementId}" data-arc="${mov.administrativeReferenceCode || ''}">View</button>`;
               
-              // Show Cancel button ONLY if it's an 'Out' movement and status is still Pending or Accepted
               const isCancelable = isOut && (status === 'Accepted' || status === 'Pending');
               if (isCancelable) {
                 actionsHtml += ` <button class="btn-small btn-red cancel-movement" data-id="${mov.movementId}" data-arc="${mov.administrativeReferenceCode || ''}" data-lrn="${mov.localReferenceNumber}">Cancel</button>`;
@@ -537,25 +543,21 @@ document.addEventListener('DOMContentLoaded', async function() {
               tbody.appendChild(tr);
             }
 
-            // 4. Attach event listeners to the newly created dynamic buttons
-            
-            // View Button Logic
+            // Attach View Button Logic
             tbody.querySelectorAll('.view-movement').forEach(btn => {
               btn.addEventListener('click', function() {
                 const movId = this.getAttribute('data-id');
-                // Switch to Tab 5 (Get Messages)
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelector('[data-tab="tab-get-messages"]').classList.add('active');
                 document.getElementById('tab-get-messages').classList.add('active');
                 
-                // Auto-fill and trigger the fetch
                 document.getElementById('gmsg-id').value = movId;
                 document.getElementById('get-messages-btn').click();
               });
             });
 
-            // Cancel Button Logic
+            // Attach Cancel Button Logic
             tbody.querySelectorAll('.cancel-movement').forEach(btn => {
               btn.addEventListener('click', function() {
                 const movId = this.getAttribute('data-id');
@@ -564,16 +566,14 @@ document.addEventListener('DOMContentLoaded', async function() {
                 
                 if (!confirm(`Are you sure you want to cancel movement ${movId} (LRN: ${lrn})?`)) return;
 
-                // Switch to Tab 4 (Submit Message)
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelector('[data-tab="tab-submit-msg"]').classList.add('active');
                 document.getElementById('tab-submit-msg').classList.add('active');
 
-                // Auto-fill the cancellation form
                 document.getElementById('sm-mov-id').value = movId;
                 document.getElementById('sm-arc').value = arc;
-                document.getElementById('sm-type').value = 'IE810'; // Cancellation
+                document.getElementById('sm-type').value = 'IE810';
                 
                 alert('Movement ID and ARC loaded into Submit Message tab. Please review, add a cancellation reason, and submit.');
               });
