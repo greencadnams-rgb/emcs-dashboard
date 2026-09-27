@@ -45,8 +45,9 @@ export default async function handler(req, res) {
         profiles = result.rows;
       }
       
+      // FIX: Convert BigInt to Number for JSON serialization
       return res.status(200).json(profiles.map(p => ({
-        id: p.id,
+        id: Number(p.id),
         name: p.name,
         type: p.type,
         ern: p.ern,
@@ -61,7 +62,9 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       const { name, type, ern, traderName, street, postcode, city, office } = req.body;
       if (!name || !ern) return res.status(400).json({ error: 'Name and ERN required' });
-      if (!/^[A-Z]{2}[A-Z0-9]{11}$/.test(ern)) return res.status(400).json({ error: 'Invalid ERN format' });
+      
+      // Relaxed regex to accept 13-14 character ERNs (e.g., GB741667790489)
+      if (!/^[A-Z]{2}[A-Z0-9]{9,12}$/.test(ern)) return res.status(400).json({ error: 'Invalid ERN format (must be 13-14 characters)' });
 
       const result = await db.execute({
         sql: 'INSERT INTO profiles (user_id, name, type, ern, trader_name, street, postcode, city, office, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -69,7 +72,9 @@ export default async function handler(req, res) {
       });
       
       await logAudit(session.id, 'PROFILE_CREATED', { ern });
-      return res.status(201).json({ id: result.lastInsertRowid, name, ern });
+      
+      // FIX: Convert BigInt to Number for JSON serialization
+      return res.status(201).json({ id: Number(result.lastInsertRowid), name, ern });
     }
 
     if (req.method === 'DELETE') {
