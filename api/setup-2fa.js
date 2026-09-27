@@ -1,26 +1,27 @@
-import { getSession } from './lib/auth.js';
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
-  const session = await getSession(req);
-  if (!session) return res.status(401).json({ error: 'Not authenticated' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  if (req.method === 'POST') {
-    const secret = crypto.randomBytes(20).toString('hex').toUpperCase();
-    const issuer = 'EMCS-Dashboard';
-    const account = session.id.slice(0, 8);
-    const qrCode = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=otpauth://totp/${issuer}:${account}?secret=${secret}&issuer=${issuer}`;
-    return res.status(200).json({ secret, qrCode });
+  const { password } = req.body;
+  const expectedPassword = process.env.APP_PASSWORD;
+
+  if (!expectedPassword) {
+    return res.status(500).json({ error: 'Server not configured' });
   }
 
-  if (req.method === 'PUT') {
-    const { secret, token } = req.body;
-    return res.status(200).json({ 
-      success: true, 
-      secret,
-      message: 'Add this as TOTP_SECRET in Vercel environment variables'
-    });
+  if (password !== expectedPassword) {
+    return res.status(401).json({ error: 'Invalid password' });
   }
 
-  return res.status(405).json({ error: 'Method not allowed' });
+  const secret = crypto.randomBytes(20).toString('hex').toUpperCase();
+  const issuer = 'EMCS-Dashboard';
+  const account = 'admin';
+  const qrCode = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=otpauth://totp/${issuer}:${account}?secret=${secret}&issuer=${issuer}`;
+  
+  return res.status(200).json({ 
+    secret, 
+    qrCode,
+    message: 'Add this secret as TOTP_SECRET in your Vercel environment variables.'
+  });
 }
