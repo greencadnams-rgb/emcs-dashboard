@@ -2,8 +2,6 @@ import { getSession } from './lib/auth.js';
 import { getDb, ensureSchema } from './lib/db.js';
 import { logAudit } from './lib/audit.js';
 
-const FIXED_USER_ID = 'dashboard-user';
-
 export default async function handler(req, res) {
   const session = await getSession(req);
   if (!session) return res.status(401).json({ error: 'Not authenticated' });
@@ -16,9 +14,10 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
+      // NO user_id filter - show ALL profiles to prevent orphaning
       let result = await db.execute({
-        sql: 'SELECT * FROM profiles WHERE user_id = ? ORDER BY id',
-        args: [FIXED_USER_ID]
+        sql: 'SELECT * FROM profiles ORDER BY id',
+        args: []
       });
       
       let profiles = result.rows;
@@ -32,10 +31,10 @@ export default async function handler(req, res) {
         for (const p of defaults) {
           await db.execute({
             sql: 'INSERT INTO profiles (user_id, name, type, ern, trader_name, street, postcode, city, office, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            args: [FIXED_USER_ID, p.name, p.type, p.ern, p.trader_name, p.street, p.postcode, p.city, p.office, now]
+            args: ['dashboard-user', p.name, p.type, p.ern, p.trader_name, p.street, p.postcode, p.city, p.office, now]
           });
         }
-        result = await db.execute({ sql: 'SELECT * FROM profiles WHERE user_id = ? ORDER BY id', args: [FIXED_USER_ID] });
+        result = await db.execute({ sql: 'SELECT * FROM profiles ORDER BY id', args: [] });
         profiles = result.rows;
       }
       
@@ -56,7 +55,7 @@ export default async function handler(req, res) {
 
       const result = await db.execute({
         sql: 'INSERT INTO profiles (user_id, name, type, ern, trader_name, street, postcode, city, office, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        args: [FIXED_USER_ID, name, type || 'consignor', ern, traderName || '', street || '', postcode || '', city || '', office || 'GB004098', new Date().toISOString()]
+        args: ['dashboard-user', name, type || 'consignor', ern, traderName || '', street || '', postcode || '', city || '', office || 'GB004098', new Date().toISOString()]
       });
       
       await logAudit(session.id, 'PROFILE_CREATED', { ern });
@@ -69,13 +68,13 @@ export default async function handler(req, res) {
       if (!id) return res.status(400).json({ error: 'Profile ID required' });
       
       const countResult = await db.execute({
-        sql: 'SELECT COUNT(*) as c FROM profiles WHERE user_id = ?',
-        args: [FIXED_USER_ID]
+        sql: 'SELECT COUNT(*) as c FROM profiles',
+        args: []
       });
       const count = typeof countResult.rows[0].c === 'bigint' ? Number(countResult.rows[0].c) : countResult.rows[0].c;
       if (count <= 1) return res.status(400).json({ error: 'Must have at least one profile' });
       
-      await db.execute({ sql: 'DELETE FROM profiles WHERE id = ? AND user_id = ?', args: [parseInt(id), FIXED_USER_ID] });
+      await db.execute({ sql: 'DELETE FROM profiles WHERE id = ?', args: [parseInt(id)] });
       await logAudit(session.id, 'PROFILE_DELETED', { profileId: id });
       return res.status(200).json({ success: true });
     }
