@@ -19,9 +19,10 @@ export default async function handler(req, res) {
 
   const url = `${getBaseUrl()}${endpoint}`;
 
-  // HMRC Spec: POST submissions expect JSON response, GET single message expects XML
+  // Use query param ?accept=xml for reliable XML format detection
+  // This is more reliable than forwarding Accept headers through Vercel
   let acceptHeader = 'application/vnd.hmrc.1.0+json';
-  if (req.headers['accept']?.includes('xml')) {
+  if (req.query.accept === 'xml' || req.headers['accept']?.includes('xml')) {
     acceptHeader = 'application/vnd.hmrc.1.0+xml';
   }
 
@@ -32,7 +33,6 @@ export default async function handler(req, res) {
     'x-correlation-id': crypto.randomUUID()
   };
 
-  // Safely extract body ONLY for methods that have one
   let requestBody = undefined;
   if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
     if (typeof req.body === 'string') {
@@ -47,7 +47,6 @@ export default async function handler(req, res) {
     }
   }
 
-  // Sandbox requirement
   const isTest = (process.env.HMRC_ENVIRONMENT || 'test') === 'test';
   if (isTest) headers['x-client-ip'] = '127.0.0.1';
   else if (req.headers['x-client-ip']) headers['x-client-ip'] = req.headers['x-client-ip'];
@@ -64,7 +63,7 @@ export default async function handler(req, res) {
     const responseText = await hmrcRes.text();
 
     if (hmrcRes.status === 400) {
-      console.error('❌ HMRC 400 BAD REQUEST DETAILS:', responseText);
+      console.error('HMRC 400 DETAILS:', responseText);
     }
 
     await logAudit(session.id, 'HMRC_API_RESPONSE', { status: hmrcRes.status, duration, endpoint: endpoint.split('?')[0] });
@@ -72,7 +71,6 @@ export default async function handler(req, res) {
     res.status(hmrcRes.status);
     const contentType = hmrcRes.headers.get('content-type');
     if (contentType) res.setHeader('Content-Type', contentType);
-
     return res.send(responseText);
   } catch (e) {
     await logAudit(session.id, 'HMRC_NETWORK_ERROR', { endpoint: endpoint.split('?')[0], error: e.message });
