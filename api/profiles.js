@@ -2,7 +2,7 @@ import { getSession } from './lib/auth.js';
 import { getDb, ensureSchema } from './lib/db.js';
 import { logAudit } from './lib/audit.js';
 
-// HARDCODED user ID to prevent profiles from disappearing due to session mismatches
+// HARDCODED to prevent session mismatches from hiding profiles
 const FIXED_USER_ID = 'dashboard-user';
 
 export default async function handler(req, res) {
@@ -14,9 +14,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
 
-  try { 
-    await ensureSchema(); 
-  } catch(e) {
+  try { await ensureSchema(); } catch(e) {
     console.error('Schema init failed:', e);
     return res.status(500).json({ error: 'Schema init failed: ' + e.message });
   }
@@ -25,16 +23,15 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      // Get ALL profiles for the fixed user ID
+      // Get ALL profiles - no user_id filter to prevent orphaning
       let result = await db.execute({
-        sql: 'SELECT * FROM profiles WHERE user_id = ? ORDER BY id',
-        args: [FIXED_USER_ID]
+        sql: 'SELECT * FROM profiles ORDER BY id',
+        args: []
       });
       
       let profiles = result.rows;
       console.log('Found', profiles.length, 'profiles in database');
       
-      // If no profiles exist, create defaults
       if (profiles.length === 0) {
         console.log('No profiles found, creating defaults...');
         const defaults = [
@@ -48,11 +45,10 @@ export default async function handler(req, res) {
             args: [FIXED_USER_ID, p.name, p.type, p.ern, p.trader_name, p.street, p.postcode, p.city, p.office, now]
           });
         }
-        result = await db.execute({ sql: 'SELECT * FROM profiles WHERE user_id = ? ORDER BY id', args: [FIXED_USER_ID] });
+        result = await db.execute({ sql: 'SELECT * FROM profiles ORDER BY id', args: [] });
         profiles = result.rows;
       }
       
-      // CRITICAL FIX: Convert BigInt to Number for JSON serialization
       const safeProfiles = profiles.map(p => ({
         id: typeof p.id === 'bigint' ? Number(p.id) : (p.id || 0),
         name: p.name || '',
