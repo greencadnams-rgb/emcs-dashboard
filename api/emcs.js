@@ -31,9 +31,10 @@ export default async function handler(req, res) {
   const url = `${baseUrl}${endpoint}`;
 
   // Build headers for HMRC
+  // HMRC EMCS API requires specific Accept headers
   const headers = {
     'Authorization': `Bearer ${hmrcToken}`,
-    'Accept': req.headers.accept || 'application/json',
+    'Accept': 'application/vnd.hmrc.1.0+json',
     'User-Agent': 'EMCS-Dashboard/2.0'
   };
 
