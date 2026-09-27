@@ -1,4 +1,4 @@
-import { createSession, setSessionCookie, getSession } from './lib/auth.js';
+import { createSession, setSessionCookie } from './lib/auth.js';
 import { logAudit } from './lib/audit.js';
 import crypto from 'crypto';
 
@@ -16,8 +16,6 @@ function generateTotp(secret, counter) {
   const buffer = Buffer.alloc(8);
   buffer.writeUInt32BE(0, 0);
   buffer.writeUInt32BE(counter, 4);
-  
-  // Convert base32 secret to buffer
   const base32Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   let bits = '';
   for (const char of secret.replace(/\s/g, '').toUpperCase()) {
@@ -26,13 +24,9 @@ function generateTotp(secret, counter) {
     bits += val.toString(2).padStart(5, '0');
   }
   const secretBytes = Buffer.from(bits.match(/.{1,8}/g).map(b => parseInt(b, 2)));
-  
   const hmac = crypto.createHmac('sha1', secretBytes).update(buffer).digest();
   const offset = hmac[hmac.length - 1] & 0xf;
-  const code = ((hmac[offset] & 0x7f) << 24) |
-    ((hmac[offset + 1] & 0xff) << 16) |
-    ((hmac[offset + 2] & 0xff) << 8) |
-    (hmac[offset + 3] & 0xff);
+  const code = ((hmac[offset] & 0x7f) << 24) | ((hmac[offset + 1] & 0xff) << 16) | ((hmac[offset + 2] & 0xff) << 8) | (hmac[offset + 3] & 0xff);
   return (code % 1000000).toString().padStart(6, '0');
 }
 
@@ -43,17 +37,13 @@ export default async function handler(req, res) {
   const expectedPassword = process.env.APP_PASSWORD;
   const totpSecret = process.env.TOTP_SECRET;
 
-  if (!expectedPassword) {
-    return res.status(500).json({ error: 'Server not configured' });
-  }
+  if (!expectedPassword) return res.status(500).json({ error: 'Server not configured' });
 
-  // Check password
   if (password !== expectedPassword) {
     await logAudit(null, 'LOGIN_FAILED', { reason: 'bad_password' });
-    return res.status(401).json({ error: 'Invalid credentials' });
+    return res.status(401).json({ error: 'Invalid password' });
   }
 
-  // Check 2FA if configured
   if (totpSecret) {
     if (!totpCode) {
       return res.status(200).json({ requires2FA: true, error: '2FA code required' });
@@ -64,7 +54,6 @@ export default async function handler(req, res) {
     }
   }
 
-  // Create session
   const session = await createSession('dashboard-user');
   await setSessionCookie(res, session);
   await logAudit(session.id, 'LOGIN_SUCCESS', {});
