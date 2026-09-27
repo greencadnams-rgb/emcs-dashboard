@@ -4,7 +4,7 @@ import crypto from 'crypto';
 const SESSION_TTL = parseInt(process.env.SESSION_TIMEOUT_MINUTES || '30') * 60 * 1000;
 const COOKIE_NAME = 'emcs_session';
 
-// Schema initialization happens lazily, not at module load
+// Lazy schema initialization to prevent Vercel serverless top-level await errors
 let schemaReady = false;
 async function initSchema() {
   if (schemaReady) return;
