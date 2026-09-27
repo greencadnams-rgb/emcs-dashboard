@@ -1,19 +1,3 @@
-import { createClient } from '@libsql/client';
-
-let db = null;
-
-export function getDb() {
-  if (!db) {
-    const url = process.env.TURSO_DATABASE_URL;
-    const token = process.env.TURSO_AUTH_TOKEN;
-    if (!url || !token) {
-      throw new Error('Turso credentials not configured');
-    }
-    db = createClient({ url, authToken: token });
-  }
-  return db;
-}
-
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS sessions (
   id TEXT PRIMARY KEY,
@@ -26,8 +10,7 @@ CREATE TABLE IF NOT EXISTS hmrc_tokens (
   session_id TEXT PRIMARY KEY,
   access_token TEXT NOT NULL,
   expires_at INTEGER NOT NULL,
-  created_at INTEGER NOT NULL,
-  FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+  created_at INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS audit_logs (
@@ -45,19 +28,18 @@ CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_logs(action);
 
 CREATE TABLE IF NOT EXISTS drafts (
   id TEXT PRIMARY KEY,
-  session_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
   name TEXT NOT NULL,
   data TEXT NOT NULL,
   created_at TEXT NOT NULL,
-  modified_at TEXT NOT NULL,
-  FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+  modified_at TEXT NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_drafts_session ON drafts(session_id);
+CREATE INDEX IF NOT EXISTS idx_drafts_user ON drafts(user_id);
 
 CREATE TABLE IF NOT EXISTS profiles (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  session_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
   name TEXT NOT NULL,
   type TEXT NOT NULL,
   ern TEXT NOT NULL,
@@ -66,50 +48,8 @@ CREATE TABLE IF NOT EXISTS profiles (
   postcode TEXT,
   city TEXT,
   office TEXT,
-  created_at TEXT NOT NULL,
-  FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+  created_at TEXT NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_profiles_session ON profiles(session_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_user ON profiles(user_id);
 `;
-
-let initialized = false;
-export async function ensureSchema() {
-  if (initialized) return;
-  try {
-    const db = getDb();
-    const statements = SCHEMA.split(';').map(s => s.trim()).filter(Boolean);
-    for (const stmt of statements) {
-      try {
-        await db.execute(stmt);
-      } catch (e) {
-        if (!e.message.includes('already exists')) {
-          console.error('Schema init error:', e.message);
-        }
-      }
-    }
-    initialized = true;
-  } catch (e) {
-    console.error('Schema initialization failed:', e.message);
-    throw e;
-  }
-}
-
-export async function cleanupOldAuditLogs(daysToKeep = 90) {
-  const db = getDb();
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - daysToKeep);
-  await db.execute({
-    sql: 'DELETE FROM audit_logs WHERE timestamp < ?',
-    args: [cutoff.toISOString()]
-  });
-}
-
-export async function cleanupExpiredSessions() {
-  const db = getDb();
-  const cutoff = Date.now() - (24 * 60 * 60 * 1000);
-  await db.execute({
-    sql: 'DELETE FROM sessions WHERE last_activity < ?',
-    args: [cutoff]
-  });
-}
