@@ -1,7 +1,4 @@
 document.addEventListener('DOMContentLoaded', async function() {
-  // Show login screen by default
-  showLoginScreen();
-  
   // Check if already logged in
   try {
     const res = await fetch('/api/session', { credentials: 'include' });
@@ -10,21 +7,32 @@ document.addEventListener('DOMContentLoaded', async function() {
       if (session.authenticated) {
         showDashboard();
         updateHmrcStatus(session.hmrcAuthenticated);
+        await loadProfiles();
+      } else {
+        showLoginScreen();
       }
+    } else {
+      showLoginScreen();
     }
   } catch(e) {
     console.error('Session check failed:', e);
+    showLoginScreen();
   }
   
-  // Login button - only attach if it exists
+  // Login button
   const loginBtn = document.getElementById('login-btn');
   if (loginBtn) {
     loginBtn.addEventListener('click', async function() {
       const password = document.getElementById('password').value;
       const totpCode = document.getElementById('totp-code').value;
       
-      if (!password || !totpCode) {
-        alert('Please enter password and 2FA code');
+      if (!password) {
+        alert('Please enter your password');
+        return;
+      }
+      
+      if (!totpCode) {
+        alert('Please enter your 2FA code');
         return;
       }
       
@@ -38,6 +46,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         if (res.ok) {
           showDashboard();
+          await loadProfiles();
           checkHmrcStatus();
         } else {
           const data = await res.json();
@@ -49,20 +58,37 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
   
-  // Setup 2FA button - only attach if it exists
+  // Setup 2FA button
   const setup2faBtn = document.getElementById('setup-2fa-btn');
   if (setup2faBtn) {
-    setup2faBtn.addEventListener('click', function() {
+    setup2faBtn.addEventListener('click', async function() {
       const password = document.getElementById('password').value;
       if (!password) {
         alert('Please enter a password first');
         return;
       }
-      window.location.href = '/setup-2fa?password=' + encodeURIComponent(password);
+      
+      try {
+        const res = await fetch('/api/setup-2fa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          alert('2FA Setup Complete!\n\nSecret: ' + data.secret + '\n\nPlease save this secret and use an authenticator app to generate codes.');
+        } else {
+          const data = await res.json();
+          alert(data.error || '2FA setup failed');
+        }
+      } catch(e) {
+        alert('2FA setup error: ' + e.message);
+      }
     });
   }
   
-  // Logout button - only attach if it exists
+  // Logout button
   const logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async function() {
@@ -71,7 +97,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
   
-  // HMRC login button - only attach if it exists
+  // HMRC login button
   const hmrcLoginBtn = document.getElementById('hmrc-login-btn');
   if (hmrcLoginBtn) {
     hmrcLoginBtn.addEventListener('click', function() {
@@ -82,7 +108,12 @@ document.addEventListener('DOMContentLoaded', async function() {
   function showLoginScreen() {
     const loginScreen = document.getElementById('login-screen');
     const dashboard = document.getElementById('dashboard');
-    if (loginScreen) loginScreen.style.display = 'block';
+    if (loginScreen) {
+      loginScreen.style.display = 'flex';
+      loginScreen.style.justifyContent = 'center';
+      loginScreen.style.alignItems = 'center';
+      loginScreen.style.minHeight = '100vh';
+    }
     if (dashboard) dashboard.style.display = 'none';
   }
   
@@ -115,6 +146,28 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
     } catch(e) {
       console.error('HMRC status check failed:', e);
+    }
+  }
+  
+  async function loadProfiles() {
+    try {
+      const res = await fetch('/api/profiles', { credentials: 'include' });
+      if (res.ok) {
+        const profiles = await res.json();
+        // Populate profile dropdowns
+        const profileSelect = document.getElementById('active-profile-select');
+        if (profileSelect) {
+          profileSelect.innerHTML = '';
+          profiles.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = p.name + ' (' + p.ern + ')';
+            profileSelect.appendChild(opt);
+          });
+        }
+      }
+    } catch(e) {
+      console.error('Load profiles failed:', e);
     }
   }
 });
