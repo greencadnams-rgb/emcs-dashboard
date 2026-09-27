@@ -70,64 +70,54 @@ function clearCookie(res, name) {
 }
 
 export async function createSession(userId) {
-  try {
-    await ensureSchema();
-    const db = getDb();
-    const sessionId = crypto.randomUUID();
-    const now = Date.now();
-    
-    await db.execute({
-      sql: 'INSERT INTO sessions (id, user_id, created_at, last_activity) VALUES (?, ?, ?, ?)',
-      args: [sessionId, userId, now, now]
-    });
-    
-    return { id: sessionId, userId, createdAt: now, lastActivity: now };
-  } catch (e) {
-    console.error('createSession error:', e);
-    throw e;
-  }
+  await ensureSchema();
+  const db = getDb();
+  const sessionId = crypto.randomUUID();
+  const now = Date.now();
+  
+  await db.execute({
+    sql: 'INSERT INTO sessions (id, user_id, created_at, last_activity) VALUES (?, ?, ?, ?)',
+    args: [sessionId, userId, now, now]
+  });
+  
+  return { id: sessionId, userId, createdAt: now, lastActivity: now };
 }
 
 export async function getSession(req) {
-  try {
-    await ensureSchema();
-    const cookies = parseCookies(req);
-    const signed = cookies[COOKIE_NAME];
-    if (!signed) return null;
-    
-    const payload = verifySignedPayload(signed);
-    if (!payload || !payload.sessionId) return null;
-    
-    const db = getDb();
-    const result = await db.execute({
-      sql: 'SELECT * FROM sessions WHERE id = ?',
-      args: [payload.sessionId]
-    });
-    
-    if (result.rows.length === 0) return null;
-    const session = result.rows[0];
-    
-    if (Date.now() - session.last_activity > SESSION_TTL) {
-      await db.execute({ sql: 'DELETE FROM sessions WHERE id = ?', args: [session.id] });
-      return null;
-    }
-    
-    const now = Date.now();
-    await db.execute({
-      sql: 'UPDATE sessions SET last_activity = ? WHERE id = ?',
-      args: [now, session.id]
-    });
-    
-    return {
-      id: session.id,
-      userId: session.user_id,
-      createdAt: session.created_at,
-      lastActivity: now
-    };
-  } catch (e) {
-    console.error('getSession error:', e);
+  await ensureSchema();
+  const cookies = parseCookies(req);
+  const signed = cookies[COOKIE_NAME];
+  if (!signed) return null;
+  
+  const payload = verifySignedPayload(signed);
+  if (!payload || !payload.sessionId) return null;
+  
+  const db = getDb();
+  const result = await db.execute({
+    sql: 'SELECT * FROM sessions WHERE id = ?',
+    args: [payload.sessionId]
+  });
+  
+  if (result.rows.length === 0) return null;
+  const session = result.rows[0];
+  
+  if (Date.now() - session.last_activity > SESSION_TTL) {
+    await db.execute({ sql: 'DELETE FROM sessions WHERE id = ?', args: [session.id] });
     return null;
   }
+  
+  const now = Date.now();
+  await db.execute({
+    sql: 'UPDATE sessions SET last_activity = ? WHERE id = ?',
+    args: [now, session.id]
+  });
+  
+  return {
+    id: session.id,
+    userId: session.user_id,
+    createdAt: session.created_at,
+    lastActivity: now
+  };
 }
 
 export async function setSessionCookie(res, session) {
@@ -136,79 +126,63 @@ export async function setSessionCookie(res, session) {
 }
 
 export async function destroySession(req, res) {
-  try {
-    await ensureSchema();
-    const cookies = parseCookies(req);
-    const signed = cookies[COOKIE_NAME];
-    if (signed) {
-      const payload = verifySignedPayload(signed);
-      if (payload && payload.sessionId) {
-        const db = getDb();
-        await db.execute({ sql: 'DELETE FROM sessions WHERE id = ?', args: [payload.sessionId] });
-      }
+  await ensureSchema();
+  const cookies = parseCookies(req);
+  const signed = cookies[COOKIE_NAME];
+  if (signed) {
+    const payload = verifySignedPayload(signed);
+    if (payload && payload.sessionId) {
+      const db = getDb();
+      await db.execute({ sql: 'DELETE FROM sessions WHERE id = ?', args: [payload.sessionId] });
     }
-  } catch (e) {
-    console.error('destroySession error:', e);
   }
   clearCookie(res, COOKIE_NAME);
 }
 
 export async function storeHmrcToken(sessionId, token, expiresInSec = 14400) {
-  try {
-    await ensureSchema();
-    const db = getDb();
-    const expiresAt = Date.now() + (expiresInSec * 1000);
-    
-    const existing = await db.execute({
-      sql: 'SELECT session_id FROM hmrc_tokens WHERE session_id = ?',
-      args: [sessionId]
+  await ensureSchema();
+  const db = getDb();
+  const expiresAt = Date.now() + (expiresInSec * 1000);
+  
+  const existing = await db.execute({
+    sql: 'SELECT session_id FROM hmrc_tokens WHERE session_id = ?',
+    args: [sessionId]
+  });
+  
+  if (existing.rows.length > 0) {
+    await db.execute({
+      sql: 'UPDATE hmrc_tokens SET access_token = ?, expires_at = ? WHERE session_id = ?',
+      args: [token, expiresAt, sessionId]
     });
-    
-    if (existing.rows.length > 0) {
-      await db.execute({
-        sql: 'UPDATE hmrc_tokens SET access_token = ?, expires_at = ? WHERE session_id = ?',
-        args: [token, expiresAt, sessionId]
-      });
-    } else {
-      await db.execute({
-        sql: 'INSERT INTO hmrc_tokens (session_id, access_token, expires_at, created_at) VALUES (?, ?, ?, ?)',
-        args: [sessionId, token, expiresAt, Date.now()]
-      });
-    }
-  } catch (e) {
-    console.error('storeHmrcToken error:', e);
-    throw e;
+  } else {
+    await db.execute({
+      sql: 'INSERT INTO hmrc_tokens (session_id, access_token, expires_at, created_at) VALUES (?, ?, ?, ?)',
+      args: [sessionId, token, expiresAt, Date.now()]
+    });
   }
 }
 
 export async function getHmrcToken(sessionId) {
-  try {
-    await ensureSchema();
-    const db = getDb();
-    const result = await db.execute({
-      sql: 'SELECT access_token, expires_at FROM hmrc_tokens WHERE session_id = ?',
-      args: [sessionId]
-    });
-    
-    if (result.rows.length === 0) return null;
-    const row = result.rows[0];
-    if (row.expires_at < Date.now()) {
-      await db.execute({ sql: 'DELETE FROM hmrc_tokens WHERE session_id = ?', args: [sessionId] });
-      return null;
-    }
-    return row.access_token;
-  } catch (e) {
-    console.error('getHmrcToken error:', e);
+  await ensureSchema();
+  const db = getDb();
+  const result = await db.execute({
+    sql: 'SELECT access_token, expires_at FROM hmrc_tokens WHERE session_id = ?',
+    args: [sessionId]
+  });
+  
+  if (result.rows.length === 0) return null;
+  const row = result.rows[0];
+  if (row.expires_at < Date.now()) {
+    await db.execute({ sql: 'DELETE FROM hmrc_tokens WHERE session_id = ?', args: [sessionId] });
     return null;
   }
+  return row.access_token;
 }
 
 export async function clearHmrcToken(sessionId) {
+  await ensureSchema();
+  const db = getDb();
   try {
-    await ensureSchema();
-    const db = getDb();
     await db.execute({ sql: 'DELETE FROM hmrc_tokens WHERE session_id = ?', args: [sessionId] });
-  } catch (e) {
-    console.error('clearHmrcToken error:', e);
-  }
+  } catch (e) {}
 }
