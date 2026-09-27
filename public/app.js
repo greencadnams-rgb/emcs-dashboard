@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     } catch(e) { document.getElementById('submit-output').innerText='Error: '+e.message; }
   });
 
-  // TAB 1: MONITOR (FAST - Progressive Loading)
+  // TAB 1: MONITOR
   const monRefreshBtn = document.getElementById('mon-refresh');
   if (monRefreshBtn) monRefreshBtn.addEventListener('click', async function() {
     const session=await checkSession(); if(!session||!session.hmrcAuthenticated){alert('Login to HMRC first!');return;}
@@ -208,7 +208,6 @@ document.addEventListener('DOMContentLoaded', async function() {
           const myErn=so?so.text.match(/\(([^)]+)\)/)?.[1]:'';
           const statusMap={'IE801':['Accepted','dot-green'],'IE818':['Receipted','dot-blue'],'IE810':['Cancelled','dot-red'],'IE813':['Changed','dot-amber'],'IE819':['Rejected','dot-red'],'IE839':['Custom Rejected','dot-red'],'IE807':['Interrupted','dot-amber'],'IE881':['Closed','dot-grey'],'IE905':['Status Update','dot-blue'],'IE802':['Reminder','dot-amber']};
 
-          // INSTANT: Show all movements immediately with "Loading..." status
           movs.forEach((mov,i) => {
             const isOut=mov.consignorId===myErn||(myErn&&mov.consigneeId!==myErn);
             const days=mov.lastUpdated?Math.floor((Date.now()-new Date(mov.lastUpdated).getTime())/(86400000)):0;
@@ -219,7 +218,6 @@ document.addEventListener('DOMContentLoaded', async function() {
           });
           if(loading)loading.style.display='none';
 
-          // PROGRESSIVE: Fetch messages for each row and update status
           for(let i=0;i<movs.length;i++) {
             try {
               const mr=await fetch(`/api/emcs?endpoint=${encodeURIComponent('/customs/excise/movements/'+movs[i].movementId+'/messages')}`,{method:'GET',credentials:'include'});
@@ -233,7 +231,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                   if(row) {
                     row.children[4].innerHTML=`<span class="status-indicator"><span class="status-dot ${sm[1]}"></span> ${sm[0]}</span>`;
                     row.children[5].textContent=lt;
-                    // Add cancel button if applicable
                     const isOut=movs[i].consignorId===myErn||(myErn&&movs[i].consigneeId!==myErn);
                     if(isOut&&(sm[0]==='Accepted'||sm[0]==='Pending')) {
                       const cb=document.createElement('button'); cb.className='btn-small btn-red cancel-movement'; cb.textContent='Cancel';
@@ -286,72 +283,368 @@ document.addEventListener('DOMContentLoaded', async function() {
   });
 
   // TAB 5: GET MESSAGES
-  document.getElementById('get-messages-btn')?.addEventListener('click', async function() {
-    const s=await checkSession(); if(!s||!s.hmrcAuthenticated){alert('Login to HMRC first!');return;}
-    const id=document.getElementById('gmsg-id').value.trim(); if(!id){alert('Enter Movement ID');return;}
-    document.getElementById('gmsg-output').innerText='Fetching...'; document.getElementById('gmsg-parsed').innerHTML=''; document.getElementById('gmsg-count').textContent='';
-    try {
-      const r=await fetch('/api/emcs?endpoint='+encodeURIComponent('/customs/excise/movements/'+id+'/messages'),{method:'GET',credentials:'include'});
-      const t=await r.text(); document.getElementById('gmsg-output').innerText='Status: '+r.status+'\n\n'+t;
-      if(r.ok){try{const msgs=JSON.parse(t);document.getElementById('gmsg-count').textContent=msgs.length+' message(s)';
-        if(!msgs.length){document.getElementById('gmsg-parsed').innerHTML='<p>No messages.</p>';}
-        else{msgs.sort((a,b)=>new Date(b.createdOn)-new Date(a.createdOn));msgs.forEach(m=>{
-          const c=document.createElement('div');c.className='parsed-card';const bc=(m.messageType||'').toLowerCase();
-          c.innerHTML=`<h4>${m.messageType} <span class="type-badge ${bc}">${m.messageType}</span></h4><div class="parsed-grid"><div class="parsed-field"><div class="label">Message ID</div><div class="value">${m.messageId}</div></div><div class="parsed-field"><div class="label">Recipient</div><div class="value">${m.recipient}</div></div><div class="parsed-field"><div class="label">Created</div><div class="value">${new Date(m.createdOn).toLocaleString()}</div></div></div><button class="btn-small btn-grey view-raw-msg">View Decoded XML</button><pre class="raw-xml" style="display:none;margin-top:10px;"></pre>`;
-          c.querySelector('.view-raw-msg').addEventListener('click',function(){const p=c.querySelector('.raw-xml');if(p.style.display==='none'){try{p.textContent=atob(m.encodedMessage).replace(/></g,'>\n<');p.style.display='block';this.textContent='Hide XML';}catch(e){p.textContent='Decode failed';p.style.display='block';}}else{p.style.display='none';this.textContent='View Decoded XML';}});
-          document.getElementById('gmsg-parsed').appendChild(c);
-        });}
-      }catch(e){document.getElementById('gmsg-parsed').innerHTML='<p class="error">Parse failed</p>';}}
-    } catch(e) { document.getElementById('gmsg-output').innerText='Error: '+e.message; }
-  });
-
-  // TAB 6: GET SINGLE MESSAGE (FIXED - uses ?accept=xml query param)
-  document.getElementById('get-single-message-btn')?.addEventListener('click', async function() {
-    const s=await checkSession(); if(!s||!s.hmrcAuthenticated){alert('Login to HMRC first!');return;}
-    const mid=document.getElementById('gsmsg-mid').value.trim(); const msgid=document.getElementById('gsmsg-id').value.trim();
-    if(!mid||!msgid){alert('Movement ID and Message ID required');return;}
-    document.getElementById('gsmsg-output').innerText='Fetching...'; document.getElementById('gsmsg-parsed').innerHTML='';
-    try {
-      // Use ?accept=xml query param for reliable XML format detection
-      const r=await fetch('/api/emcs?endpoint='+encodeURIComponent('/customs/excise/movements/'+mid+'/messages/'+msgid)+'&accept=xml',{method:'GET',credentials:'include'});
-      const t=await r.text(); document.getElementById('gsmsg-output').innerText='Status: '+r.status+'\n\n'+t;
-      if(r.ok) {
-        // Display formatted XML
-        const formatted=esc(t).replace(/&lt;/g,'<span style="color:#005ea5">&lt;').replace(/&gt;/g,'&gt;</span>');
-        document.getElementById('gsmsg-parsed').innerHTML=`<div class="parsed-card"><h4>Message ${msgid}</h4><pre style="white-space:pre-wrap;font-size:12px;">${formatted}</pre></div>`;
-      } else {
-        document.getElementById('gsmsg-parsed').innerHTML=`<p class="error">Error: ${r.status}</p>`;
+  const getMessagesBtn = document.getElementById('get-messages-btn');
+  if (getMessagesBtn) {
+    getMessagesBtn.replaceWith(getMessagesBtn.cloneNode(true));
+    const freshBtn = document.getElementById('get-messages-btn');
+    
+    freshBtn.addEventListener('click', async function() {
+      const s = await checkSession();
+      if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
+      
+      const id = document.getElementById('gmsg-id').value.trim();
+      if (!id) { alert('Enter Movement ID'); return; }
+      
+      document.getElementById('gmsg-output').innerText = 'Fetching...';
+      const container = document.getElementById('gmsg-parsed');
+      container.innerHTML = '';
+      document.getElementById('gmsg-count').textContent = '';
+      
+      try {
+        const r = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/movements/' + id + '/messages'), {
+          method: 'GET', credentials: 'include'
+        });
+        const t = await r.text();
+        document.getElementById('gmsg-output').innerText = 'Status: ' + r.status + '\n\n' + t;
+        
+        if (r.ok) {
+          try {
+            const msgs = JSON.parse(t);
+            document.getElementById('gmsg-count').textContent = msgs.length + ' message(s)';
+            
+            if (!msgs.length) {
+              container.innerHTML = '<p>No messages found for this movement.</p>';
+            } else {
+              msgs.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
+              
+              msgs.forEach(m => {
+                const c = document.createElement('div');
+                c.className = 'parsed-card';
+                const bc = (m.messageType || '').toLowerCase();
+                
+                c.innerHTML = `
+                  <h4>${m.messageType} <span class="type-badge ${bc}">${m.messageType}</span></h4>
+                  <div class="parsed-grid">
+                    <div class="parsed-field">
+                      <div class="label">Message ID (use this for Tab 6)</div>
+                      <div class="value" style="color:#005ea5;font-weight:bold;">${m.messageId}
+                        <button class="btn-small btn-grey use-msg-id" style="margin-left:10px;" data-msgid="${m.messageId}" data-movid="${id}">Use in Tab 6 →</button>
+                      </div>
+                    </div>
+                    <div class="parsed-field"><div class="label">Message Type</div><div class="value">${m.messageType}</div></div>
+                    <div class="parsed-field"><div class="label">Recipient</div><div class="value">${m.recipient}</div></div>
+                    <div class="parsed-field"><div class="label">Created</div><div class="value">${new Date(m.createdOn).toLocaleString()}</div></div>
+                  </div>
+                  <button class="btn-small btn-grey view-raw-msg">View Decoded XML</button>
+                  <pre class="raw-xml" style="display:none;margin-top:10px;"></pre>
+                `;
+                
+                c.querySelector('.view-raw-msg').addEventListener('click', function() {
+                  const p = c.querySelector('.raw-xml');
+                  if (p.style.display === 'none') {
+                    try {
+                      p.textContent = atob(m.encodedMessage).replace(/></g, '>\n<');
+                      p.style.display = 'block';
+                      this.textContent = 'Hide XML';
+                    } catch(e) { p.textContent = 'Decode failed: ' + e.message; p.style.display = 'block'; }
+                  } else { p.style.display = 'none'; this.textContent = 'View Decoded XML'; }
+                });
+                
+                c.querySelector('.use-msg-id').addEventListener('click', function() {
+                  const msgId = this.getAttribute('data-msgid');
+                  const movId = this.getAttribute('data-movid');
+                  document.querySelector('[data-tab="tab-get-message"]').click();
+                  document.getElementById('gsmsg-mid').value = movId;
+                  document.getElementById('gsmsg-id').value = msgId;
+                  document.getElementById('get-single-message-btn').click();
+                });
+                
+                container.appendChild(c);
+              });
+            }
+          } catch(e) {
+            container.innerHTML = '<p class="error">Parse failed: ' + e.message + '</p>';
+          }
+        }
+      } catch(e) {
+        document.getElementById('gmsg-output').innerText = 'Error: ' + e.message;
       }
-    } catch(e) { document.getElementById('gsmsg-output').innerText='Error: '+e.message; }
+    });
+  }
+
+  // TAB 6: GET SINGLE MESSAGE (FIXED - proper XML display)
+  document.getElementById('get-single-message-btn')?.addEventListener('click', async function() {
+    const s = await checkSession();
+    if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
+    
+    const mid = document.getElementById('gsmsg-mid').value.trim();
+    const msgid = document.getElementById('gsmsg-id').value.trim();
+    
+    if (!mid || !msgid) {
+      alert('Both Movement ID and Message ID are required.\n\nTip: Use Tab 5 first, then click "Use in Tab 6 →" on any message.');
+      return;
+    }
+    
+    if (/^IE\d{3}$/i.test(msgid)) {
+      alert('⚠️ "' + msgid + '" looks like a message TYPE (e.g., IE801, IE818), not a Message ID.\n\nMessage IDs look like: XI000002, XI004323, XI00432M\n\nUse Tab 5 first to find the actual Message ID, then click "Use in Tab 6 →" on any message.');
+      return;
+    }
+    
+    const outputPre = document.getElementById('gsmsg-output');
+    const parsedDiv = document.getElementById('gsmsg-parsed');
+    outputPre.innerText = 'Fetching...';
+    parsedDiv.innerHTML = '';
+    
+    try {
+      const r = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/movements/' + mid + '/messages/' + msgid) + '&accept=xml', {
+        method: 'GET', credentials: 'include'
+      });
+      const t = await r.text();
+      outputPre.innerText = 'Status: ' + r.status + '\n\n' + t;
+      
+      if (r.ok) {
+        // Format XML with syntax highlighting
+        const formatted = esc(t)
+          .replace(/(&lt;\/?)([a-zA-Z0-9:]+)/g, '$1<span style="color:#005ea5;font-weight:bold;">$2</span>')
+          .replace(/(&gt;)/g, '<span style="color:#005ea5;">$1</span>')
+          .replace(/(>)(<)/g, '$1\n$2');
+        
+        parsedDiv.innerHTML = `
+          <div class="parsed-card">
+            <h4>Message ${msgid} <span class="type-badge ie801">XML</span></h4>
+            <pre style="white-space:pre-wrap;font-size:12px;line-height:1.5;background:#f8f9fa;color:#333;padding:15px;border-radius:5px;border:1px solid #e0e0e0;">${formatted}</pre>
+          </div>
+        `;
+      } else if (r.status === 404) {
+        parsedDiv.innerHTML = `
+          <div class="parsed-card">
+            <h4 style="color:#d4351c;">❌ Message Not Found</h4>
+            <p style="margin:10px 0;">The Message ID <code>${esc(msgid)}</code> does not exist for Movement <code>${esc(mid)}</code>.</p>
+            <p style="color:#666;font-size:13px;"><strong>Common causes:</strong></p>
+            <ul style="color:#666;font-size:13px;margin-left:20px;">
+              <li>You entered a message TYPE (like IE818) instead of a Message ID (like XI000002)</li>
+              <li>The Message ID has a typo</li>
+              <li>The movement doesn't have any messages yet</li>
+            </ul>
+            <p style="margin-top:15px;"><strong>💡 Tip:</strong> Go to <strong>Tab 5 (Get Messages)</strong> first, enter the Movement ID, and click the <strong>"Use in Tab 6 →"</strong> button on any message to auto-fill this form.</p>
+          </div>
+        `;
+      } else {
+        parsedDiv.innerHTML = `<div class="parsed-card"><h4 style="color:#d4351c;">Error ${r.status}</h4><pre>${esc(t)}</pre></div>`;
+      }
+    } catch(e) {
+      outputPre.innerText = 'Error: ' + e.message;
+      parsedDiv.innerHTML = `<p class="error">Network error: ${e.message}</p>`;
+    }
   });
 
   // TAB 7: PRE-VALIDATE
   document.getElementById('pre-validate-btn')?.addEventListener('click', async function() {
-    const s=await checkSession(); if(!s||!s.hmrcAuthenticated){alert('Login to HMRC first!');return;}
-    const ern=document.getElementById('pv-ern').value.trim(); if(!ern){alert('ERN required');return;}
-    document.getElementById('pv-output').innerText='Validating...'; document.getElementById('pv-parsed').innerHTML='';
+    const s = await checkSession();
+    if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
+    
+    const ern = document.getElementById('pv-ern').value.trim();
+    const group = document.getElementById('pv-group').value;
+    const p1 = document.getElementById('pv-p1').value.trim();
+    
+    if (!ern) { alert('ERN required'); return; }
+    
+    document.getElementById('pv-output').innerText = 'Validating...';
+    document.getElementById('pv-parsed').innerHTML = '';
+    
     try {
-      const body={exciseRegistrationNumber:ern,entityGroup:document.getElementById('pv-group').value,validateProductAuthorisationRequest:document.getElementById('pv-p1').value?[{product:{exciseProductCode:document.getElementById('pv-p1').value}}]:[]};
-      const r=await fetch('/api/emcs?endpoint='+encodeURIComponent('/customs/excise/traders/pre-validate'),{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-      const t=await r.text(); document.getElementById('pv-output').innerText='Status: '+r.status+'\n\n'+t;
-      if(r.ok){try{const d=JSON.parse(t);document.getElementById('pv-parsed').innerHTML=`<div class="parsed-card"><h4>Result</h4><div class="parsed-grid"><div class="parsed-field"><div class="label">Valid</div><div class="value ${d.validTrader?'arc':'warn'}">${d.validTrader?'YES':'NO'}</div></div><div class="parsed-field"><div class="label">ERN</div><div class="value">${d.exciseRegistrationNumber}</div></div><div class="parsed-field"><div class="label">Type</div><div class="value">${d.traderType||'N/A'}</div></div></div></div>`;}catch(e){}}
-    } catch(e) { document.getElementById('pv-output').innerText='Error: '+e.message; }
+      const body = {
+        exciseTraderValidationRequest: {
+          exciseRegistrationNumber: ern,
+          entityGroup: group
+        }
+      };
+      
+      if (p1) {
+        body.exciseTraderValidationRequest.validateProductAuthorisationRequest = [
+          { product: { exciseProductCode: p1 } }
+        ];
+      }
+      
+      const r = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/traders/pre-validate'), {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      
+      const t = await r.text();
+      document.getElementById('pv-output').innerText = 'Status: ' + r.status + '\n\n' + t;
+      
+      if (r.ok) {
+        try {
+          const d = JSON.parse(t);
+          const result = d.exciseTraderValidationResponse || d;
+          const valid = result.validTrader;
+          const trader = result.exciseTrader || {};
+          
+          document.getElementById('pv-parsed').innerHTML = `
+            <div class="parsed-card">
+              <h4>Validation Result</h4>
+              <div class="parsed-grid">
+                <div class="parsed-field">
+                  <div class="label">Valid Trader</div>
+                  <div class="value ${valid ? 'arc' : 'warn'}" style="font-weight:bold;font-size:16px;">${valid ? '✅ YES' : '❌ NO'}</div>
+                </div>
+                <div class="parsed-field"><div class="label">ERN</div><div class="value">${result.exciseRegistrationNumber || ern}</div></div>
+                <div class="parsed-field"><div class="label">Trader Name</div><div class="value">${trader.traderName || 'N/A'}</div></div>
+                <div class="parsed-field"><div class="label">Trader Type</div><div class="value">${trader.traderType || result.traderType || 'N/A'}</div></div>
+                <div class="parsed-field"><div class="label">Entity Group</div><div class="value">${result.entityGroup || group}</div></div>
+                <div class="parsed-field"><div class="label">Street</div><div class="value">${trader.streetName || 'N/A'}</div></div>
+                <div class="parsed-field"><div class="label">Postcode</div><div class="value">${trader.postcode || 'N/A'}</div></div>
+                <div class="parsed-field"><div class="label">City</div><div class="value">${trader.city || 'N/A'}</div></div>
+              </div>
+              ${result.validateProductAuthorisationResponse ? `
+                <h4 style="margin-top:15px;">Product Authorisation</h4>
+                <div class="parsed-grid">
+                  ${result.validateProductAuthorisationResponse.map(p => `
+                    <div class="parsed-field">
+                      <div class="label">${p.product?.exciseProductCode || 'Product'}</div>
+                      <div class="value ${p.authorised ? 'arc' : 'warn'}">${p.authorised ? '✅ Authorised' : '❌ Not Authorised'}</div>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        } catch(e) {
+          document.getElementById('pv-parsed').innerHTML = `<p>Response received but couldn't be parsed: ${e.message}</p>`;
+        }
+      } else {
+        try {
+          const err = JSON.parse(t);
+          document.getElementById('pv-parsed').innerHTML = `
+            <div class="parsed-card">
+              <h4 style="color:#d4351c;">❌ Validation Error</h4>
+              <div class="parsed-grid">
+                <div class="parsed-field"><div class="label">Message</div><div class="value warn">${err.message || 'Unknown error'}</div></div>
+                ${err.debugMessage ? `<div class="parsed-field"><div class="label">Details</div><div class="value warn">${err.debugMessage}</div></div>` : ''}
+              </div>
+            </div>
+          `;
+        } catch(e) {
+          document.getElementById('pv-parsed').innerHTML = `<p class="error">Error ${r.status}: ${esc(t)}</p>`;
+        }
+      }
+    } catch(e) {
+      document.getElementById('pv-output').innerText = 'Error: ' + e.message;
+    }
   });
 
-  // TAB 8: SUBSCRIBE
+  // TAB 8: SUBSCRIBE (WITH PARSED VIEW)
   document.getElementById('subscribe-ern-btn')?.addEventListener('click', async function() {
-    const s=await checkSession(); if(!s||!s.hmrcAuthenticated){alert('Login to HMRC first!');return;}
-    const ern=document.getElementById('sub-ern').value.trim(); if(!ern){alert('ERN required');return;}
-    document.getElementById('sub-output').innerText='Subscribing...';
-    try { const r=await fetch('/api/emcs?endpoint='+encodeURIComponent('/customs/excise/erns/'+ern+'/subscription'),{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}); document.getElementById('sub-output').innerText='Status: '+r.status+'\n\n'+await r.text(); } catch(e) { document.getElementById('sub-output').innerText='Error: '+e.message; }
+    const s = await checkSession();
+    if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
+    
+    const ern = document.getElementById('sub-ern').value.trim();
+    if (!ern) { alert('ERN required'); return; }
+    
+    document.getElementById('sub-output').innerText = 'Subscribing...';
+    
+    try {
+      const r = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/erns/' + ern + '/subscription'), {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      
+      const t = await r.text();
+      document.getElementById('sub-output').innerText = 'Status: ' + r.status + '\n\n' + t;
+      
+      // Parse response
+      if (r.ok) {
+        try {
+          const d = JSON.parse(t);
+          document.getElementById('sub-output').innerHTML = `
+            <div class="parsed-card" style="margin-top:15px;">
+              <h4>✅ Subscription Successful</h4>
+              <div class="parsed-grid">
+                <div class="parsed-field"><div class="label">ERN</div><div class="value">${d.ern || ern}</div></div>
+                <div class="parsed-field"><div class="label">Status</div><div class="value arc">Active</div></div>
+                <div class="parsed-field"><div class="label">Created</div><div class="value">${d.createdAt ? new Date(d.createdAt).toLocaleString() : 'Now'}</div></div>
+              </div>
+              <p style="margin-top:15px;color:#666;font-size:13px;">Your ERN is now subscribed to receive automatic notifications for movement updates.</p>
+            </div>
+            <details style="margin-top:15px;"><summary style="cursor:pointer;color:#005ea5;">Show Raw Response</summary><pre style="margin-top:10px;">${esc(t)}</pre></details>
+          `;
+        } catch(e) {
+          document.getElementById('sub-output').innerHTML += `<div class="parsed-card" style="margin-top:15px;"><h4>Response</h4><pre>${esc(t)}</pre></div>`;
+        }
+      } else {
+        try {
+          const err = JSON.parse(t);
+          document.getElementById('sub-output').innerHTML = `
+            <div class="parsed-card" style="margin-top:15px;">
+              <h4 style="color:#d4351c;">❌ Subscription Failed</h4>
+              <div class="parsed-grid">
+                <div class="parsed-field"><div class="label">Error</div><div class="value warn">${err.message || 'Unknown error'}</div></div>
+                ${err.debugMessage ? `<div class="parsed-field"><div class="label">Details</div><div class="value warn">${err.debugMessage}</div></div>` : ''}
+              </div>
+            </div>
+          `;
+        } catch(e) {
+          document.getElementById('sub-output').innerHTML += `<p class="error">Error ${r.status}: ${esc(t)}</p>`;
+        }
+      }
+    } catch(e) {
+      document.getElementById('sub-output').innerText = 'Error: ' + e.message;
+    }
   });
 
-  // TAB 9: UNSUBSCRIBE
+  // TAB 9: UNSUBSCRIBE (WITH PARSED VIEW)
   document.getElementById('unsubscribe-ern-btn')?.addEventListener('click', async function() {
-    const s=await checkSession(); if(!s||!s.hmrcAuthenticated){alert('Login to HMRC first!');return;}
-    const ern=document.getElementById('unsub-ern').value.trim(); if(!ern){alert('ERN required');return;}
-    document.getElementById('unsub-output').innerText='Unsubscribing...';
-    try { const r=await fetch('/api/emcs?endpoint='+encodeURIComponent('/customs/excise/erns/'+ern+'/subscription'),{method:'DELETE',credentials:'include'}); document.getElementById('unsub-output').innerText='Status: '+r.status+'\n\n'+await r.text(); } catch(e) { document.getElementById('unsub-output').innerText='Error: '+e.message; }
+    const s = await checkSession();
+    if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
+    
+    const ern = document.getElementById('unsub-ern').value.trim();
+    if (!ern) { alert('ERN required'); return; }
+    
+    document.getElementById('unsub-output').innerText = 'Unsubscribing...';
+    
+    try {
+      const r = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/erns/' + ern + '/subscription'), {
+        method: 'DELETE', credentials: 'include'
+      });
+      
+      const t = await r.text();
+      document.getElementById('unsub-output').innerText = 'Status: ' + r.status + '\n\n' + t;
+      
+      // Parse response
+      if (r.ok || r.status === 204) {
+        document.getElementById('unsub-output').innerHTML = `
+          <div class="parsed-card" style="margin-top:15px;">
+            <h4>✅ Unsubscribed Successfully</h4>
+            <div class="parsed-grid">
+              <div class="parsed-field"><div class="label">ERN</div><div class="value">${ern}</div></div>
+              <div class="parsed-field"><div class="label">Status</div><div class="value">Removed</div></div>
+            </div>
+            <p style="margin-top:15px;color:#666;font-size:13px;">Your ERN will no longer receive automatic notifications. You can still manually fetch movements via the Monitor tab.</p>
+          </div>
+          ${t ? `<details style="margin-top:15px;"><summary style="cursor:pointer;color:#005ea5;">Show Raw Response</summary><pre style="margin-top:10px;">${esc(t)}</pre></details>` : ''}
+        `;
+      } else {
+        try {
+          const err = JSON.parse(t);
+          document.getElementById('unsub-output').innerHTML = `
+            <div class="parsed-card" style="margin-top:15px;">
+              <h4 style="color:#d4351c;">❌ Unsubscribe Failed</h4>
+              <div class="parsed-grid">
+                <div class="parsed-field"><div class="label">Error</div><div class="value warn">${err.message || 'Unknown error'}</div></div>
+                ${err.debugMessage ? `<div class="parsed-field"><div class="label">Details</div><div class="value warn">${err.debugMessage}</div></div>` : ''}
+              </div>
+            </div>
+          `;
+        } catch(e) {
+          document.getElementById('unsub-output').innerHTML += `<p class="error">Error ${r.status}: ${esc(t)}</p>`;
+        }
+      }
+    } catch(e) {
+      document.getElementById('unsub-output').innerText = 'Error: ' + e.message;
+    }
   });
 
   // DRAFTS
