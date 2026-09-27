@@ -23,27 +23,33 @@ async function exchangeCode(code) {
     ? 'https://test-api.service.hmrc.gov.uk' 
     : 'https://api.service.hmrc.gov.uk';
     
-  const res = await fetch(`${baseUrl}/oauth/token`, {
-    method: 'POST',
-    headers: { 
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Accept': 'application/json'
-    },
-    body: new URLSearchParams({
-      client_id: process.env.HMRC_CLIENT_ID,
-      client_secret: process.env.HMRC_CLIENT_SECRET,
-      grant_type: 'authorization_code',
-      code,
-      redirect_uri: process.env.HMRC_REDIRECT_URI
-    })
-  });
-  
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error('OAuth token exchange failed: ' + text);
+  try {
+    const res = await fetch(`${baseUrl}/oauth/token`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json'
+      },
+      body: new URLSearchParams({
+        client_id: process.env.HMRC_CLIENT_ID,
+        client_secret: process.env.HMRC_CLIENT_SECRET,
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: process.env.HMRC_REDIRECT_URI
+      })
+    });
+    
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('OAuth token exchange failed:', res.status, text);
+      throw new Error('OAuth token exchange failed: ' + text);
+    }
+    
+    return await res.json();
+  } catch (e) {
+    console.error('OAuth exchange error:', e);
+    throw e;
   }
-  
-  return await res.json();
 }
 
 function setCookie(res, name, value, maxAgeSec) {
@@ -62,16 +68,17 @@ function setCookie(res, name, value, maxAgeSec) {
 }
 
 export default async function handler(req, res) {
-  // OAuth callback - HMRC sent us back with a code
-  if (req.query.code) {
-    const stateCookie = req.cookies?.emcs_oauth_state;
-    const stateParam = req.query.state;
-    
-    if (!stateCookie || stateCookie !== stateParam) {
-      return res.status(400).send('Invalid OAuth state. Please try logging in again.');
-    }
+  try {
+    // OAuth callback - HMRC sent us back with a code
+    if (req.query.code) {
+      const stateCookie = req.cookies?.emcs_oauth_state;
+      const stateParam = req.query.state;
+      
+      if (!stateCookie || stateCookie !== stateParam) {
+        console.error('OAuth state mismatch. Cookie:', stateCookie, 'Param:', stateParam);
+        return res.status(400).send('Invalid OAuth state. Please try logging in again.');
+      }
 
-    try {
       const tokenData = await exchangeCode(req.query.code);
       
       // Get or create dashboard session
@@ -89,22 +96,22 @@ export default async function handler(req, res) {
 
       // Redirect to dashboard
       return res.redirect('/?authenticated=1');
-    } catch (e) {
-      console.error('HMRC OAuth Error:', e.message);
-      return res.status(500).send('HMRC authentication failed: ' + e.message);
     }
+
+    // Start OAuth flow
+    const session = await getSession(req);
+    if (!session) {
+      return res.redirect('/?error=not_logged_in');
+    }
+
+    const state = crypto.randomUUID();
+    const url = getOAuthUrl(state);
+
+    // Store state in cookie for validation (10 minutes)
+    setCookie(res, 'emcs_oauth_state', state, 600);
+    return res.redirect(url);
+  } catch (e) {
+    console.error('Auth handler error:', e);
+    return res.status(500).send('Authentication failed: ' + e.message);
   }
-
-  // Start OAuth flow
-  const session = await getSession(req);
-  if (!session) {
-    return res.redirect('/?error=not_logged_in');
-  }
-
-  const state = crypto.randomUUID();
-  const url = getOAuthUrl(state);
-
-  // Store state in cookie for validation (10 minutes)
-  setCookie(res, 'emcs_oauth_state', state, 600);
-  return res.redirect(url);
 }
