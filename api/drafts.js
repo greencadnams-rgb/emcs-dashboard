@@ -3,19 +3,26 @@ import { getDb, ensureSchema } from './lib/db.js';
 import { logAudit } from './lib/audit.js';
 import crypto from 'crypto';
 
-await ensureSchema();
+let schemaReady = false;
+async function initSchema() {
+  if (schemaReady) return;
+  await ensureSchema();
+  schemaReady = true;
+}
 
 export default async function handler(req, res) {
   const session = await getSession(req);
   if (!session) return res.status(401).json({ error: 'Not authenticated' });
 
+  await initSchema();
   const db = getDb();
+  const userId = session.userId;
 
   try {
     if (req.method === 'GET') {
       const result = await db.execute({
-        sql: 'SELECT id, name, data, created_at, modified_at FROM drafts WHERE session_id = ? ORDER BY modified_at DESC LIMIT 50',
-        args: [session.id]
+        sql: 'SELECT id, name, data, created_at, modified_at FROM drafts WHERE user_id = ? ORDER BY modified_at DESC LIMIT 50',
+        args: [userId]
       });
       const drafts = result.rows.map(r => ({
         id: r.id,
@@ -37,15 +44,15 @@ export default async function handler(req, res) {
 
       if (existingId) {
         await db.execute({
-          sql: 'UPDATE drafts SET name = ?, data = ?, modified_at = ? WHERE id = ? AND session_id = ?',
-          args: [name, dataStr, now, existingId, session.id]
+          sql: 'UPDATE drafts SET name = ?, data = ?, modified_at = ? WHERE id = ? AND user_id = ?',
+          args: [name, dataStr, now, existingId, userId]
         });
         draftId = existingId;
       } else {
         draftId = crypto.randomUUID();
         await db.execute({
-          sql: 'INSERT INTO drafts (id, session_id, name, data, created_at, modified_at) VALUES (?, ?, ?, ?, ?, ?)',
-          args: [draftId, session.id, name, dataStr, now, now]
+          sql: 'INSERT INTO drafts (id, user_id, name, data, created_at, modified_at) VALUES (?, ?, ?, ?, ?, ?)',
+          args: [draftId, userId, name, dataStr, now, now]
         });
       }
 
@@ -58,8 +65,8 @@ export default async function handler(req, res) {
       if (!id) return res.status(400).json({ error: 'Draft ID required' });
       
       await db.execute({
-        sql: 'DELETE FROM drafts WHERE id = ? AND session_id = ?',
-        args: [id, session.id]
+        sql: 'DELETE FROM drafts WHERE id = ? AND user_id = ?',
+        args: [id, userId]
       });
       
       await logAudit(session.id, 'DRAFT_DELETED', { draftId: id });
