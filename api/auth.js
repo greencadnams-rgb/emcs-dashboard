@@ -1,24 +1,28 @@
 import { getSession, createSession, setSessionCookie, storeHmrcToken } from './lib/auth.js';
-import { logAudit } from './lib/audit.js';
 import crypto from 'crypto';
 
-function getBaseUrl() {
-  const env = process.env.HMRC_ENVIRONMENT || 'test';
-  return env === 'production'
-    ? 'https://api.service.hmrc.gov.uk'
-    : 'https://test-api.service.hmrc.gov.uk';
-}
-
 function getOAuthUrl(state) {
-  const baseUrl = getBaseUrl();
   const clientId = process.env.HMRC_CLIENT_ID;
   const redirectUri = process.env.HMRC_REDIRECT_URI;
-  const scope = 'read:excise-movements write:excise-movements';
+  
+  // The exact scope from your working code
+  const scope = 'excise-movement-control-system';
+  
+  // HMRC uses a different domain for the OAuth UI than the API
+  const isTest = (process.env.HMRC_ENVIRONMENT || 'test') === 'test';
+  const baseUrl = isTest 
+    ? 'https://test-www.tax.service.gov.uk' 
+    : 'https://www.tax.service.gov.uk';
+    
   return `${baseUrl}/oauth/authorize?response_type=code&client_id=${clientId}&scope=${scope}&state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}`;
 }
 
 async function exchangeCode(code) {
-  const baseUrl = getBaseUrl();
+  const isTest = (process.env.HMRC_ENVIRONMENT || 'test') === 'test';
+  const baseUrl = isTest 
+    ? 'https://test-api.service.hmrc.gov.uk' 
+    : 'https://api.service.hmrc.gov.uk';
+    
   const res = await fetch(`${baseUrl}/oauth/token`, {
     method: 'POST',
     headers: { 
@@ -46,7 +50,7 @@ function setCookie(res, name, value, maxAgeSec) {
   const attrs = [
     `${name}=${encodeURIComponent(value)}`,
     'Path=/',
-    'SameSite=Strict',
+    'SameSite=Lax', // Lax is required for OAuth redirects
     'HttpOnly',
     'Secure',
     `Max-Age=${maxAgeSec}`
@@ -64,7 +68,6 @@ export default async function handler(req, res) {
     const stateParam = req.query.state;
     
     if (!stateCookie || stateCookie !== stateParam) {
-      await logAudit(null, 'OAUTH_FAILED', { reason: 'invalid_state' });
       return res.status(400).send('Invalid OAuth state. Please try logging in again.');
     }
 
@@ -80,10 +83,6 @@ export default async function handler(req, res) {
       
       // Store HMRC token in Turso (server-side, not in browser!)
       await storeHmrcToken(session.id, tokenData.access_token, tokenData.expires_in || 14400);
-      
-      await logAudit(session.id, 'HMRC_LOGIN_SUCCESS', { 
-        expiresIn: tokenData.expires_in 
-      });
 
       // Clear state cookie
       setCookie(res, 'emcs_oauth_state', '', 0);
@@ -91,7 +90,7 @@ export default async function handler(req, res) {
       // Redirect to dashboard
       return res.redirect('/?authenticated=1');
     } catch (e) {
-      await logAudit(null, 'HMRC_LOGIN_FAILED', { error: e.message });
+      console.error('HMRC OAuth Error:', e.message);
       return res.status(500).send('HMRC authentication failed: ' + e.message);
     }
   }
@@ -105,7 +104,7 @@ export default async function handler(req, res) {
   const state = crypto.randomUUID();
   const url = getOAuthUrl(state);
 
-  // Store state in cookie for validation
+  // Store state in cookie for validation (10 minutes)
   setCookie(res, 'emcs_oauth_state', state, 600);
   return res.redirect(url);
 }
