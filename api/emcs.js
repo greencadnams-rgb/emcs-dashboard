@@ -9,19 +9,16 @@ function getBaseUrl() {
 }
 
 export default async function handler(req, res) {
-  // Check dashboard session
   const session = await getSession(req);
   if (!session) {
     return res.status(401).json({ error: 'Dashboard session expired' });
   }
 
-  // Get HMRC token from database
   const hmrcToken = await getHmrcToken(session.id);
   if (!hmrcToken) {
     return res.status(401).json({ error: 'HMRC_NOT_AUTHENTICATED' });
   }
 
-  // Build the HMRC endpoint URL
   const endpoint = req.query.endpoint;
   if (!endpoint) {
     return res.status(400).json({ error: 'endpoint parameter required' });
@@ -30,15 +27,26 @@ export default async function handler(req, res) {
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}${endpoint}`;
 
-  // Build headers for HMRC
-  // HMRC EMCS API requires specific Accept headers
+  // Determine Accept header based on request type
+  let acceptHeader = 'application/vnd.hmrc.1.0+json';
+  
+  // If browser is sending XML, it expects XML back
+  if (req.headers['content-type'] && req.headers['content-type'].includes('xml')) {
+    acceptHeader = 'application/xml';
+  }
+  
+  // If browser explicitly requested XML (for Get Single Message)
+  if (req.headers['accept'] && req.headers['accept'].includes('xml')) {
+    acceptHeader = req.headers['accept'];
+  }
+
   const headers = {
     'Authorization': `Bearer ${hmrcToken}`,
-    'Accept': 'application/vnd.hmrc.1.0+json',
+    'Accept': acceptHeader,
     'User-Agent': 'EMCS-Dashboard/2.0'
   };
 
-  // Forward specific headers from the browser
+  // Forward headers from browser
   if (req.headers['content-type']) {
     headers['Content-Type'] = req.headers['content-type'];
   }
@@ -46,8 +54,7 @@ export default async function handler(req, res) {
     headers['x-correlation-id'] = req.headers['x-correlation-id'];
   }
   
-  // HMRC sandbox requires x-client-ip header
-  // Always set it to 127.0.0.1 for sandbox, or use real IP in production
+  // HMRC sandbox requires x-client-ip
   const isTest = (process.env.HMRC_ENVIRONMENT || 'test') === 'test';
   if (isTest) {
     headers['x-client-ip'] = '127.0.0.1';
@@ -55,7 +62,6 @@ export default async function handler(req, res) {
     headers['x-client-ip'] = req.headers['x-client-ip'];
   }
 
-  // Log the request (redact sensitive data)
   await logAudit(session.id, 'HMRC_API_CALL', {
     method: req.method,
     endpoint: endpoint.split('?')[0],
@@ -70,7 +76,6 @@ export default async function handler(req, res) {
       headers
     };
 
-    // Only include body for POST/PUT/PATCH
     if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
       if (typeof req.body === 'string') {
         fetchOptions.body = req.body;
@@ -86,17 +91,14 @@ export default async function handler(req, res) {
     const duration = Date.now() - startTime;
     const responseText = await hmrcRes.text();
 
-    // Log response (only status, not body — may contain sensitive data)
     await logAudit(session.id, 'HMRC_API_RESPONSE', {
       status: hmrcRes.status,
       duration,
       endpoint: endpoint.split('?')[0]
     });
 
-    // Forward the response
     res.status(hmrcRes.status);
     
-    // Copy relevant headers from HMRC response
     const contentType = hmrcRes.headers.get('content-type');
     if (contentType) {
       res.setHeader('Content-Type', contentType);
