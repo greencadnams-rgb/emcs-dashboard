@@ -76,19 +76,23 @@ CREATE INDEX IF NOT EXISTS idx_profiles_session ON profiles(session_id);
 let initialized = false;
 export async function ensureSchema() {
   if (initialized) return;
-  const db = getDb();
-  
-  const statements = SCHEMA.split(';').map(s => s.trim()).filter(Boolean);
-  for (const stmt of statements) {
-    try {
-      await db.execute(stmt);
-    } catch (e) {
-      if (!e.message.includes('already exists')) {
-        console.error('Schema init error:', e.message);
+  try {
+    const db = getDb();
+    const statements = SCHEMA.split(';').map(s => s.trim()).filter(Boolean);
+    for (const stmt of statements) {
+      try {
+        await db.execute(stmt);
+      } catch (e) {
+        if (!e.message.includes('already exists')) {
+          console.error('Schema init error:', e.message);
+        }
       }
     }
+    initialized = true;
+  } catch (e) {
+    console.error('Schema initialization failed:', e.message);
+    throw e;
   }
-  initialized = true;
 }
 
 export async function cleanupOldAuditLogs(daysToKeep = 90) {
