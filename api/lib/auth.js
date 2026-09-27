@@ -4,7 +4,13 @@ import crypto from 'crypto';
 const SESSION_TTL = parseInt(process.env.SESSION_TIMEOUT_MINUTES || '30') * 60 * 1000;
 const COOKIE_NAME = 'emcs_session';
 
-await ensureSchema();
+// Schema initialization happens lazily, not at module load
+let schemaReady = false;
+async function initSchema() {
+  if (schemaReady) return;
+  await ensureSchema();
+  schemaReady = true;
+}
 
 function signPayload(payload) {
   const secret = process.env.SESSION_SECRET;
@@ -72,6 +78,7 @@ function clearCookie(res, name) {
 }
 
 export async function createSession(userId) {
+  await initSchema();
   const db = getDb();
   const sessionId = crypto.randomUUID();
   const now = Date.now();
@@ -85,6 +92,7 @@ export async function createSession(userId) {
 }
 
 export async function getSession(req) {
+  await initSchema();
   const cookies = parseCookies(req);
   const signed = cookies[COOKIE_NAME];
   if (!signed) return null;
@@ -126,6 +134,7 @@ export async function setSessionCookie(res, session) {
 }
 
 export async function destroySession(req, res) {
+  await initSchema();
   const cookies = parseCookies(req);
   const signed = cookies[COOKIE_NAME];
   if (signed) {
@@ -139,6 +148,7 @@ export async function destroySession(req, res) {
 }
 
 export async function storeHmrcToken(sessionId, token, expiresInSec = 14400) {
+  await initSchema();
   const db = getDb();
   const expiresAt = Date.now() + (expiresInSec * 1000);
   
@@ -161,6 +171,7 @@ export async function storeHmrcToken(sessionId, token, expiresInSec = 14400) {
 }
 
 export async function getHmrcToken(sessionId) {
+  await initSchema();
   const db = getDb();
   const result = await db.execute({
     sql: 'SELECT access_token, expires_at FROM hmrc_tokens WHERE session_id = ?',
@@ -177,6 +188,9 @@ export async function getHmrcToken(sessionId) {
 }
 
 export async function clearHmrcToken(sessionId) {
+  await initSchema();
   const db = getDb();
-  await db.execute({ sql: 'DELETE FROM hmrc_tokens WHERE session_id = ?', args: [sessionId] }).catch(() => {});
+  try {
+    await db.execute({ sql: 'DELETE FROM hmrc_tokens WHERE session_id = ?', args: [sessionId] });
+  } catch (e) {}
 }
