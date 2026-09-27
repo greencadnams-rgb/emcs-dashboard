@@ -75,16 +75,11 @@ export async function ensureSchema() {
   if (initialized) return;
   try {
     const db = getDb();
-    
-    // SAFE SCHEMA INITIALIZATION: NO DROP TABLES
-    // This will ONLY create tables if they don't exist.
-    // It will NEVER delete your data.
     const statements = SCHEMA.split(';').map(s => s.trim()).filter(Boolean);
     for (const stmt of statements) {
       try {
         await db.execute(stmt);
       } catch (e) {
-        // Ignore safe errors like "table already exists" or "index already exists"
         if (!e.message.includes('already exists') && !e.message.includes('duplicate')) {
           console.error('Schema init error:', e.message);
         }
@@ -95,23 +90,4 @@ export async function ensureSchema() {
     console.error('Schema initialization failed:', e.message);
     throw e;
   }
-}
-
-export async function cleanupOldAuditLogs(daysToKeep = 90) {
-  const db = getDb();
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - daysToKeep);
-  await db.execute({
-    sql: 'DELETE FROM audit_logs WHERE timestamp < ?',
-    args: [cutoff.toISOString()]
-  });
-}
-
-export async function cleanupExpiredSessions() {
-  const db = getDb();
-  const cutoff = Date.now() - (24 * 60 * 60 * 1000);
-  await db.execute({
-    sql: 'DELETE FROM sessions WHERE last_activity < ?',
-    args: [cutoff]
-  });
 }
