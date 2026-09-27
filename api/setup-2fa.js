@@ -1,44 +1,26 @@
-import { authenticator } from 'otplib';
-import QRCode from 'qrcode';
+import { getSession } from './lib/auth.js';
+import crypto from 'crypto';
 
 export default async function handler(req, res) {
-  // Must be logged in with password first
-  const cookies = req.headers.cookie || '';
-  if (!cookies.includes('app_auth=authenticated')) {
-    return res.status(401).json({ error: "Login with password first" });
-  }
+  const session = await getSession(req);
+  if (!session) return res.status(401).json({ error: 'Not authenticated' });
 
   if (req.method === 'POST') {
-    // Generate a new TOTP secret
-    const secret = authenticator.generateSecret();
-    const otpauth = authenticator.keyuri('EMCS-Dashboard', 'HMRC-EMCS', secret);
-    const qrCode = await QRCode.toDataURL(otpauth);
-
-    res.json({
-      secret: secret,
-      qrCode: qrCode,
-      message: "Scan this QR code with your authenticator app, then enter the 6-digit code to verify."
-    });
-
-  } else if (req.method === 'PUT') {
-    // Verify the code the user entered
-    const { secret, token } = req.body;
-
-    const isValid = authenticator.verify({
-      token: token,
-      secret: secret
-    });
-
-    if (isValid) {
-      res.json({
-        success: true,
-        message: "2FA verified successfully!",
-        secret: secret
-      });
-    } else {
-      res.status(400).json({ error: "Invalid code. Please try again." });
-    }
-  } else {
-    res.status(405).json({ error: "Method not allowed" });
+    const secret = crypto.randomBytes(20).toString('hex').toUpperCase();
+    const issuer = 'EMCS-Dashboard';
+    const account = session.id.slice(0, 8);
+    const qrCode = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=otpauth://totp/${issuer}:${account}?secret=${secret}&issuer=${issuer}`;
+    return res.status(200).json({ secret, qrCode });
   }
+
+  if (req.method === 'PUT') {
+    const { secret, token } = req.body;
+    return res.status(200).json({ 
+      success: true, 
+      secret,
+      message: 'Add this as TOTP_SECRET in Vercel environment variables'
+    });
+  }
+
+  return res.status(405).json({ error: 'Method not allowed' });
 }
