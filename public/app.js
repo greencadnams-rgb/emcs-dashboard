@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   });
 
-  // --- 6. MONITOR TAB REFRESH LOGIC ---
+    // --- 6. MONITOR TAB REFRESH LOGIC ---
   const monRefreshBtn = document.getElementById('mon-refresh');
   if (monRefreshBtn) {
     monRefreshBtn.addEventListener('click', async function() {
@@ -454,39 +454,131 @@ document.addEventListener('DOMContentLoaded', async function() {
       if (loading) loading.style.display = 'block';
       if (noResults) noResults.style.display = 'none';
       if (table) table.style.display = 'none';
+      tbody.innerHTML = '';
 
       try {
-        // Fetch all movements for the logged-in user's ERNs
+        // 1. Fetch all movements
         const res = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/movements'), {
           method: 'GET', credentials: 'include'
         });
         
         if (res.ok) {
           const movements = await res.json();
-          tbody.innerHTML = '';
           
           if (movements && movements.length > 0) {
             if (table) table.style.display = 'table';
-            movements.forEach(mov => {
-              const tr = document.createElement('tr');
+            
+            // Get active profile ERN to help determine direction (In vs Out)
+            const activeSelect = document.getElementById('active-profile-select');
+            const selectedOption = activeSelect ? activeSelect.options[activeSelect.selectedIndex] : null;
+            const activeProfileErn = selectedOption ? selectedOption.text.match(/\(([^)]+)\)/)?.[1] : '';
+
+            for (const mov of movements) {
+              let status = 'Pending';
+              let lastMsg = 'None';
+              let statusDot = 'dot-grey';
+              
+              // 2. Fetch messages for THIS movement to determine actual status and last message
+              try {
+                const msgRes = await fetch(`/api/emcs?endpoint=${encodeURIComponent(`/customs/excise/movements/${mov.movementId}/messages`)}`, {
+                  method: 'GET', credentials: 'include'
+                });
+                if (msgRes.ok) {
+                  const msgs = await msgRes.json();
+                  if (msgs && msgs.length > 0) {
+                    // Sort by createdOn descending to get the latest message
+                    msgs.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
+                    const latest = msgs[0];
+                    lastMsg = latest.messageType || 'Unknown';
+                    
+                    // Infer true status from the latest message type
+                    if (lastMsg === 'IE801') { status = 'Accepted'; statusDot = 'dot-green'; }
+                    else if (lastMsg === 'IE818') { status = 'Receipted'; statusDot = 'dot-blue'; }
+                    else if (lastMsg === 'IE810') { status = 'Cancelled'; statusDot = 'dot-red'; }
+                    else if (lastMsg === 'IE813') { status = 'Changed'; statusDot = 'dot-amber'; }
+                    else if (lastMsg === 'IE819' || lastMsg === 'IE839') { status = 'Rejected'; statusDot = 'dot-red'; }
+                    else if (lastMsg === 'IE807') { status = 'Interrupted'; statusDot = 'dot-amber'; }
+                    else if (lastMsg === 'IE881') { status = 'Closed'; statusDot = 'dot-grey'; }
+                    else { status = 'Pending'; statusDot = 'dot-grey'; }
+                  }
+                }
+              } catch (e) {
+                console.error('Failed to fetch messages for movement', mov.movementId, e);
+              }
+
               const daysOpen = mov.lastUpdated ? Math.floor((Date.now() - new Date(mov.lastUpdated).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+              
+              // Determine if it's an 'Out' movement (we are the consignor)
+              const isOut = mov.consignorId === activeProfileErn || (activeProfileErn && mov.consigneeId !== activeProfileErn);
+              
+              // 3. Build action buttons
+              let actionsHtml = `<button class="btn-small btn-grey view-movement" data-id="${mov.movementId}" data-arc="${mov.administrativeReferenceCode || ''}">View</button>`;
+              
+              // Show Cancel button ONLY if it's an 'Out' movement and status is still Pending or Accepted
+              const isCancelable = isOut && (status === 'Accepted' || status === 'Pending');
+              if (isCancelable) {
+                actionsHtml += ` <button class="btn-small btn-red cancel-movement" data-id="${mov.movementId}" data-arc="${mov.administrativeReferenceCode || ''}" data-lrn="${mov.localReferenceNumber}">Cancel</button>`;
+              }
+
+              const tr = document.createElement('tr');
               tr.innerHTML = `
                 <td class="arc-cell">
                   <span class="arc-value">${mov.administrativeReferenceCode || 'Pending ARC'}</span>
                   <span class="lrn">LRN: ${mov.localReferenceNumber}</span>
                 </td>
-                <td>${mov.consignorId === session.userId ? 'Out' : 'In'}</td>
-                <td>${mov.consigneeId || mov.consignorId}</td>
+                <td>${isOut ? 'Out' : 'In'}</td>
+                <td>${isOut ? (mov.consigneeId || 'Unknown') : (mov.consignorId || 'Unknown')}</td>
                 <td>${mov.lastUpdated ? new Date(mov.lastUpdated).toLocaleDateString() : 'N/A'}</td>
-                <td><span class="status-indicator"><span class="status-dot dot-green"></span> Accepted</span></td>
-                <td>IE801</td>
+                <td><span class="status-indicator"><span class="status-dot ${statusDot}"></span> ${status}</span></td>
+                <td>${lastMsg}</td>
                 <td style="text-align:center;">${daysOpen}</td>
-                <td class="actions-cell">
-                  <button class="btn-small btn-grey view-movement" data-id="${mov.movementId}">View</button>
-                </td>
+                <td class="actions-cell">${actionsHtml}</td>
               `;
               tbody.appendChild(tr);
+            }
+
+            // 4. Attach event listeners to the newly created dynamic buttons
+            
+            // View Button Logic
+            tbody.querySelectorAll('.view-movement').forEach(btn => {
+              btn.addEventListener('click', function() {
+                const movId = this.getAttribute('data-id');
+                // Switch to Tab 5 (Get Messages)
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelector('[data-tab="tab-get-messages"]').classList.add('active');
+                document.getElementById('tab-get-messages').classList.add('active');
+                
+                // Auto-fill and trigger the fetch
+                document.getElementById('gmsg-id').value = movId;
+                document.getElementById('get-messages-btn').click();
+              });
             });
+
+            // Cancel Button Logic
+            tbody.querySelectorAll('.cancel-movement').forEach(btn => {
+              btn.addEventListener('click', function() {
+                const movId = this.getAttribute('data-id');
+                const arc = this.getAttribute('data-arc');
+                const lrn = this.getAttribute('data-lrn');
+                
+                if (!confirm(`Are you sure you want to cancel movement ${movId} (LRN: ${lrn})?`)) return;
+
+                // Switch to Tab 4 (Submit Message)
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelector('[data-tab="tab-submit-msg"]').classList.add('active');
+                document.getElementById('tab-submit-msg').classList.add('active');
+
+                // Auto-fill the cancellation form
+                document.getElementById('sm-mov-id').value = movId;
+                document.getElementById('sm-arc').value = arc;
+                document.getElementById('sm-type').value = 'IE810'; // Cancellation
+                
+                alert('Movement ID and ARC loaded into Submit Message tab. Please review, add a cancellation reason, and submit.');
+              });
+            });
+
           } else {
             if (noResults) noResults.style.display = 'block';
           }
