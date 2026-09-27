@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   const hmrcLoginBtn = document.getElementById('hmrc-login-link');
   if (hmrcLoginBtn) hmrcLoginBtn.addEventListener('click', function(e) { e.preventDefault(); window.location.href='/api/auth'; });
 
-  // TAB NAV
+  // TAB NAV (with auto-load for Monitor tab)
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -95,6 +95,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       this.classList.add('active');
       const id=this.getAttribute('data-tab');
       if(id) document.getElementById(id).classList.add('active');
+      
+      // Auto-load Monitor when Tab 1 is clicked
+      if (id === 'tab-monitor') {
+        const refreshBtn = document.getElementById('mon-refresh');
+        if (refreshBtn) refreshBtn.click();
+      }
     });
   });
 
@@ -282,7 +288,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     try { const r=await fetch('/api/emcs?endpoint='+encodeURIComponent('/customs/excise/movements/'+mid+'/messages'),{method:'POST',credentials:'include',headers:{'Content-Type':'application/xml'},body:xml}); const t=await r.text(); document.getElementById('sm-output').innerText='Status: '+r.status+'\n\n'+t; } catch(e) { document.getElementById('sm-output').innerText='Error: '+e.message; }
   });
 
-  // TAB 5: GET MESSAGES
+  // TAB 5: GET MESSAGES (clean - no "Use in Tab 6" button)
   const getMessagesBtn = document.getElementById('get-messages-btn');
   if (getMessagesBtn) {
     getMessagesBtn.replaceWith(getMessagesBtn.cloneNode(true));
@@ -325,12 +331,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 c.innerHTML = `
                   <h4>${m.messageType} <span class="type-badge ${bc}">${m.messageType}</span></h4>
                   <div class="parsed-grid">
-                    <div class="parsed-field">
-                      <div class="label">Message ID (use this for Tab 6)</div>
-                      <div class="value" style="color:#005ea5;font-weight:bold;">${m.messageId}
-                        <button class="btn-small btn-grey use-msg-id" style="margin-left:10px;" data-msgid="${m.messageId}" data-movid="${id}">Use in Tab 6 →</button>
-                      </div>
-                    </div>
+                    <div class="parsed-field"><div class="label">Message ID</div><div class="value">${m.messageId}</div></div>
                     <div class="parsed-field"><div class="label">Message Type</div><div class="value">${m.messageType}</div></div>
                     <div class="parsed-field"><div class="label">Recipient</div><div class="value">${m.recipient}</div></div>
                     <div class="parsed-field"><div class="label">Created</div><div class="value">${new Date(m.createdOn).toLocaleString()}</div></div>
@@ -348,15 +349,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                       this.textContent = 'Hide XML';
                     } catch(e) { p.textContent = 'Decode failed: ' + e.message; p.style.display = 'block'; }
                   } else { p.style.display = 'none'; this.textContent = 'View Decoded XML'; }
-                });
-                
-                c.querySelector('.use-msg-id').addEventListener('click', function() {
-                  const msgId = this.getAttribute('data-msgid');
-                  const movId = this.getAttribute('data-movid');
-                  document.querySelector('[data-tab="tab-get-message"]').click();
-                  document.getElementById('gsmsg-mid').value = movId;
-                  document.getElementById('gsmsg-id').value = msgId;
-                  document.getElementById('get-single-message-btn').click();
                 });
                 
                 container.appendChild(c);
@@ -381,12 +373,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     const msgid = document.getElementById('gsmsg-id').value.trim();
     
     if (!mid || !msgid) {
-      alert('Both Movement ID and Message ID are required.\n\nTip: Use Tab 5 first, then click "Use in Tab 6 →" on any message.');
+      alert('Both Movement ID and Message ID are required.');
       return;
     }
     
     if (/^IE\d{3}$/i.test(msgid)) {
-      alert('⚠️ "' + msgid + '" looks like a message TYPE (e.g., IE801, IE818), not a Message ID.\n\nMessage IDs look like: XI000002, XI004323, XI00432M\n\nUse Tab 5 first to find the actual Message ID, then click "Use in Tab 6 →" on any message.');
+      alert('⚠️ "' + msgid + '" looks like a message TYPE (e.g., IE801, IE818), not a Message ID.\n\nMessage IDs look like: XI000002, XI004323, XI00432M\n\nUse Tab 5 first to find the actual Message ID.');
       return;
     }
     
@@ -419,13 +411,7 @@ document.addEventListener('DOMContentLoaded', async function() {
           <div class="parsed-card">
             <h4 style="color:#d4351c;">❌ Message Not Found</h4>
             <p style="margin:10px 0;">The Message ID <code>${esc(msgid)}</code> does not exist for Movement <code>${esc(mid)}</code>.</p>
-            <p style="color:#666;font-size:13px;"><strong>Common causes:</strong></p>
-            <ul style="color:#666;font-size:13px;margin-left:20px;">
-              <li>You entered a message TYPE (like IE818) instead of a Message ID (like XI000002)</li>
-              <li>The Message ID has a typo</li>
-              <li>The movement doesn't have any messages yet</li>
-            </ul>
-            <p style="margin-top:15px;"><strong>💡 Tip:</strong> Go to <strong>Tab 5 (Get Messages)</strong> first, enter the Movement ID, and click the <strong>"Use in Tab 6 →"</strong> button on any message to auto-fill this form.</p>
+            <p style="color:#666;font-size:13px;"><strong>💡 Tip:</strong> Use Tab 5 (Get Messages) to find the correct Message ID.</p>
           </div>
         `;
       } else {
@@ -437,14 +423,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   });
 
-  // TAB 7: PRE-VALIDATE TRADER (FIXED - correct JSON structure with exciseTraderRequest array)
+  // TAB 7: PRE-VALIDATE TRADER (FIXED - simplified request, clean overview)
   document.getElementById('pre-validate-btn')?.addEventListener('click', async function() {
     const s = await checkSession();
     if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
     
     const ern = document.getElementById('pv-ern').value.trim();
     const group = document.getElementById('pv-group').value;
-    const p1 = document.getElementById('pv-p1').value.trim();
     
     if (!ern) { alert('ERN required'); return; }
     
@@ -452,20 +437,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('pv-parsed').innerHTML = '';
     
     try {
-      const traderRequest = {
-        exciseRegistrationNumber: ern,
-        entityGroup: group
-      };
-      
-      if (p1) {
-        traderRequest.validateProductAuthorisationRequest = [
-          { product: { exciseProductCode: p1 } }
-        ];
-      }
-      
+      // Simplified request - just ERN and entity group (no product validation)
       const body = {
         exciseTraderValidationRequest: {
-          exciseTraderRequest: [traderRequest]
+          exciseTraderRequest: [
+            {
+              exciseRegistrationNumber: ern,
+              entityGroup: group
+            }
+          ]
         }
       };
       
@@ -486,46 +466,29 @@ document.addEventListener('DOMContentLoaded', async function() {
             ? response.exciseTraderResponse 
             : [response];
           
-          let html = '<div class="parsed-card"><h4>Validation Result</h4>';
+          let html = '';
           
           traders.forEach(trader => {
             const valid = trader.validTrader;
             const details = trader.exciseTraderValidationDetail || trader;
             
+            // Clean overview card
             html += `
-              <div class="parsed-grid" style="margin-bottom:15px;">
-                <div class="parsed-field">
-                  <div class="label">Valid Trader</div>
-                  <div class="value ${valid ? 'arc' : 'warn'}" style="font-weight:bold;font-size:16px;">${valid ? '✅ YES' : '❌ NO'}</div>
+              <div class="parsed-card">
+                <h4>
+                  ${valid ? '✅ Valid Trader' : '❌ Invalid Trader'}
+                  <span class="type-badge ${valid ? 'ie801' : 'ie810'}">${valid ? 'VALID' : 'INVALID'}</span>
+                </h4>
+                <div class="parsed-grid">
+                  <div class="parsed-field"><div class="label">ERN</div><div class="value">${details.exciseRegistrationNumber || ern}</div></div>
+                  <div class="parsed-field"><div class="label">Trader Name</div><div class="value">${details.traderName || 'N/A'}</div></div>
+                  <div class="parsed-field"><div class="label">Trader Type</div><div class="value">${details.traderType || 'N/A'}</div></div>
+                  <div class="parsed-field"><div class="label">Entity Group</div><div class="value">${details.entityGroup || group}</div></div>
                 </div>
-                <div class="parsed-field"><div class="label">ERN</div><div class="value">${details.exciseRegistrationNumber || ern}</div></div>
-                <div class="parsed-field"><div class="label">Trader Name</div><div class="value">${details.traderName || 'N/A'}</div></div>
-                <div class="parsed-field"><div class="label">Trader Type</div><div class="value">${details.traderType || 'N/A'}</div></div>
-                <div class="parsed-field"><div class="label">Entity Group</div><div class="value">${details.entityGroup || group}</div></div>
-                <div class="parsed-field"><div class="label">Street</div><div class="value">${details.streetName || 'N/A'}</div></div>
-                <div class="parsed-field"><div class="label">Postcode</div><div class="value">${details.postcode || 'N/A'}</div></div>
-                <div class="parsed-field"><div class="label">City</div><div class="value">${details.city || 'N/A'}</div></div>
-                <div class="parsed-field"><div class="label">Country</div><div class="value">${details.countryId || 'N/A'}</div></div>
-                <div class="parsed-field"><div class="label">VAT Number</div><div class="value">${details.vatNumber || 'N/A'}</div></div>
               </div>
             `;
-            
-            if (details.validateProductAuthorisationResponse && details.validateProductAuthorisationResponse.length > 0) {
-              html += `<h4 style="margin-top:15px;">Product Authorisation</h4><div class="parsed-grid">`;
-              details.validateProductAuthorisationResponse.forEach(p => {
-                const authorised = p.authorised || p.productAuthorised;
-                html += `
-                  <div class="parsed-field">
-                    <div class="label">${p.product?.exciseProductCode || 'Product'}</div>
-                    <div class="value ${authorised ? 'arc' : 'warn'}">${authorised ? '✅ Authorised' : '❌ Not Authorised'}</div>
-                  </div>
-                `;
-              });
-              html += '</div>';
-            }
           });
           
-          html += '</div>';
           document.getElementById('pv-parsed').innerHTML = html;
         } catch(e) {
           document.getElementById('pv-parsed').innerHTML = `<p>Response received but couldn't be parsed: ${e.message}</p><pre>${esc(t)}</pre>`;
@@ -551,7 +514,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   });
 
-  // TAB 8: SUBSCRIBE (SIMPLE - raw response only)
+  // TAB 8: SUBSCRIBE
   document.getElementById('subscribe-ern-btn')?.addEventListener('click', async function() {
     const s = await checkSession();
     if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
@@ -575,7 +538,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   });
 
-  // TAB 9: UNSUBSCRIBE (SIMPLE - raw response only)
+  // TAB 9: UNSUBSCRIBE
   document.getElementById('unsubscribe-ern-btn')?.addEventListener('click', async function() {
     const s = await checkSession();
     if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
