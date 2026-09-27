@@ -76,35 +76,16 @@ export async function ensureSchema() {
   try {
     const db = getDb();
     
-    // Check if old schema exists and needs migration
-    try {
-      const checkResult = await db.execute({
-        sql: "SELECT sql FROM sqlite_master WHERE type='table' AND name='profiles'",
-        args: []
-      });
-      
-      if (checkResult.rows.length > 0) {
-        const tableSql = checkResult.rows[0].sql || '';
-        // If old table has session_id column, drop and recreate
-        if (tableSql.includes('session_id')) {
-          console.log('Migrating old schema...');
-          await db.execute('DROP TABLE IF EXISTS profiles');
-          await db.execute('DROP TABLE IF EXISTS drafts');
-          await db.execute('DROP TABLE IF EXISTS hmrc_tokens');
-          await db.execute('DROP TABLE IF EXISTS sessions');
-          await db.execute('DROP TABLE IF EXISTS audit_logs');
-        }
-      }
-    } catch (e) {
-      console.log('Schema check:', e.message);
-    }
-    
+    // SAFE SCHEMA INITIALIZATION: NO DROP TABLES
+    // This will ONLY create tables if they don't exist.
+    // It will NEVER delete your data.
     const statements = SCHEMA.split(';').map(s => s.trim()).filter(Boolean);
     for (const stmt of statements) {
       try {
         await db.execute(stmt);
       } catch (e) {
-        if (!e.message.includes('already exists')) {
+        // Ignore safe errors like "table already exists" or "index already exists"
+        if (!e.message.includes('already exists') && !e.message.includes('duplicate')) {
           console.error('Schema init error:', e.message);
         }
       }
