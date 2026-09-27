@@ -13,7 +13,8 @@
     <h1>🔒 EMCS Dashboard</h1>
     <p style="margin-bottom:20px; color:#666;">Enter your password to continue</p>
     <input type="password" id="password" placeholder="Dashboard Password" style="margin-bottom:10px;">
-    <input type="text" id="totp-code" placeholder="6-digit 2FA code (if enabled)" maxlength="6" style="display:none; margin-bottom:10px;">
+    <input type="text" id="totp-code" placeholder="6-digit 2FA code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="display:none; margin-bottom:10px;">
+    <p id="totp-off-note" style="display:none; font-size:12px; color:#b45309; margin-bottom:10px;">⚠️ 2FA is not configured on the server. Logins will be blocked until you run Setup 2FA below and save TOTP_SECRET in Vercel.</p>
     <button id="login-btn" style="width:100%; margin-top:10px;">Login</button>
     <p id="login-error" class="error" style="margin-top:10px;"></p>
     <hr style="margin:25px 0;">
