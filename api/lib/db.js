@@ -1,3 +1,19 @@
+import { createClient } from '@libsql/client';
+
+let db = null;
+
+export function getDb() {
+  if (!db) {
+    const url = process.env.TURSO_DATABASE_URL;
+    const token = process.env.TURSO_AUTH_TOKEN;
+    if (!url || !token) {
+      throw new Error('Turso credentials not configured');
+    }
+    db = createClient({ url, authToken: token });
+  }
+  return db;
+}
+
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS sessions (
   id TEXT PRIMARY KEY,
@@ -53,3 +69,68 @@ CREATE TABLE IF NOT EXISTS profiles (
 
 CREATE INDEX IF NOT EXISTS idx_profiles_user ON profiles(user_id);
 `;
+
+let initialized = false;
+export async function ensureSchema() {
+  if (initialized) return;
+  try {
+    const db = getDb();
+    
+    // Check if old schema exists and needs migration
+    try {
+      const checkResult = await db.execute({
+        sql: "SELECT sql FROM sqlite_master WHERE type='table' AND name='profiles'",
+        args: []
+      });
+      
+      if (checkResult.rows.length > 0) {
+        const tableSql = checkResult.rows[0].sql || '';
+        // If old table has session_id column, drop and recreate
+        if (tableSql.includes('session_id')) {
+          console.log('Migrating old schema...');
+          await db.execute('DROP TABLE IF EXISTS profiles');
+          await db.execute('DROP TABLE IF EXISTS drafts');
+          await db.execute('DROP TABLE IF EXISTS hmrc_tokens');
+          await db.execute('DROP TABLE IF EXISTS sessions');
+          await db.execute('DROP TABLE IF EXISTS audit_logs');
+        }
+      }
+    } catch (e) {
+      console.log('Schema check:', e.message);
+    }
+    
+    const statements = SCHEMA.split(';').map(s => s.trim()).filter(Boolean);
+    for (const stmt of statements) {
+      try {
+        await db.execute(stmt);
+      } catch (e) {
+        if (!e.message.includes('already exists')) {
+          console.error('Schema init error:', e.message);
+        }
+      }
+    }
+    initialized = true;
+  } catch (e) {
+    console.error('Schema initialization failed:', e.message);
+    throw e;
+  }
+}
+
+export async function cleanupOldAuditLogs(daysToKeep = 90) {
+  const db = getDb();
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - daysToKeep);
+  await db.execute({
+    sql: 'DELETE FROM audit_logs WHERE timestamp < ?',
+    args: [cutoff.toISOString()]
+  });
+}
+
+export async function cleanupExpiredSessions() {
+  const db = getDb();
+  const cutoff = Date.now() - (24 * 60 * 60 * 1000);
+  await db.execute({
+    sql: 'DELETE FROM sessions WHERE last_activity < ?',
+    args: [cutoff]
+  });
+}
