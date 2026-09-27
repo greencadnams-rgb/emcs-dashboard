@@ -28,9 +28,7 @@ export default async function handler(req, res) {
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}${endpoint}`;
 
-  // HMRC API Spec Compliance:
-  // - POST submissions (IE815, IE818, etc.) MUST expect JSON responses.
-  // - GET single message MUST expect XML responses.
+  // Per API spec: POST submissions expect JSON response, GET single message expects XML
   let acceptHeader = 'application/vnd.hmrc.1.0+json';
   if (req.headers['accept'] && req.headers['accept'].includes('xml')) {
     acceptHeader = 'application/vnd.hmrc.1.0+xml';
@@ -43,15 +41,14 @@ export default async function handler(req, res) {
     'x-correlation-id': crypto.randomUUID()
   };
 
-  // Forward Content-Type from browser (application/xml for movements, application/json for pre-validate)
+  // Forward Content-Type from browser
   if (req.headers['content-type']) {
     headers['Content-Type'] = req.headers['content-type'];
   } else if (req.method === 'POST' || req.method === 'PUT') {
-    // Default to XML for movement submissions if not explicitly set
     headers['Content-Type'] = 'application/xml';
   }
 
-  // HMRC sandbox strictly requires x-client-ip
+  // HMRC sandbox requires x-client-ip
   const isTest = (process.env.HMRC_ENVIRONMENT || 'test') === 'test';
   if (isTest) {
     headers['x-client-ip'] = '127.0.0.1';
@@ -67,11 +64,7 @@ export default async function handler(req, res) {
 
   try {
     const startTime = Date.now();
-    
-    const fetchOptions = {
-      method: req.method,
-      headers
-    };
+    const fetchOptions = { method: req.method, headers };
 
     if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
       if (typeof req.body === 'string') {
@@ -93,7 +86,6 @@ export default async function handler(req, res) {
     });
 
     res.status(hmrcRes.status);
-    
     const contentType = hmrcRes.headers.get('content-type');
     if (contentType) {
       res.setHeader('Content-Type', contentType);
