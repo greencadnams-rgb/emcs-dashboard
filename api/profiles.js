@@ -7,22 +7,24 @@ export default async function handler(req, res) {
   if (!session) return res.status(401).json({ error: 'Not authenticated' });
 
   try { await ensureSchema(); } catch(e) {
+    console.error('Schema init failed:', e);
     return res.status(500).json({ error: 'Schema init failed' });
   }
   
   const db = getDb();
-  // DYNAMIC: Use the actual session userId, not hardcoded
-  const userId = session.userId; 
+  const userId = session.userId;
 
   try {
     if (req.method === 'GET') {
+      // Get ALL profiles (not filtered by user_id to prevent orphaning issues)
       let result = await db.execute({
-        sql: 'SELECT * FROM profiles WHERE user_id = ? ORDER BY id',
-        args: [userId]
+        sql: 'SELECT * FROM profiles ORDER BY id',
+        args: []
       });
       
       let profiles = result.rows;
       
+      // If no profiles exist at all, create defaults
       if (profiles.length === 0) {
         const defaults = [
           { name: 'Consignor Profile', type: 'consignor', ern: '', trader_name: '', street: '', postcode: '', city: '', office: 'GB004098' },
@@ -35,11 +37,11 @@ export default async function handler(req, res) {
             args: [userId, p.name, p.type, p.ern, p.trader_name, p.street, p.postcode, p.city, p.office, now]
           });
         }
-        result = await db.execute({ sql: 'SELECT * FROM profiles WHERE user_id = ? ORDER BY id', args: [userId] });
+        result = await db.execute({ sql: 'SELECT * FROM profiles ORDER BY id', args: [] });
         profiles = result.rows;
       }
       
-      // FIX: Safely convert BigInt to Number for JSON serialization
+      // Convert BigInt to Number for JSON serialization
       const safeProfiles = profiles.map(p => ({
         id: typeof p.id === 'bigint' ? Number(p.id) : (p.id || 0),
         name: p.name,
@@ -49,7 +51,8 @@ export default async function handler(req, res) {
         street: p.street,
         postcode: p.postcode,
         city: p.city,
-        office: p.office
+        office: p.office,
+        userId: p.user_id
       }));
       
       return res.status(200).json(safeProfiles);
@@ -58,16 +61,15 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       const { name, type, ern, traderName, street, postcode, city, office } = req.body;
       if (!name || !ern) return res.status(400).json({ error: 'Name and ERN required' });
-      if (!/^[A-Z]{2}[A-Z0-9]{9,12}$/.test(ern)) return res.status(400).json({ error: 'Invalid ERN format' });
+      if (!/^[A-Z]{2}[A-Z0-9]{9,12}$/.test(ern)) return res.status(400).json({ error: 'Invalid ERN format (must be 13-14 characters)' });
 
       const result = await db.execute({
         sql: 'INSERT INTO profiles (user_id, name, type, ern, trader_name, street, postcode, city, office, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         args: [userId, name, type || 'consignor', ern, traderName || '', street || '', postcode || '', city || '', office || 'GB004098', new Date().toISOString()]
       });
       
-      await logAudit(session.id, 'PROFILE_CREATED', { ern });
+      await logAudit(session.id, 'PROFILE_CREATED', { ern, userId });
       
-      // FIX: Safely convert BigInt to Number
       const newId = typeof result.lastInsertRowid === 'bigint' ? Number(result.lastInsertRowid) : result.lastInsertRowid;
       return res.status(201).json({ id: newId, name, ern });
     }
@@ -76,19 +78,9 @@ export default async function handler(req, res) {
       const { id } = req.query;
       if (!id) return res.status(400).json({ error: 'Profile ID required' });
       
-      const countResult = await db.execute({
-        sql: 'SELECT COUNT(*) as c FROM profiles WHERE user_id = ?',
-        args: [userId]
-      });
-      const count = typeof countResult.rows[0].c === 'bigint' ? Number(countResult.rows[0].c) : countResult.rows[0].c;
-      
-      if (count <= 1) {
-        return res.status(400).json({ error: 'Must have at least one profile' });
-      }
-      
       await db.execute({
-        sql: 'DELETE FROM profiles WHERE id = ? AND user_id = ?',
-        args: [parseInt(id), userId]
+        sql: 'DELETE FROM profiles WHERE id = ?',
+        args: [parseInt(id)]
       });
       
       await logAudit(session.id, 'PROFILE_DELETED', { profileId: id });
