@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   });
 
-  // --- 6. MONITOR TAB REFRESH LOGIC (Smart Rate-Limiting) ---
+  // --- 6. MONITOR TAB REFRESH LOGIC (Optimized to prevent 429 Rate Limits) ---
   const monRefreshBtn = document.getElementById('mon-refresh');
   if (monRefreshBtn) {
     monRefreshBtn.addEventListener('click', async function() {
@@ -469,6 +469,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       tbody.innerHTML = '';
 
       try {
+        // 1. Fetch all movements (This is a single, safe API call)
         const res = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/movements'), {
           method: 'GET', credentials: 'include'
         });
@@ -483,39 +484,14 @@ document.addEventListener('DOMContentLoaded', async function() {
             const selectedOption = activeSelect ? activeSelect.options[activeSelect.selectedIndex] : null;
             const activeProfileErn = selectedOption ? selectedOption.text.match(/\(([^)]+)\)/)?.[1] : '';
 
-            // Process movements sequentially with a delay to respect HMRC's 3 req/sec limit
-            for (const mov of movements) {
-              let status = 'Pending';
-              let lastMsg = 'None';
-              let statusDot = 'dot-grey';
+            movements.forEach(mov => {
+              // Safe status inference without making extra API calls:
+              // If it has an ARC, it was accepted. Otherwise, it's pending.
+              const hasArc = !!mov.administrativeReferenceCode;
+              const status = hasArc ? 'Accepted' : 'Pending';
+              const statusDot = hasArc ? 'dot-green' : 'dot-grey';
+              const lastMsg = hasArc ? 'IE801' : 'None';
               
-              try {
-                const msgRes = await fetch(`/api/emcs?endpoint=${encodeURIComponent(`/customs/excise/movements/${mov.movementId}/messages`)}`, {
-                  method: 'GET', credentials: 'include'
-                });
-                if (msgRes.ok) {
-                  const msgs = await msgRes.json();
-                  if (msgs && msgs.length > 0) {
-                    msgs.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
-                    const latest = msgs[0];
-                    lastMsg = latest.messageType || 'Unknown';
-                    
-                    if (lastMsg === 'IE801') { status = 'Accepted'; statusDot = 'dot-green'; }
-                    else if (lastMsg === 'IE818') { status = 'Receipted'; statusDot = 'dot-blue'; }
-                    else if (lastMsg === 'IE810') { status = 'Cancelled'; statusDot = 'dot-red'; }
-                    else if (lastMsg === 'IE813') { status = 'Changed'; statusDot = 'dot-amber'; }
-                    else if (lastMsg === 'IE819' || lastMsg === 'IE839') { status = 'Rejected'; statusDot = 'dot-red'; }
-                    else if (lastMsg === 'IE807') { status = 'Interrupted'; statusDot = 'dot-amber'; }
-                    else if (lastMsg === 'IE881') { status = 'Closed'; statusDot = 'dot-grey'; }
-                  }
-                }
-              } catch (e) {
-                console.error('Failed to fetch messages for', mov.movementId, e);
-              }
-
-              // 400ms delay strictly respects HMRC's 3 requests/second rate limit
-              await new Promise(r => setTimeout(r, 400));
-
               const daysOpen = mov.lastUpdated ? Math.floor((Date.now() - new Date(mov.lastUpdated).getTime()) / (1000 * 60 * 60 * 24)) : 0;
               const isOut = mov.consignorId === activeProfileErn || (activeProfileErn && mov.consigneeId !== activeProfileErn);
               
@@ -541,9 +517,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 <td class="actions-cell">${actionsHtml}</td>
               `;
               tbody.appendChild(tr);
-            }
+            });
 
-            // Attach View Button Logic
+            // Attach View Button Logic (Fetches messages ONLY when clicked)
             tbody.querySelectorAll('.view-movement').forEach(btn => {
               btn.addEventListener('click', function() {
                 const movId = this.getAttribute('data-id');
@@ -592,6 +568,71 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (loading) loading.style.display = 'none';
       }
     });
+  }
+
+  // --- 7. PROFILE MANAGEMENT (With Debug Logging) ---
+  async function loadProfiles() {
+    try {
+      console.log('Fetching profiles...');
+      const res = await fetch('/api/profiles', { credentials: 'include' });
+      
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('Profile fetch failed with status:', res.status, errText);
+        alert('Failed to load profiles: ' + res.status + '\n' + errText);
+        return;
+      }
+
+      const profiles = await res.json();
+      console.log('Profiles loaded successfully:', profiles);
+
+      const profileSelect = document.getElementById('active-profile-select');
+      const profileChips = document.getElementById('profile-chips');
+      
+      if (profileSelect) {
+        profileSelect.innerHTML = '<option value="">Select a profile...</option>';
+        profiles.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = `${p.name} (${p.ern})`;
+          profileSelect.appendChild(opt);
+        });
+        
+        profileSelect.addEventListener('change', function() {
+          const selected = profiles.find(p => p.id == this.value);
+          if (selected) {
+            document.getElementById('s-consignor-ern').value = selected.ern;
+            document.getElementById('s-consignor-name').value = selected.traderName || '';
+            document.getElementById('s-consignor-street').value = selected.street || '';
+            document.getElementById('s-consignor-postcode').value = selected.postcode || '';
+            document.getElementById('s-consignor-city').value = selected.city || '';
+            document.getElementById('s-dispatch-office').value = selected.office || 'GB004098';
+          }
+        });
+      }
+
+      if (profileChips) {
+        profileChips.innerHTML = '';
+        profiles.forEach(p => {
+          const chip = document.createElement('div');
+          chip.className = 'profile-chip';
+          chip.innerHTML = `<span>${p.name} (${p.ern})</span> <span class="del-prof" data-id="${p.id}">&times;</span>`;
+          profileChips.appendChild(chip);
+        });
+        
+        profileChips.querySelectorAll('.del-prof').forEach(delBtn => {
+          delBtn.addEventListener('click', async function() {
+            if (confirm('Delete this profile?')) {
+              await fetch(`/api/profiles?id=${this.getAttribute('data-id')}`, { method: 'DELETE', credentials: 'include' });
+              loadProfiles();
+            }
+          });
+        });
+      }
+    } catch(e) { 
+      console.error('Load profiles network error:', e); 
+      alert('Network error loading profiles: ' + e.message);
+    }
   }
 
   // --- 7. DRAFTS ---
