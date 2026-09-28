@@ -4,24 +4,10 @@ let db = null;
 
 export function getDb() {
   if (!db) {
-    // FIX: .trim() automatically strips out any hidden newlines or spaces!
-    const rawUrl = process.env.TURSO_DATABASE_URL;
-    const rawToken = process.env.TURSO_AUTH_TOKEN;
-    
-    const url = rawUrl ? rawUrl.trim() : undefined;
-    const token = rawToken ? rawToken.trim() : undefined;
-    
-    if (!url || !token) {
-      console.error('❌ TURSO ERROR: Missing TURSO_DATABASE_URL or TURSO_AUTH_TOKEN');
-      throw new Error('Turso credentials not configured');
-    }
-    
-    try {
-      db = createClient({ url, authToken: token });
-    } catch (e) {
-      console.error('❌ TURSO ERROR: Failed to initialize client:', e.message);
-      throw e;
-    }
+    const url = process.env.TURSO_DATABASE_URL;
+    const token = process.env.TURSO_AUTH_TOKEN;
+    if (!url || !token) throw new Error('Turso credentials not configured');
+    db = createClient({ url, authToken: token });
   }
   return db;
 }
