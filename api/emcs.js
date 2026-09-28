@@ -18,8 +18,8 @@ export default async function handler(req, res) {
   if (!endpoint) return res.status(400).json({ error: 'endpoint parameter required' });
 
   const url = `${getBaseUrl()}${endpoint}`;
+  console.log('➡️ Proxying to HMRC:', req.method, url); // DEBUG LOG
 
-  // Use query param ?accept=xml for reliable XML format detection
   let acceptHeader = 'application/vnd.hmrc.1.0+json';
   if (req.query.accept === 'xml' || req.headers['accept']?.includes('xml')) {
     acceptHeader = 'application/vnd.hmrc.1.0+xml';
