@@ -14,7 +14,6 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      // NO user_id filter - show ALL profiles to prevent orphaning
       let result = await db.execute({
         sql: 'SELECT * FROM profiles ORDER BY id',
         args: []
@@ -74,7 +73,8 @@ export default async function handler(req, res) {
       const count = typeof countResult.rows[0].c === 'bigint' ? Number(countResult.rows[0].c) : countResult.rows[0].c;
       if (count <= 1) return res.status(400).json({ error: 'Must have at least one profile' });
       
-      await db.execute({ sql: 'DELETE FROM profiles WHERE id = ?', args: [parseInt(id)] });
+      // FIX: Added user_id check for consistency
+      await db.execute({ sql: 'DELETE FROM profiles WHERE id = ? AND user_id = ?', args: [parseInt(id), 'dashboard-user'] });
       await logAudit(session.id, 'PROFILE_DELETED', { profileId: id });
       return res.status(200).json({ success: true });
     }
