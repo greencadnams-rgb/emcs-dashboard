@@ -6,9 +6,7 @@ export function getDb() {
   if (!db) {
     const url = process.env.TURSO_DATABASE_URL;
     const token = process.env.TURSO_AUTH_TOKEN;
-    if (!url || !token) {
-      throw new Error('Turso credentials not configured');
-    }
+    if (!url || !token) throw new Error('Turso credentials not configured');
     db = createClient({ url, authToken: token });
   }
   return db;
@@ -53,6 +51,16 @@ CREATE TABLE IF NOT EXISTS drafts (
 
 CREATE INDEX IF NOT EXISTS idx_drafts_user ON drafts(user_id);
 
+CREATE TABLE IF NOT EXISTS templates (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  data TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_templates_user ON templates(user_id);
+
 CREATE TABLE IF NOT EXISTS profiles (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id TEXT NOT NULL,
@@ -77,9 +85,8 @@ export async function ensureSchema() {
     const db = getDb();
     const statements = SCHEMA.split(';').map(s => s.trim()).filter(Boolean);
     for (const stmt of statements) {
-      try {
-        await db.execute(stmt);
-      } catch (e) {
+      try { await db.execute(stmt); }
+      catch (e) {
         if (!e.message.includes('already exists') && !e.message.includes('duplicate')) {
           console.error('Schema init error:', e.message);
         }
