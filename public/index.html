@@ -107,8 +107,20 @@
     <!-- TAB 2: SUBMIT MOVEMENT -->
     <div id="tab-submit" class="tab">
       <div class="card">
-        <h2>Submit Draft Movement (IE815)</h2>
 
+        <h2>Submit Draft Movement (IE815)</h2>
+                <div style="background:#e8f4fd; border-left:3px solid #005ea5; padding:15px; margin-bottom:20px; border-radius:4px;">
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <label style="font-weight:bold; margin:0;">📋 Template:</label>
+            <select id="template-select" style="flex:1; min-width:200px;">
+              <option value="">-- Select a template --</option>
+            </select>
+            <button id="load-template-btn" type="button" class="btn-green btn-small">Load</button>
+            <button id="delete-template-btn" type="button" class="btn-red btn-small">Delete</button>
+          </div>
+          <p style="margin:8px 0 0 0; font-size:12px; color:#666;">Load a saved template to pre-fill the form, then submit live or save as draft.</p>
+        </div>
+        
         <h3>Box 1: eAD Header</h3>
         <div class="form-grid">
           <div class="field"><label>Destination Type <span class="required-asterisk">*</span></label>
