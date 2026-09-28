@@ -427,6 +427,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     const table = document.getElementById('mon-table');
     const tbody = document.getElementById('mon-tbody');
     
+    // FIX: Define sourceFilter so it doesn't throw "sourceFilter is not defined"
+    const sourceFilter = 'all';
+    
     if (loading) loading.style.display = 'block';
     if (noRes) noRes.style.display = 'none';
     if (table) table.style.display = 'none';
@@ -700,14 +703,13 @@ document.addEventListener('DOMContentLoaded', async function() {
   });
 
   // === TAB 7: PRE-VALIDATE ===
-  // FIX: Corrected payload structure to match OpenAPI spec (object, not array, with required product array)
   document.getElementById('pre-validate-btn')?.addEventListener('click', async function() {
     const s = await checkSession(); 
     if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
     
     const ern = document.getElementById('pv-ern').value.trim();
     const group = document.getElementById('pv-group').value;
-    const p1 = (document.getElementById('pv-p1').value.trim() || 'B000').toUpperCase(); // Default to B000 if blank
+    const p1 = (document.getElementById('pv-p1').value.trim() || 'B000').toUpperCase();
     
     if (!ern) { alert('ERN is required'); return; }
     
