@@ -44,12 +44,13 @@ async function exchangeCode(code) {
 }
 
 function setCookie(res, name, value, maxAgeSec) {
+  const isProd = process.env.NODE_ENV === 'production';
   const attrs = [
     `${name}=${encodeURIComponent(value)}`,
     'Path=/',
     'SameSite=Lax',
     'HttpOnly',
-    'Secure',
+    ...(isProd ? ['Secure'] : []),
     `Max-Age=${maxAgeSec}`
   ];
   const existing = res.getHeader('Set-Cookie') || [];
