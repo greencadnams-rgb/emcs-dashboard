@@ -40,12 +40,13 @@ function parseCookies(req) {
 }
 
 function setCookie(res, name, value, maxAgeMs) {
+  const isProd = process.env.NODE_ENV === 'production';
   const attrs = [
     `${name}=${encodeURIComponent(value)}`,
     'Path=/',
     'SameSite=Strict',
     'HttpOnly',
-    'Secure',
+    ...(isProd ? ['Secure'] : []),
     `Max-Age=${Math.floor(maxAgeMs / 1000)}`
   ];
   const existing = res.getHeader('Set-Cookie') || [];
@@ -55,12 +56,13 @@ function setCookie(res, name, value, maxAgeMs) {
 }
 
 function clearCookie(res, name) {
+  const isProd = process.env.NODE_ENV === 'production';
   const attrs = [
     `${name}=`,
     'Path=/',
     'SameSite=Strict',
     'HttpOnly',
-    'Secure',
+    ...(isProd ? ['Secure'] : []),
     'Max-Age=0'
   ];
   const existing = res.getHeader('Set-Cookie') || [];
