@@ -255,11 +255,18 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // === TEMPLATES ===
   let templatesCache = [];
+  
   async function loadTemplates() {
     try {
-      const r = await fetch('/api/templates', { credentials:'include' });
-      if (!r.ok) return;
+      console.log('Loading templates...');
+      const r = await fetch('/api/templates', { credentials: 'include' });
+      if (!r.ok) {
+        console.error('Templates fetch failed:', r.status);
+        return;
+      }
       templatesCache = await r.json();
+      console.log('Loaded', templatesCache.length, 'templates');
+      
       const sel = document.getElementById('template-select');
       if (sel) {
         sel.innerHTML = '<option value="">-- Select a template --</option>';
@@ -270,47 +277,92 @@ document.addEventListener('DOMContentLoaded', async function() {
           sel.appendChild(o);
         });
       }
-    } catch(e) { console.error('Load templates error:', e); }
+    } catch(e) { 
+      console.error('Load templates error:', e); 
+    }
   }
 
-  document.getElementById('load-template-btn')?.addEventListener('click', function() {
-    const sel = document.getElementById('template-select');
-    const id = sel?.value;
-    if (!id) { alert('Select a template first'); return; }
-    const t = templatesCache.find(x => x.id === id);
-    if (t && t.data) {
-      populateFormData(t.data);
-      window.currentDraftId = null; // New draft, not editing existing
-      alert('Template "' + t.name + '" loaded into form. You can now edit and submit live or save as draft.');
-    }
-  });
+  // Load template button
+  const loadTemplateBtn = document.getElementById('load-template-btn');
+  if (loadTemplateBtn) {
+    loadTemplateBtn.addEventListener('click', function() {
+      const sel = document.getElementById('template-select');
+      const id = sel?.value;
+      if (!id) { 
+        alert('Select a template first'); 
+        return; 
+      }
+      const t = templatesCache.find(x => x.id === id);
+      if (t && t.data) {
+        populateFormData(t.data);
+        window.currentDraftId = null; // New draft, not editing existing
+        alert('Template "' + t.name + '" loaded into form.\n\nYou can now:\n• Edit and click "Submit Live"\n• Edit and click "Save as Draft"\n• Click "Save as Template" to create a new template');
+      } else {
+        alert('Template data not found');
+      }
+    });
+  }
 
-  document.getElementById('delete-template-btn')?.addEventListener('click', async function() {
-    const sel = document.getElementById('template-select');
-    const id = sel?.value;
-    if (!id) { alert('Select a template first'); return; }
-    if (!confirm('Delete this template?')) return;
-    try {
-      const r = await fetch('/api/templates?id=' + id, { method:'DELETE', credentials:'include' });
-      if (r.ok) { alert('Template deleted'); await loadTemplates(); }
-      else { const e = await r.json(); alert('Error: ' + e.error); }
-    } catch(e) { alert('Error: ' + e.message); }
-  });
+  // Delete template button
+  const deleteTemplateBtn = document.getElementById('delete-template-btn');
+  if (deleteTemplateBtn) {
+    deleteTemplateBtn.addEventListener('click', async function() {
+      const sel = document.getElementById('template-select');
+      const id = sel?.value;
+      if (!id) { 
+        alert('Select a template first'); 
+        return; 
+      }
+      if (!confirm('Delete this template?')) return;
+      
+      try {
+        const r = await fetch('/api/templates?id=' + id, { 
+          method: 'DELETE', 
+          credentials: 'include' 
+        });
+        if (r.ok) { 
+          alert('Template deleted'); 
+          await loadTemplates(); 
+        } else { 
+          const e = await r.json(); 
+          alert('Error: ' + e.error); 
+        }
+      } catch(e) { 
+        alert('Error: ' + e.message); 
+      }
+    });
+  }
 
-  document.getElementById('save-template-btn')?.addEventListener('click', async function() {
-    const name = prompt('Template name:');
-    if (!name) return;
-    const data = collectFormData();
-    try {
-      const r = await fetch('/api/templates', {
-        method:'POST', credentials:'include',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ name, data })
-      });
-      if (r.ok) { alert('Template saved!'); await loadTemplates(); }
-      else { const e = await r.json(); alert('Error: ' + e.error); }
-    } catch(e) { alert('Error: ' + e.message); }
-  });
+  // Save as template button
+  const saveTemplateBtn = document.getElementById('save-template-btn');
+  if (saveTemplateBtn) {
+    saveTemplateBtn.addEventListener('click', async function() {
+      const name = prompt('Template name:');
+      if (!name) return;
+      
+      const data = collectFormData();
+      console.log('Saving template:', name, data);
+      
+      try {
+        const r = await fetch('/api/templates', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, data })
+        });
+        
+        if (r.ok) { 
+          alert('Template "' + name + '" saved!\n\nYou can now load it from the Template dropdown anytime.'); 
+          await loadTemplates(); 
+        } else { 
+          const e = await r.json(); 
+          alert('Error: ' + e.error); 
+        }
+      } catch(e) { 
+        alert('Error: ' + e.message); 
+      }
+    });
+  }
 
   // === DRAFTS ===
   window.currentDraftId = null;
