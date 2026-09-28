@@ -90,7 +90,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   function populateFormData(data) {
     if (!data) return;
-    // Clear existing dynamic items first
     document.getElementById('transport-units-container').innerHTML = '';
     document.getElementById('goods-items-container').innerHTML = '';
     
@@ -282,20 +281,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
 
-  // Load template button
   const loadTemplateBtn = document.getElementById('load-template-btn');
   if (loadTemplateBtn) {
     loadTemplateBtn.addEventListener('click', function() {
       const sel = document.getElementById('template-select');
       const id = sel?.value;
-      if (!id) { 
-        alert('Select a template first'); 
-        return; 
-      }
+      if (!id) { alert('Select a template first'); return; }
       const t = templatesCache.find(x => x.id === id);
       if (t && t.data) {
         populateFormData(t.data);
-        window.currentDraftId = null; // New draft, not editing existing
+        window.currentDraftId = null;
         alert('Template "' + t.name + '" loaded into form.\n\nYou can now:\n• Edit and click "Submit Live"\n• Edit and click "Save as Draft"\n• Click "Save as Template" to create a new template');
       } else {
         alert('Template data not found');
@@ -303,64 +298,35 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // Delete template button
   const deleteTemplateBtn = document.getElementById('delete-template-btn');
   if (deleteTemplateBtn) {
     deleteTemplateBtn.addEventListener('click', async function() {
       const sel = document.getElementById('template-select');
       const id = sel?.value;
-      if (!id) { 
-        alert('Select a template first'); 
-        return; 
-      }
+      if (!id) { alert('Select a template first'); return; }
       if (!confirm('Delete this template?')) return;
-      
       try {
-        const r = await fetch('/api/templates?id=' + id, { 
-          method: 'DELETE', 
-          credentials: 'include' 
-        });
-        if (r.ok) { 
-          alert('Template deleted'); 
-          await loadTemplates(); 
-        } else { 
-          const e = await r.json(); 
-          alert('Error: ' + e.error); 
-        }
-      } catch(e) { 
-        alert('Error: ' + e.message); 
-      }
+        const r = await fetch('/api/templates?id=' + id, { method: 'DELETE', credentials: 'include' });
+        if (r.ok) { alert('Template deleted'); await loadTemplates(); } 
+        else { const e = await r.json(); alert('Error: ' + e.error); }
+      } catch(e) { alert('Error: ' + e.message); }
     });
   }
 
-  // Save as template button
   const saveTemplateBtn = document.getElementById('save-template-btn');
   if (saveTemplateBtn) {
     saveTemplateBtn.addEventListener('click', async function() {
       const name = prompt('Template name:');
       if (!name) return;
-      
       const data = collectFormData();
-      console.log('Saving template:', name, data);
-      
       try {
         const r = await fetch('/api/templates', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, data })
         });
-        
-        if (r.ok) { 
-          alert('Template "' + name + '" saved!\n\nYou can now load it from the Template dropdown anytime.'); 
-          await loadTemplates(); 
-        } else { 
-          const e = await r.json(); 
-          alert('Error: ' + e.error); 
-        }
-      } catch(e) { 
-        alert('Error: ' + e.message); 
-      }
+        if (r.ok) { alert('Template "' + name + '" saved!'); await loadTemplates(); } 
+        else { const e = await r.json(); alert('Error: ' + e.error); }
+      } catch(e) { alert('Error: ' + e.message); }
     });
   }
 
@@ -384,16 +350,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     const data = collectFormData();
     try {
       const r = await fetch('/api/drafts', {
-        method:'POST', credentials:'include',
-        headers:{'Content-Type':'application/json'},
+        method:'POST', credentials:'include', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ name, data, id: existingId })
       });
       if (r.ok) {
         const result = await r.json();
         window.currentDraftId = result.id;
         alert(existingId ? 'Draft updated!' : 'Draft saved!');
-      }
-      else { const e = await r.json(); alert('Error: ' + e.error); }
+      } else { const e = await r.json(); alert('Error: ' + e.error); }
     } catch(e) { alert('Error: ' + e.message); }
   });
 
@@ -404,14 +368,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     const lrn = document.getElementById('s-lrn').value || ('LRN' + Date.now().toString().slice(-10));
     const dt = document.getElementById('s-date').value || new Date().toISOString().slice(0,10);
     const tm = new Date().toISOString().slice(11,19);
-    let body = ''; const items = [];
+    let body = '';
     document.querySelectorAll('#goods-items-container .item-field').forEach(function(it,i){
       const nw = it.querySelector('.s-net-weight').value || it.querySelector('.s-weight').value;
       const pc = it.querySelector('.s-product-code').value; const q = it.querySelector('.s-qty').value;
       const abv = it.querySelector('.s-abv').value; const cd = it.querySelector('.s-comm-desc').value;
       const br = it.querySelector('.s-brand').value; const sm = it.querySelector('.s-ship-mark').value;
       body += '<urn:BodyEadEsad><urn:BodyRecordUniqueReference>'+(i+1)+'</urn:BodyRecordUniqueReference><urn:ExciseProductCode>'+pc+'</urn:ExciseProductCode><urn:CnCode>'+it.querySelector('.s-cn-code').value+'</urn:CnCode><urn:Quantity>'+q+'</urn:Quantity><urn:GrossMass>'+it.querySelector('.s-weight').value+'</urn:GrossMass><urn:NetMass>'+nw+'</urn:NetMass>'+(abv?'<urn:AlcoholicStrengthByVolumeInPercentage>'+abv+'</urn:AlcoholicStrengthByVolumeInPercentage>':'')+'<urn:FiscalMarkUsedFlag>0</urn:FiscalMarkUsedFlag>'+(cd?'<urn:CommercialDescription>'+cd+'</urn:CommercialDescription>':'')+(br?'<urn:BrandNameOfProducts>'+br+'</urn:BrandNameOfProducts>':'')+'<urn:Package><urn:KindOfPackages>'+it.querySelector('.s-package-kind').value+'</urn:KindOfPackages><urn:NumberOfPackages>'+it.querySelector('.s-package-count').value+'</urn:NumberOfPackages>'+(sm?'<urn:ShippingMarks>'+sm+'</urn:ShippingMarks>':'')+'</urn:Package></urn:BodyEadEsad>';
-      items.push({productCode:pc,qty:q});
     });
     let xml = '<?xml version="1.0" encoding="UTF-8"?><urn:IE815 xmlns:urn="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:IE815:V3.13" xmlns:urn1="urn:publicid:-:EC:DGTAXUD:EMCS:PHASE4:TMS:V3.13"><urn:Header><urn1:MessageSender>NDEA.GB</urn1:MessageSender><urn1:MessageRecipient>NDEA.GB</urn1:MessageRecipient><urn1:DateOfPreparation>'+dt+'</urn1:DateOfPreparation><urn1:TimeOfPreparation>'+tm+'</urn1:TimeOfPreparation><urn1:MessageIdentifier>'+lrn+'</urn1:MessageIdentifier><urn1:CorrelationIdentifier>PORTAL'+lrn+'</urn1:CorrelationIdentifier></urn:Header><urn:Body><urn:SubmittedDraftOfEADESAD><urn:Attributes><urn:SubmissionMessageType>1</urn:SubmissionMessageType></urn:Attributes><urn:ConsigneeTrader language="en"><urn:Traderid>'+document.getElementById('s-consignee-ern').value+'</urn:Traderid><urn:TraderName>'+document.getElementById('s-consignee-name').value+'</urn:TraderName><urn:StreetName>'+document.getElementById('s-consignee-street').value+'</urn:StreetName>'+xmlField('StreetNumber',document.getElementById('s-consignee-street-num').value)+'<urn:Postcode>'+document.getElementById('s-consignee-postcode').value+'</urn:Postcode><urn:City>'+document.getElementById('s-consignee-city').value+'</urn:City></urn:ConsigneeTrader><urn:ConsignorTrader language="en"><urn:TraderExciseNumber>'+document.getElementById('s-consignor-ern').value+'</urn:TraderExciseNumber><urn:TraderName>'+document.getElementById('s-consignor-name').value+'</urn:TraderName><urn:StreetName>'+document.getElementById('s-consignor-street').value+'</urn:StreetName>'+xmlField('StreetNumber',document.getElementById('s-consignor-street-num').value)+'<urn:Postcode>'+document.getElementById('s-consignor-postcode').value+'</urn:Postcode><urn:City>'+document.getElementById('s-consignor-city').value+'</urn:City></urn:ConsignorTrader>';
     const dw = document.getElementById('s-dispatch-warehouse').value.trim();
@@ -427,7 +390,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         try {
           const p = JSON.parse(t);
           if (p.movementId) {
-            // If this was a draft, delete it now that it's been submitted live
             if (window.currentDraftId) {
               await fetch('/api/drafts?id=' + window.currentDraftId, { method:'DELETE', credentials:'include' });
               window.currentDraftId = null;
@@ -442,6 +404,20 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // === TAB 1: MONITOR (with drafts as rows) ===
   const monRefreshBtn = document.getElementById('mon-refresh');
+  
+  // FIX: Wire up filter buttons
+  document.getElementById('mon-apply-filters')?.addEventListener('click', () => {
+    monRefreshBtn?.click();
+  });
+  document.getElementById('mon-clear-filters')?.addEventListener('click', () => {
+    document.getElementById('mon-direction').value = '';
+    document.getElementById('mon-status').value = '';
+    document.getElementById('mon-epc').value = '';
+    document.getElementById('mon-disp-from').value = '';
+    document.getElementById('mon-disp-to').value = '';
+    monRefreshBtn?.click();
+  });
+
   if (monRefreshBtn) monRefreshBtn.addEventListener('click', async function() {
     const session = await checkSession();
     if (!session || !session.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
@@ -450,7 +426,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     const noRes = document.getElementById('mon-no-results');
     const table = document.getElementById('mon-table');
     const tbody = document.getElementById('mon-tbody');
-    const sourceFilter = document.getElementById('mon-source')?.value || 'all';
     
     if (loading) loading.style.display = 'block';
     if (noRes) noRes.style.display = 'none';
@@ -458,46 +433,33 @@ document.addEventListener('DOMContentLoaded', async function() {
     tbody.innerHTML = '';
     
     try {
-      // Fetch drafts and live movements in parallel
       const [draftsResult, liveResult] = await Promise.all([
         fetch('/api/drafts', { credentials:'include' }).then(r => r.ok ? r.json() : []),
         fetch('/api/emcs?endpoint='+encodeURIComponent('/customs/excise/movements'), { method:'GET', credentials:'include' }).then(r => r.ok ? r.json() : [])
       ]);
       
       draftsCache = draftsResult;
-      
-      // Build combined list
       const allRows = [];
       
-      // Add drafts
       if (sourceFilter === 'all' || sourceFilter === 'draft') {
         draftsResult.forEach(d => {
           allRows.push({
-            source: 'draft',
-            id: d.id,
-            name: d.name,
+            source: 'draft', id: d.id, name: d.name,
             lrn: d.data?.['s-lrn'] || d.id.slice(0, 8),
             consignorErn: d.data?.['s-consignor-ern'] || '',
             consigneeErn: d.data?.['s-consignee-ern'] || '',
-            modified: d.modified_at,
-            data: d.data
+            modified: d.modified_at, data: d.data
           });
         });
       }
       
-      // Add live movements
       if (sourceFilter === 'all' || sourceFilter === 'live') {
         if (Array.isArray(liveResult)) {
           liveResult.forEach(mov => {
             allRows.push({
-              source: 'live',
-              id: mov.movementId,
-              arc: mov.administrativeReferenceCode,
-              lrn: mov.localReferenceNumber,
-              consignorId: mov.consignorId,
-              consigneeId: mov.consigneeId,
-              lastUpdated: mov.lastUpdated,
-              data: mov
+              source: 'live', id: mov.movementId, arc: mov.administrativeReferenceCode,
+              lrn: mov.localReferenceNumber, consignorId: mov.consignorId,
+              consigneeId: mov.consigneeId, lastUpdated: mov.lastUpdated, data: mov
             });
           });
         }
@@ -510,7 +472,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
       
       if (table) table.style.display = 'table';
-      
       const sel = document.getElementById('active-profile-select');
       const so = sel ? sel.options[sel.selectedIndex] : null;
       const myErn = so ? so.text.match(/\(([^)]+)\)/)?.[1] : '';
@@ -521,17 +482,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         'IE802':['Reminder','dot-amber']
       };
       
-      // Render draft rows immediately
-      allRows.filter(r => r.source === 'draft').forEach((draft, idx) => {
+      allRows.filter(r => r.source === 'draft').forEach((draft) => {
         const days = draft.modified ? Math.floor((Date.now() - new Date(draft.modified).getTime()) / 86400000) : 0;
         const tr = document.createElement('tr');
-        tr.style.backgroundColor = '#fff8e1'; // Light yellow for drafts
+        tr.style.backgroundColor = '#fff8e1';
         tr.style.cursor = 'pointer';
         tr.innerHTML = `
-          <td class="arc-cell">
-            <span class="arc-value" style="color:#ef6c00;">📝 DRAFT</span>
-            <span class="lrn">${esc(draft.name)} | LRN: ${esc(draft.lrn)}</span>
-          </td>
+          <td class="arc-cell"><span class="arc-value" style="color:#ef6c00;">📝 DRAFT</span><span class="lrn">${esc(draft.name)} | LRN: ${esc(draft.lrn)}</span></td>
           <td><span style="background:#ef6c00;color:white;padding:2px 8px;border-radius:3px;font-size:11px;">DRAFT</span></td>
           <td>${esc(draft.consigneeErn || '—')}</td>
           <td>${draft.modified ? new Date(draft.modified).toLocaleDateString() : 'N/A'}</td>
@@ -541,14 +498,9 @@ document.addEventListener('DOMContentLoaded', async function() {
           <td class="actions-cell">
             <button class="btn-small btn-green edit-draft" data-id="${draft.id}">Edit</button>
             <button class="btn-small btn-red delete-draft-row" data-id="${draft.id}">Delete</button>
-          </td>
-        `;
+          </td>`;
         tbody.appendChild(tr);
-        
-        tr.querySelector('.edit-draft').addEventListener('click', function(e) {
-          e.stopPropagation();
-          openDraftForEdit(draft.id);
-        });
+        tr.querySelector('.edit-draft').addEventListener('click', function(e) { e.stopPropagation(); openDraftForEdit(draft.id); });
         tr.querySelector('.delete-draft-row').addEventListener('click', async function(e) {
           e.stopPropagation();
           if (!confirm('Delete this draft?')) return;
@@ -558,7 +510,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         tr.addEventListener('click', function() { openDraftForEdit(draft.id); });
       });
       
-      // Render live movement rows with progressive status loading
       const liveRows = allRows.filter(r => r.source === 'live');
       liveRows.forEach((mov, idx) => {
         const isOut = mov.consignorId === myErn || (myErn && mov.consigneeId !== myErn);
@@ -573,8 +524,7 @@ document.addEventListener('DOMContentLoaded', async function() {
           <td><span class="status-indicator"><span class="status-dot dot-amber"></span> Loading...</span></td>
           <td>...</td>
           <td style="text-align:center">${days}</td>
-          <td class="actions-cell"><button class="btn-small btn-grey view-movement" data-id="${mov.id}">View</button></td>
-        `;
+          <td class="actions-cell"><button class="btn-small btn-grey view-movement" data-id="${mov.id}">View</button></td>`;
         tbody.appendChild(tr);
         tr.querySelector('.view-movement').addEventListener('click', function(e) {
           e.stopPropagation();
@@ -586,7 +536,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       
       if (loading) loading.style.display = 'none';
       
-      // Progressive status loading for live movements
       for (let i = 0; i < liveRows.length; i++) {
         try {
           const mr = await fetch(`/api/emcs?endpoint=${encodeURIComponent('/customs/excise/movements/' + liveRows[i].id + '/messages')}`, { method:'GET', credentials:'include' });
@@ -637,11 +586,8 @@ document.addEventListener('DOMContentLoaded', async function() {
   function openDraftForEdit(draftId) {
     const draft = draftsCache.find(d => d.id === draftId);
     if (!draft) { alert('Draft not found'); return; }
-    // Switch to Submit tab
     document.querySelector('[data-tab="tab-submit"]').click();
-    // Populate form
     populateFormData(draft.data);
-    // Remember this is an existing draft
     window.currentDraftId = draftId;
     alert('Draft "' + draft.name + '" loaded. Edit and click "Submit Live" or "Save as Draft" to update.');
   }
@@ -659,6 +605,17 @@ document.addEventListener('DOMContentLoaded', async function() {
   });
 
   // === TAB 4: SUBMIT MESSAGE ===
+  // FIX: Add IE818 section toggle
+  const smTypeSelect = document.getElementById('sm-type');
+  if (smTypeSelect) {
+    smTypeSelect.addEventListener('change', function() {
+      const ie818Section = document.getElementById('ie818-section');
+      if (ie818Section) {
+        ie818Section.style.display = this.value === 'IE818' ? 'block' : 'none';
+      }
+    });
+  }
+
   document.getElementById('submit-message-btn')?.addEventListener('click', async function() {
     const s = await checkSession(); if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
     const mid = document.getElementById('sm-mov-id').value.trim(); const arc = document.getElementById('sm-arc').value.trim();
@@ -743,41 +700,86 @@ document.addEventListener('DOMContentLoaded', async function() {
   });
 
   // === TAB 7: PRE-VALIDATE ===
+  // FIX: Corrected payload structure to match OpenAPI spec (object, not array, with required product array)
   document.getElementById('pre-validate-btn')?.addEventListener('click', async function() {
-    const s = await checkSession(); if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
+    const s = await checkSession(); 
+    if (!s || !s.hmrcAuthenticated) { alert('Login to HMRC first!'); return; }
+    
     const ern = document.getElementById('pv-ern').value.trim();
     const group = document.getElementById('pv-group').value;
-    if (!ern) { alert('ERN required'); return; }
+    const p1 = (document.getElementById('pv-p1').value.trim() || 'B000').toUpperCase(); // Default to B000 if blank
+    
+    if (!ern) { alert('ERN is required'); return; }
+    
     document.getElementById('pv-output').innerText = 'Validating...';
     document.getElementById('pv-parsed').innerHTML = '';
+    
     try {
       const body = {
         exciseTraderValidationRequest: {
-          exciseTraderRequest: [{ exciseRegistrationNumber: ern, entityGroup: group }]
+          exciseTraderRequest: {
+            exciseRegistrationNumber: ern,
+            entityGroup: group,
+            validateProductAuthorisationRequest: [
+              {
+                product: {
+                  exciseProductCode: p1
+                }
+              }
+            ]
+          }
         }
       };
-      const r = await fetch('/api/emcs?endpoint=' + encodeURIComponent('/customs/excise/traders/pre-validate'), { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
-      const t = await r.text(); document.getElementById('pv-output').innerText = 'Status: '+r.status+'\n\n'+t;
+      
+      const endpoint = '/customs/excise/traders/pre-validate';
+      const r = await fetch('/api/emcs?endpoint=' + encodeURIComponent(endpoint), { 
+        method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) 
+      });
+      
+      const t = await r.text(); 
+      document.getElementById('pv-output').innerText = 'Status: ' + r.status + '\n\n' + t;
+      
       if (r.ok) {
         try {
           const d = JSON.parse(t);
           const response = d.exciseTraderValidationResponse || d;
-          const traders = Array.isArray(response.exciseTraderResponse) ? response.exciseTraderResponse : [response];
-          let html = '';
-          traders.forEach(trader => {
-            const valid = trader.validTrader;
-            const details = trader.exciseTraderValidationDetail || trader;
-            html += `<div class="parsed-card"><h4>${valid ? '✅ Valid Trader' : '❌ Invalid Trader'} <span class="type-badge ${valid ? 'ie801' : 'ie810'}">${valid ? 'VALID' : 'INVALID'}</span></h4><div class="parsed-grid"><div class="parsed-field"><div class="label">ERN</div><div class="value">${details.exciseRegistrationNumber || ern}</div></div><div class="parsed-field"><div class="label">Trader Name</div><div class="value">${details.traderName || 'N/A'}</div></div><div class="parsed-field"><div class="label">Trader Type</div><div class="value">${details.traderType || 'N/A'}</div></div><div class="parsed-field"><div class="label">Entity Group</div><div class="value">${details.entityGroup || group}</div></div></div></div>`;
-          });
+          const valid = response.validTrader;
+          
+          let html = `<div class="parsed-card">
+            <h4>${valid ? '✅ Valid Trader' : '❌ Invalid Trader'} 
+              <span class="type-badge ${valid ? 'ie801' : 'ie810'}">${valid ? 'VALID' : 'INVALID'}</span>
+            </h4>
+            <div class="parsed-grid">
+              <div class="parsed-field"><div class="label">ERN</div><div class="value">${response.exciseRegistrationNumber || ern}</div></div>
+              <div class="parsed-field"><div class="label">Entity Group</div><div class="value">${response.entityGroup || group}</div></div>
+              <div class="parsed-field"><div class="label">Trader Type</div><div class="value">${response.traderType || 'N/A'}</div></div>
+              ${response.errorCode ? `<div class="parsed-field"><div class="label">Error Code</div><div class="value warn">${response.errorCode}</div></div>` : ''}
+              ${response.errorText ? `<div class="parsed-field"><div class="label">Error Text</div><div class="value warn">${response.errorText}</div></div>` : ''}
+            </div>
+          </div>`;
+          
+          if (response.validateProductAuthorisationResponse) {
+            const prodResp = response.validateProductAuthorisationResponse;
+            if (prodResp.productError && prodResp.productError.length > 0) {
+              html += `<div class="parsed-card"><h4>⚠️ Product Authorisation Errors</h4><div class="parsed-grid">`;
+              prodResp.productError.forEach(pe => {
+                html += `<div class="parsed-field"><div class="label">Product Code</div><div class="value">${pe.exciseProductCode}</div></div>
+                         <div class="parsed-field"><div class="label">Error</div><div class="value warn">${pe.errorText} (${pe.errorCode})</div></div>`;
+              });
+              html += `</div></div>`;
+            } else {
+              html += `<div class="parsed-card"><h4>✅ Product Authorisation</h4><div class="parsed-grid"><div class="parsed-field"><div class="label">Valid</div><div class="value" style="color:#00703c;">${prodResp.valid ? 'Yes' : 'No'}</div></div></div></div>`;
+            }
+          }
           document.getElementById('pv-parsed').innerHTML = html;
         } catch(e) { document.getElementById('pv-parsed').innerHTML = `<p>Parse error: ${e.message}</p><pre>${esc(t)}</pre>`; }
       } else {
         try {
           const err = JSON.parse(t);
-          document.getElementById('pv-parsed').innerHTML = `<div class="parsed-card"><h4 style="color:#d4351c;">❌ Validation Error</h4><div class="parsed-grid"><div class="parsed-field"><div class="label">Message</div><div class="value warn">${err.message || 'Unknown'}</div></div>${err.debugMessage ? `<div class="parsed-field"><div class="label">Details</div><div class="value warn">${err.debugMessage}</div></div>` : ''}</div></div>`;
+          document.getElementById('pv-parsed').innerHTML = `<div class="parsed-card"><h4 style="color:#d4351c;">❌ API Error (${r.status})</h4><div class="parsed-grid"><div class="parsed-field"><div class="label">Message</div><div class="value warn">${err.message || 'Unknown'}</div></div>${err.debugMessage ? `<div class="parsed-field"><div class="label">Details</div><div class="value warn">${err.debugMessage}</div></div>` : ''}</div></div>`;
         } catch(e) { document.getElementById('pv-parsed').innerHTML = `<p class="error">Error ${r.status}: ${esc(t)}</p>`; }
       }
-    } catch(e) { document.getElementById('pv-output').innerText = 'Error: '+e.message; }
+    } catch(e) { document.getElementById('pv-output').innerText = 'Network Error: ' + e.message; }
   });
 
   // === TAB 8: SUBSCRIBE ===
