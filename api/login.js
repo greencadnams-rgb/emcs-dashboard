@@ -33,30 +33,43 @@ function generateTotp(secret, counter) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { password, totpCode } = req.body;
-  const expectedPassword = process.env.APP_PASSWORD;
-  const totpSecret = process.env.TOTP_SECRET;
+  try {
+    const { password, totpCode } = req.body;
+    const expectedPassword = process.env.APP_PASSWORD;
+    const totpSecret = process.env.TOTP_SECRET;
 
-  if (!expectedPassword) return res.status(500).json({ error: 'Server not configured' });
-
-  if (password !== expectedPassword) {
-    await logAudit(null, 'LOGIN_FAILED', { reason: 'bad_password' });
-    return res.status(401).json({ error: 'Invalid password' });
-  }
-
-  if (totpSecret) {
-    if (!totpCode) {
-      return res.status(200).json({ requires2FA: true, error: '2FA code required' });
+    // 1. Check if APP_PASSWORD is configured
+    if (!expectedPassword) {
+      return res.status(500).json({ error: 'Server not configured: APP_PASSWORD is missing in Vercel Environment Variables.' });
     }
-    if (!verifyTotp(totpSecret, totpCode)) {
-      await logAudit(null, 'LOGIN_FAILED', { reason: 'bad_2fa' });
-      return res.status(401).json({ error: 'Invalid 2FA code' });
+
+    if (password !== expectedPassword) {
+      await logAudit(null, 'LOGIN_FAILED', { reason: 'bad_password' }).catch(console.error);
+      return res.status(401).json({ error: 'Invalid password' });
     }
+
+    if (totpSecret) {
+      if (!totpCode) {
+        return res.status(200).json({ requires2FA: true, error: '2FA code required' });
+      }
+      if (!verifyTotp(totpSecret, totpCode)) {
+        await logAudit(null, 'LOGIN_FAILED', { reason: 'bad_2fa' }).catch(console.error);
+        return res.status(401).json({ error: 'Invalid 2FA code' });
+      }
+    }
+
+    // 2. This is where it likely crashes if Turso env vars are wrong
+    const session = await createSession('dashboard-user');
+    await setSessionCookie(res, session);
+    await logAudit(session.id, 'LOGIN_SUCCESS', {}).catch(console.error);
+
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    // 3. Catch the crash and return the exact error message to the browser
+    console.error('❌ LOGIN CRASH:', error);
+    return res.status(500).json({ 
+      error: 'Internal server error during login', 
+      details: error.message 
+    });
   }
-
-  const session = await createSession('dashboard-user');
-  await setSessionCookie(res, session);
-  await logAudit(session.id, 'LOGIN_SUCCESS', {});
-
-  return res.status(200).json({ success: true });
 }
